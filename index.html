@@ -562,6 +562,7 @@ const Game = {
   gates: [],
   enemies: [],
   particles: [],
+  fireballs: [],
   worldEnd: 999999,
   lives: 3,
   score: 0,
@@ -572,24 +573,46 @@ const Game = {
   questionPending: null,
   paused: false,
   bossHP: 0, bossMaxHP: 0,
-  bossDefeated: 0
+  bossDefeated: 0,
+  energy: 0, energyMax: 100,
+  nextEnergyQ: 0,
+  fireballTimer: 0,
+  bossBreathTimer: 0,
+  correctAnswers: 0
 };
+
+const KEYS_STATE = { jumpHeld: false, jumpBuffer: 0, coyote: 0 };
 
 const KEYS = { left: false, right: false, jump: false };
 window.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft' || e.key === 'a') KEYS.left = true;
   if (e.key === 'ArrowRight' || e.key === 'd') KEYS.right = true;
-  if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') { KEYS.jump = true; e.preventDefault(); }
+  if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') {
+    if (!KEYS_STATE.jumpHeld) KEYS_STATE.jumpBuffer = 8;
+    KEYS_STATE.jumpHeld = true;
+    KEYS.jump = true; e.preventDefault();
+  }
 });
 window.addEventListener('keyup', (e) => {
   if (e.key === 'ArrowLeft' || e.key === 'a') KEYS.left = false;
   if (e.key === 'ArrowRight' || e.key === 'd') KEYS.right = false;
-  if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') KEYS.jump = false;
+  if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') { KEYS.jump = false; KEYS_STATE.jumpHeld = false; }
 });
 document.querySelectorAll('.ctrl').forEach(c => {
   const k = c.dataset.key;
-  const press = (e) => { e.preventDefault(); KEYS[k] = true; };
-  const rel   = (e) => { e.preventDefault(); KEYS[k] = false; };
+  const press = (e) => {
+    e.preventDefault();
+    if (k === 'jump') {
+      if (!KEYS_STATE.jumpHeld) KEYS_STATE.jumpBuffer = 8;
+      KEYS_STATE.jumpHeld = true;
+    }
+    KEYS[k] = true;
+  };
+  const rel = (e) => {
+    e.preventDefault();
+    if (k === 'jump') KEYS_STATE.jumpHeld = false;
+    KEYS[k] = false;
+  };
   c.addEventListener('touchstart', press, { passive: false });
   c.addEventListener('touchend', rel);
   c.addEventListener('touchcancel', rel);
@@ -603,12 +626,41 @@ function buildLevel() {
   const groundY = H - 80;
 
   if (Game.mode === 'boss') {
-    // single arena with platforms
+    // climbing arena with many platforms, multiple paths up
     Game.platforms.push({ x: 0, y: groundY, w: W, h: 80, ground: true });
-    Game.platforms.push({ x: W*0.2, y: groundY-120, w: 100, h: 16 });
-    Game.platforms.push({ x: W*0.6, y: groundY-180, w: 100, h: 16 });
-    Game.platforms.push({ x: W*0.4, y: groundY-260, w: 110, h: 16 });
+    // tier 1 (low)
+    Game.platforms.push({ x: W*0.10, y: groundY-90,  w: 110, h: 14 });
+    Game.platforms.push({ x: W*0.32, y: groundY-110, w: 100, h: 14 });
+    Game.platforms.push({ x: W*0.55, y: groundY-95,  w: 110, h: 14 });
+    Game.platforms.push({ x: W*0.78, y: groundY-105, w: 100, h: 14 });
+    // tier 2 (mid)
+    Game.platforms.push({ x: W*0.05, y: groundY-180, w: 90,  h: 14 });
+    Game.platforms.push({ x: W*0.25, y: groundY-200, w: 90,  h: 14 });
+    Game.platforms.push({ x: W*0.45, y: groundY-185, w: 90,  h: 14 });
+    Game.platforms.push({ x: W*0.65, y: groundY-205, w: 90,  h: 14 });
+    Game.platforms.push({ x: W*0.85, y: groundY-180, w: 90,  h: 14 });
+    // tier 3 (high)
+    Game.platforms.push({ x: W*0.15, y: groundY-280, w: 80,  h: 14 });
+    Game.platforms.push({ x: W*0.40, y: groundY-300, w: 90,  h: 14 });
+    Game.platforms.push({ x: W*0.65, y: groundY-285, w: 80,  h: 14 });
+    // top perch (drop-kick launch pad)
+    Game.platforms.push({ x: W*0.35, y: groundY-380, w: 130, h: 16, perch: true });
+
+    // obstacles - spikes between platforms
+    Game.obstacles.push({ x: W*0.22, y: groundY-18, w: 30, h: 18, type: 'spike' });
+    Game.obstacles.push({ x: W*0.48, y: groundY-18, w: 30, h: 18, type: 'spike' });
+    Game.obstacles.push({ x: W*0.72, y: groundY-18, w: 30, h: 18, type: 'spike' });
+    // spikes on some lower platforms
+    Game.obstacles.push({ x: W*0.32+30, y: groundY-128, w: 22, h: 18, type: 'spike' });
+    Game.obstacles.push({ x: W*0.78+25, y: groundY-123, w: 22, h: 18, type: 'spike' });
+
     Game.worldEnd = W;
+    Game.energy = 0;
+    Game.energyMax = 100;
+    Game.nextEnergyQ = performance.now() + 4000;
+    Game.fireballTimer = 0;
+    Game.bossBreathTimer = 0;
+    Game.correctAnswers = 0;
     spawnBoss();
     return;
   }
@@ -667,15 +719,21 @@ function buildLevel() {
 
 function spawnBoss() {
   const monsters = [
-    { emoji: '🐉', hp: 100, name: 'Dragon' },
-    { emoji: '👹', hp: 130, name: 'Ogre' },
-    { emoji: '👺', hp: 160, name: 'Goblin King' },
-    { emoji: '🧟', hp: 200, name: 'Zombie Lord' },
-    { emoji: '🦖', hp: 250, name: 'T-Rex' }
+    { emoji: '🐉', hp: 100, name: 'Dragon',     speed: 1.4 },
+    { emoji: '👹', hp: 100, name: 'Ogre',       speed: 1.0 },
+    { emoji: '👺', hp: 100, name: 'Goblin King',speed: 1.6 },
+    { emoji: '🧟', hp: 100, name: 'Zombie Lord',speed: 0.8 },
+    { emoji: '🦖', hp: 100, name: 'T-Rex',      speed: 1.8 }
   ];
   const m = monsters[Game.bossDefeated % monsters.length];
-  Game.boss = { x: W - 130, y: H - 230, w: 100, h: 130, emoji: m.emoji, name: m.name, hitFlash: 0 };
-  Game.bossMaxHP = m.hp + Game.bossDefeated * 30;
+  const groundY = H - 80;
+  Game.boss = {
+    x: W - 160, y: groundY - 120, w: 100, h: 120,
+    emoji: m.emoji, name: m.name,
+    vx: -m.speed, baseSpeed: m.speed,
+    hitFlash: 0, stunned: 0
+  };
+  Game.bossMaxHP = m.hp;
   Game.bossHP = Game.bossMaxHP;
 }
 
@@ -750,21 +808,30 @@ function endGame(reason) {
 }
 
 function physics(p, dt) {
-  const SPEED = 4.5, JUMP_V = -12, GRAV = 0.55, FRICTION = 0.82;
+  const SPEED = 5, JUMP_V = -14.5, DJUMP_V = -13, GRAV = 0.6, FRICTION = 0.82;
   if (KEYS.left) { p.vx = -SPEED; p.facing = -1; }
   else if (KEYS.right) { p.vx = SPEED; p.facing = 1; }
   else p.vx *= FRICTION;
 
-  if (KEYS.jump && (p.onGround || p.canDoubleJump)) {
-    if (!p.onGround && p.canDoubleJump) { p.canDoubleJump = false; SFX.jump(); }
-    else if (p.onGround) SFX.jump();
-    p.vy = JUMP_V;
-    p.onGround = false;
-    KEYS.jump = false; // require re-press
+  // coyote time + jump buffer
+  if (KEYS_STATE.jumpBuffer > 0) KEYS_STATE.jumpBuffer--;
+  if (p.onGround) KEYS_STATE.coyote = 8;
+  else if (KEYS_STATE.coyote > 0) KEYS_STATE.coyote--;
+
+  if (KEYS_STATE.jumpBuffer > 0) {
+    if (p.onGround || KEYS_STATE.coyote > 0) {
+      p.vy = JUMP_V; p.onGround = false; KEYS_STATE.coyote = 0; KEYS_STATE.jumpBuffer = 0; SFX.jump();
+    } else if (p.canDoubleJump) {
+      p.vy = DJUMP_V; p.canDoubleJump = false; KEYS_STATE.jumpBuffer = 0; SFX.jump();
+      // double-jump particles
+      for (let i = 0; i < 6; i++) Game.particles.push({ x: p.x + p.w/2 + (Math.random()-0.5)*20, y: p.y + p.h, vx:(Math.random()-0.5)*2, vy: 1+Math.random(), life: 20, text: '✨', color: '#fff' });
+    }
   }
+  // variable jump height: release jump early = cut velocity
+  if (!KEYS_STATE.jumpHeld && p.vy < -6) p.vy = -6;
 
   p.vy += GRAV;
-  if (p.vy > 16) p.vy = 16;
+  if (p.vy > 18) p.vy = 18;
   p.x += p.vx;
   // horizontal collision
   for (const pl of Game.platforms) {
@@ -826,12 +893,50 @@ function physics(p, dt) {
       }
     }
   }
-  // boss
+  // boss collision — drop-kick if powered + falling from above
   if (Game.mode === 'boss' && Game.boss) {
-    if (rectOverlap(p, Game.boss) && p.invuln === 0) {
-      Game.lives--; p.invuln = 80; p.vx = -8; p.vy = -8; SFX.hurt();
-      if (Game.lives <= 0) { endGame('dead'); return; }
+    const b = Game.boss;
+    if (rectOverlap(p, b) && p.invuln === 0) {
+      const fromAbove = (p.vy > 4) && (p.y + p.h - b.y < 35);
+      const powered = Game.energy >= 25;
+      if (fromAbove && powered) {
+        // DROP-KICK!
+        Game.energy -= 25;
+        Game.bossHP -= 25;
+        b.hitFlash = 25; b.stunned = 60; b.vx = 0;
+        p.vy = -14; p.invuln = 30;
+        Game.score += 50;
+        SFX.correct();
+        for (let i = 0; i < 12; i++) Game.particles.push({ x: b.x + b.w/2 + (Math.random()-0.5)*60, y: b.y, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*3, life: 40, text: '💥', color: '#ff5722' });
+        Game.particles.push({ x: b.x + b.w/2, y: b.y - 20, vx:0, vy:-2, life: 50, text: '-25 HP!', color: '#f44336' });
+        if (Game.bossHP <= 0) {
+          Game.score += 200; Game.bossDefeated++;
+          Game.particles.push({ x: b.x + b.w/2, y: b.y, vx:0, vy:-2, life: 90, text: 'DEFEATED!', color: '#ffeb3b' });
+          SFX.win();
+          setTimeout(() => spawnBoss(), 800);
+        }
+      } else {
+        // dragon hurts you
+        Game.lives--; p.invuln = 80;
+        p.vx = (p.x < b.x ? -10 : 10); p.vy = -10;
+        SFX.hurt();
+        Game.particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life: 40, text: powered ? 'JUMP ON HEAD!' : 'NEED ENERGY!', color: '#f44336' });
+        if (Game.lives <= 0) { endGame('dead'); return; }
+      }
     }
+  }
+  // fireball collisions
+  if (Game.mode === 'boss') {
+    Game.fireballs = Game.fireballs.filter(fb => {
+      fb.x += fb.vx; fb.y += fb.vy; fb.vy += 0.3; fb.life--;
+      if (rectOverlap(p, { x: fb.x-12, y: fb.y-12, w: 24, h: 24 }) && p.invuln === 0) {
+        Game.lives--; p.invuln = 60; p.vy = -8; SFX.hurt();
+        Game.particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life: 30, text: '🔥-1', color: '#ff5722' });
+        if (Game.lives <= 0) { endGame('dead'); return false; }
+        return false;
+      }
+      return fb.life > 0 && fb.y < H + 50;
+    });
   }
   // out of map
   if (p.y > H + 200) {
@@ -855,6 +960,102 @@ function physics(p, dt) {
 
 function rectOverlap(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function updateBoss(t) {
+  const b = Game.boss;
+  if (!b) return;
+  const p = Game.player;
+  // movement: stunned -> stand still; otherwise chase player horizontally
+  if (b.stunned > 0) { b.stunned--; }
+  else {
+    const dir = p.x + p.w/2 < b.x + b.w/2 ? -1 : 1;
+    b.vx += (dir * b.baseSpeed - b.vx) * 0.05;
+    b.x += b.vx;
+    if (b.x < 0) b.x = 0;
+    if (b.x + b.w > W) b.x = W - b.w;
+  }
+  if (b.hitFlash > 0) b.hitFlash--;
+
+  // dragon spits fireballs
+  Game.bossBreathTimer = (Game.bossBreathTimer || 0) + 16;
+  if (Game.bossBreathTimer > 2200 && b.stunned === 0) {
+    Game.bossBreathTimer = 0;
+    const dx = (p.x + p.w/2) - (b.x + b.w/2);
+    const dy = (p.y) - (b.y + 30);
+    const dist = Math.hypot(dx, dy) || 1;
+    Game.fireballs.push({ x: b.x + b.w/2, y: b.y + 20, vx: (dx/dist)*4, vy: (dy/dist)*3 - 2, life: 200 });
+    SFX.hurt();
+  }
+
+  // falling rocks/fireballs from sky every few seconds
+  Game.fireballTimer = (Game.fireballTimer || 0) + 16;
+  if (Game.fireballTimer > 1800) {
+    Game.fireballTimer = 0;
+    for (let i = 0; i < 2; i++) {
+      Game.fireballs.push({ x: Math.random() * W, y: -20, vx: 0, vy: 2 + Math.random()*2, life: 400, sky: true });
+    }
+  }
+
+  // periodic energy question
+  if (!Game.paused && t > Game.nextEnergyQ && Game.bossHP > 0 && Game.energy < Game.energyMax) {
+    Game.nextEnergyQ = t + 99999999;
+    showEnergyQuestion();
+  }
+}
+
+function showEnergyQuestion() {
+  Game.paused = true;
+  const q = makeQ(Game.subject);
+  Game.currentQ = q;
+  const overlay = document.getElementById('qOverlay');
+  document.getElementById('qPrompt').innerHTML = q.prompt.replace(/\n/g, '<br>');
+  document.getElementById('qSub').textContent = '⚡ POWER UP! Correct = +25 Energy';
+  const grid = document.getElementById('qAnswers');
+  grid.innerHTML = '';
+  q.choices.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'q-ans';
+    b.textContent = c;
+    b.addEventListener('click', () => answerEnergyQ(c, b));
+    grid.appendChild(b);
+  });
+  overlay.classList.add('active');
+  let tt = 100;
+  const tEl = document.getElementById('qTimer');
+  tEl.style.width = '100%';
+  if (qTimerId) clearInterval(qTimerId);
+  qTimerId = setInterval(() => {
+    tt -= 0.4;
+    tEl.style.width = Math.max(0, tt) + '%';
+    if (tt <= 0) { clearInterval(qTimerId); answerEnergyQ('___timeout___', null); }
+  }, 100);
+}
+
+function answerEnergyQ(choice, btn) {
+  if (qTimerId) { clearInterval(qTimerId); qTimerId = null; }
+  const q = Game.currentQ;
+  const correct = String(choice) === String(q.answer);
+  if (btn) {
+    btn.classList.add(correct ? 'correct' : 'wrong');
+    document.querySelectorAll('.q-ans').forEach(b => b.disabled = true);
+  }
+  if (correct) {
+    SFX.correct();
+    Game.correctAnswers++;
+    Game.energy = Math.min(Game.energyMax, Game.energy + 25);
+    Game.score += 30;
+    Game.particles.push({ x: Game.player.x, y: Game.player.y, vx:0, vy:-3, life: 60, text: '+25 ⚡', color: '#ffeb3b' });
+  } else {
+    SFX.wrong();
+    Game.particles.push({ x: Game.player.x, y: Game.player.y, vx:0, vy:-2, life: 40, text: 'No Energy', color: '#f44336' });
+  }
+  setTimeout(() => {
+    document.getElementById('qOverlay').classList.remove('active');
+    Game.paused = false;
+    // schedule next question 10-14 sec later
+    Game.nextEnergyQ = performance.now() + 10000 + Math.random() * 4000;
+  }, 700);
 }
 
 /* ============================================================
@@ -1058,16 +1259,29 @@ function render() {
   // boss
   if (Game.mode === 'boss' && Game.boss) {
     const b = Game.boss;
-    if (b.hitFlash > 0) { b.hitFlash--; ctx.globalAlpha = 0.6; }
+    if (b.hitFlash > 0) ctx.globalAlpha = (b.hitFlash % 6 < 3) ? 0.4 : 1;
+    if (b.stunned > 0) {
+      // dizzy stars
+      ctx.font = '20px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('💫', b.x + b.w/2 - 20 + Math.cos(performance.now()/100)*15, b.y - 5);
+      ctx.fillText('💫', b.x + b.w/2 + 20 + Math.cos(performance.now()/100 + 2)*15, b.y - 5);
+    }
     ctx.font = `${b.h}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(b.emoji, b.x + b.w/2, b.y + b.h/2);
     ctx.globalAlpha = 1;
     // HP bar above
-    ctx.fillStyle = '#000'; ctx.fillRect(b.x - 10, b.y - 20, b.w + 20, 10);
+    ctx.fillStyle = '#000'; ctx.fillRect(b.x - 10, b.y - 22, b.w + 20, 10);
     ctx.fillStyle = '#f44336';
-    ctx.fillRect(b.x - 8, b.y - 18, (b.w + 16) * (Game.bossHP / Game.bossMaxHP), 6);
-    ctx.fillStyle = '#fff'; ctx.font = '12px sans-serif';
-    ctx.fillText(b.name + ' Lv.' + (Game.bossDefeated + 1), b.x + b.w/2, b.y - 28);
+    ctx.fillRect(b.x - 8, b.y - 20, (b.w + 16) * Math.max(0, Game.bossHP / Game.bossMaxHP), 6);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px sans-serif';
+    ctx.fillText(`${b.name} Lv.${Game.bossDefeated + 1}  ${Game.bossHP}/${Game.bossMaxHP}`, b.x + b.w/2, b.y - 30);
+  }
+  // fireballs
+  if (Game.mode === 'boss') {
+    for (const fb of Game.fireballs) {
+      ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(fb.sky ? '☄️' : '🔥', fb.x, fb.y);
+    }
   }
 
   // other players
@@ -1089,6 +1303,15 @@ function render() {
   const p = Game.player;
   if (p) {
     if (p.invuln > 0 && Math.floor(p.invuln / 6) % 2 === 0) ctx.globalAlpha = 0.4;
+    // powered glow when energy >= 25 in boss mode
+    if (Game.mode === 'boss' && Game.energy >= 25) {
+      const glow = 12 + Math.sin(performance.now()/120) * 4;
+      ctx.save();
+      ctx.shadowColor = '#ffeb3b'; ctx.shadowBlur = glow;
+      ctx.fillStyle = 'rgba(255,235,59,0.25)';
+      ctx.beginPath(); ctx.arc(p.x + p.w/2, p.y + p.h/2, 28, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
     p.frame++;
     drawCharacter(ctx, p.char, p.x + p.w/2, p.y + p.h, p.w + 8, p.frame, p.facing);
     ctx.globalAlpha = 1;
@@ -1120,9 +1343,50 @@ function render() {
     const left = Math.max(0, Math.ceil((Game.duration - (performance.now() - Game.startTime)) / 1000));
     document.getElementById('hudCenter').textContent = `⏱ ${left}s`;
   } else if (Game.mode === 'boss') {
-    document.getElementById('hudCenter').textContent = `🐲 Boss Lv.${Game.bossDefeated + 1}`;
+    document.getElementById('hudCenter').textContent = `⚡${Game.energy}/100 · 🐲Lv.${Game.bossDefeated + 1}`;
   } else {
     document.getElementById('hudCenter').textContent = `🏃 ${Math.floor(Game.furthest)}m`;
+  }
+
+  // Boss mode UI overlay (energy bar + formula tip)
+  if (Game.mode === 'boss') {
+    // energy bar (top center, below HUD)
+    const barW = Math.min(W * 0.7, 400);
+    const barX = (W - barW) / 2;
+    const barY = 50;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(barX - 4, barY - 4, barW + 8, 22);
+    ctx.fillStyle = '#222';
+    ctx.fillRect(barX, barY, barW, 14);
+    const ratio = Game.energy / Game.energyMax;
+    const grad2 = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+    grad2.addColorStop(0, '#ffeb3b'); grad2.addColorStop(1, '#ff9800');
+    ctx.fillStyle = grad2;
+    ctx.fillRect(barX, barY, barW * ratio, 14);
+    // tick marks every 25 (drop-kick units)
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+    for (let i = 25; i < 100; i += 25) {
+      ctx.beginPath(); ctx.moveTo(barX + barW * i/100, barY); ctx.lineTo(barX + barW * i/100, barY + 14); ctx.stroke();
+    }
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+    ctx.strokeText(`⚡ ENERGY: ${Game.energy}/${Game.energyMax}`, barX + barW/2, barY + 11);
+    ctx.fillText(`⚡ ENERGY: ${Game.energy}/${Game.energyMax}`, barX + barW/2, barY + 11);
+
+    // formula reminder
+    ctx.font = 'bold 11px sans-serif';
+    const tip = Game.energy >= 25
+      ? '✨ POWERED UP! Jump on dragon\'s head!'
+      : 'Answer questions to charge energy (need 25 to drop-kick)';
+    ctx.strokeText(tip, W/2, barY + 32);
+    ctx.fillStyle = Game.energy >= 25 ? '#ffeb3b' : '#fff';
+    ctx.fillText(tip, W/2, barY + 32);
+
+    // formula
+    const formula = `Damage = ⚡25 → 🐲HP. Need ${Math.ceil(Game.bossHP/25)} more drop-kicks!`;
+    ctx.fillStyle = '#bbdefb'; ctx.font = '10px sans-serif';
+    ctx.strokeText(formula, W/2, barY + 48);
+    ctx.fillText(formula, W/2, barY + 48);
   }
 
   // multiplayer panel
@@ -1152,6 +1416,7 @@ function loop(t) {
 
   if (!Game.paused && Game.player) {
     physics(Game.player, dt);
+    if (Game.mode === 'boss') updateBoss(t);
   }
   // camera follow
   if (Game.player) {
