@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Aarav's Learning Quest</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Comic Sans MS', 'Trebuchet MS', sans-serif; }
+  body {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e57c2 100%);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    user-select: none;
+  }
+  #app {
+    width: 100%; height: 100%; max-width: 900px; max-height: 1200px;
+    position: relative; overflow: hidden;
+  }
+  .screen {
+    position: absolute; inset: 0; display: none; flex-direction: column;
+    padding: 16px; gap: 12px;
+  }
+  .screen.active { display: flex; }
+  h1 { text-align: center; font-size: clamp(24px, 5vw, 40px); text-shadow: 2px 2px 0 #000; }
+  h2 { text-align: center; font-size: clamp(20px, 4vw, 30px); }
+  .btn {
+    background: linear-gradient(180deg, #ffeb3b, #ff9800);
+    color: #222; border: 4px solid #fff; border-radius: 16px;
+    padding: 14px 18px; font-size: clamp(16px, 3vw, 22px); font-weight: bold;
+    cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.3);
+    transition: transform 0.1s, box-shadow 0.1s;
+    font-family: inherit;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+  .btn.green { background: linear-gradient(180deg, #8bc34a, #4caf50); color: #fff; }
+  .btn.blue  { background: linear-gradient(180deg, #29b6f6, #1976d2); color: #fff; }
+  .btn.red   { background: linear-gradient(180deg, #ef5350, #c62828); color: #fff; }
+  .btn.purple { background: linear-gradient(180deg, #ab47bc, #6a1b9a); color: #fff; }
+  .btn.small { padding: 8px 12px; font-size: 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .grid { display: grid; gap: 12px; }
+
+  /* HOME */
+  #home .hero {
+    text-align: center; padding: 10px;
+    background: rgba(0,0,0,0.25); border-radius: 20px; border: 3px solid rgba(255,255,255,0.3);
+  }
+  #home .modes { grid-template-columns: 1fr 1fr; gap: 14px; padding: 10px; }
+  .mode-card {
+    background: rgba(255,255,255,0.12); border: 3px solid rgba(255,255,255,0.4);
+    border-radius: 18px; padding: 16px 10px; text-align: center;
+    cursor: pointer; transition: transform 0.15s;
+  }
+  .mode-card:active { transform: scale(0.95); }
+  .mode-card .emoji { font-size: clamp(40px, 8vw, 64px); display: block; }
+  .mode-card .name { font-size: clamp(15px, 3vw, 20px); font-weight: bold; margin-top: 6px; }
+  .mode-card .desc { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+
+  .topic-pick { grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+  .topic-pick .btn { padding: 18px 10px; }
+
+  /* HUD */
+  .hud {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(0,0,0,0.4); padding: 8px 14px; border-radius: 14px; font-size: 16px;
+  }
+  .hud .stat { display: flex; gap: 6px; align-items: center; }
+  .stars { color: gold; }
+
+  /* QUESTION CARD */
+  .qcard {
+    background: rgba(255,255,255,0.95); color: #222;
+    border-radius: 22px; padding: 20px; text-align: center;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.3); border: 4px solid #fff;
+  }
+  .qprompt { font-size: clamp(22px, 5vw, 38px); font-weight: bold; margin-bottom: 14px; }
+  .qsmall  { font-size: clamp(14px, 3vw, 18px); margin-bottom: 10px; opacity: 0.7; }
+  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ans {
+    background: linear-gradient(180deg, #42a5f5, #1565c0); color: #fff;
+    border: 3px solid #fff; border-radius: 14px;
+    padding: 14px; font-size: clamp(18px, 4vw, 26px); font-weight: bold;
+    cursor: pointer; box-shadow: 0 5px 0 rgba(0,0,0,0.3);
+    font-family: inherit;
+  }
+  .ans:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+  .ans.correct { background: linear-gradient(180deg, #66bb6a, #2e7d32) !important; }
+  .ans.wrong   { background: linear-gradient(180deg, #ef5350, #c62828) !important; }
+  .ans.disabled { pointer-events: none; opacity: 0.7; }
+
+  .typing {
+    background: #fff; color: #222; border: 3px solid #1565c0;
+    border-radius: 12px; padding: 12px; font-size: 24px; text-align: center;
+    width: 100%; font-family: inherit;
+  }
+  .feedback {
+    text-align: center; font-size: clamp(20px, 4vw, 28px); font-weight: bold;
+    min-height: 36px; text-shadow: 2px 2px 0 #000;
+  }
+
+  /* CANVAS GAMES */
+  #gameCanvas { width: 100%; flex: 1; background: #000; border-radius: 16px; touch-action: none; }
+
+  /* MONSTER MODE */
+  .battle {
+    flex: 1; display: flex; flex-direction: column; gap: 10px;
+    background: linear-gradient(180deg, #2c1810, #5d4037);
+    border-radius: 18px; padding: 14px; border: 4px solid #fff;
+  }
+  .monster {
+    text-align: center; font-size: clamp(60px, 14vw, 110px); margin: 5px 0;
+    transition: transform 0.2s;
+  }
+  .monster.hit { animation: shake 0.4s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-12px) rotate(-5deg); }
+    75% { transform: translateX(12px) rotate(5deg); }
+  }
+  .hpbar {
+    height: 18px; background: #333; border-radius: 10px; overflow: hidden;
+    border: 2px solid #fff;
+  }
+  .hpfill {
+    height: 100%; background: linear-gradient(90deg, #f44336, #ff9800, #4caf50);
+    width: 100%; transition: width 0.4s;
+  }
+
+  /* RESULTS */
+  .result-card {
+    background: rgba(255,255,255,0.95); color: #222;
+    border-radius: 24px; padding: 24px; text-align: center;
+    margin: auto; max-width: 400px; border: 5px solid gold;
+  }
+  .result-card .big { font-size: clamp(50px, 10vw, 80px); }
+
+  .floaty {
+    position: absolute; pointer-events: none;
+    font-weight: bold; font-size: 28px; color: gold;
+    text-shadow: 2px 2px 0 #000;
+    animation: floatup 1s ease-out forwards;
+  }
+  @keyframes floatup {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-80px); opacity: 0; }
+  }
+
+  /* SPELL BEE */
+  .word-display {
+    font-size: clamp(40px, 8vw, 70px); font-weight: bold; letter-spacing: 6px;
+    text-align: center; padding: 14px; background: rgba(0,0,0,0.4);
+    border-radius: 14px; min-height: 80px;
+  }
+  .keyboard { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .key {
+    background: linear-gradient(180deg, #ffca28, #ff8f00); color: #222;
+    border: 2px solid #fff; border-radius: 8px; padding: 12px 0;
+    font-size: 18px; font-weight: bold; cursor: pointer;
+    font-family: inherit;
+  }
+  .key:active { transform: scale(0.92); }
+  .key.wide { grid-column: span 2; background: linear-gradient(180deg, #ef5350, #c62828); color: #fff; }
+
+  .footer-row {
+    display: flex; justify-content: space-between; gap: 10px; margin-top: auto;
+  }
+
+  @media (max-height: 600px) {
+    .qprompt { font-size: 22px; margin-bottom: 8px; }
+    .ans { padding: 10px; font-size: 18px; }
+    h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <div id="home" class="screen active">
+    <div class="hero">
+      <h1>🚀 Aarav's Learning Quest 🌟</h1>
+      <div id="welcomeLine" style="font-size:16px; margin-top:6px;">Tap to start!</div>
+    </div>
+
+    <h2>Pick a Subject</h2>
+    <div class="row">
+      <button class="btn blue" data-subject="math">🔢 Math</button>
+      <button class="btn green" data-subject="english">📚 English</button>
+      <button class="btn purple" data-subject="mixed">🎯 Mixed</button>
+    </div>
+
+    <h2>Pick a Game</h2>
+    <div class="grid modes">
+      <div class="mode-card" data-mode="space">
+        <span class="emoji">🚀</span>
+        <div class="name">Space Defender</div>
+        <div class="desc">Blast aliens with right answers!</div>
+      </div>
+      <div class="mode-card" data-mode="monster">
+        <span class="emoji">🐉</span>
+        <div class="name">Monster Battle</div>
+        <div class="desc">Defeat monsters with brain power!</div>
+      </div>
+      <div class="mode-card" data-mode="runner">
+        <span class="emoji">🏃</span>
+        <div class="name">Treasure Run</div>
+        <div class="desc">Grab coins, dodge traps!</div>
+      </div>
+      <div class="mode-card" data-mode="spell">
+        <span class="emoji">🐝</span>
+        <div class="name">Spelling Bee</div>
+        <div class="desc">Spell tricky words!</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <button class="btn small" id="resetBtn">Reset Stars</button>
+      <div class="hud" style="flex:1;">
+        <div class="stat">⭐ Total: <span id="totalStars">0</span></div>
+        <div class="stat">🏆 Best: <span id="bestStreak">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ-STYLE GAME (used by space, monster) -->
+  <div id="play" class="screen">
+    <div class="hud">
+      <div class="stat">❤️ <span id="lives">3</span></div>
+      <div class="stat">⭐ <span id="score">0</span></div>
+      <div class="stat">🔥 <span id="streak">0</span></div>
+      <button class="btn small red" id="quitBtn">✖</button>
+    </div>
+    <div id="gameArea" style="flex:1; display:flex; flex-direction:column; gap:10px;"></div>
+  </div>
+
+  <!-- SPELL BEE -->
+  <div id="spell" class="screen">
+    <div class="hud">
+      <div class="stat">❤️ <span id="spellLives">3</span></div>
+      <div class="stat">⭐ <span id="spellScore">0</span></div>
+      <button class="btn small red" id="spellQuit">✖</button>
+    </div>
+    <div class="qcard">
+      <div class="qsmall" id="spellHint">Hint goes here</div>
+      <div class="qprompt" id="spellMeaning"></div>
+      <button class="btn blue" id="speakBtn" style="margin-top:8px;">🔊 Hear Word</button>
+    </div>
+    <div class="word-display" id="spellWord"></div>
+    <div class="feedback" id="spellFeedback"></div>
+    <div class="keyboard" id="keyboard"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="result" class="screen" style="justify-content:center;">
+    <div class="result-card">
+      <div class="big" id="resultEmoji">🎉</div>
+      <h2 id="resultTitle">Great Job!</h2>
+      <p style="font-size:18px; margin:12px 0;" id="resultMsg">You earned stars!</p>
+      <div style="font-size:36px; color:gold; margin:14px 0;" id="resultStars">⭐ 0</div>
+      <button class="btn green" id="playAgain">Play Again</button>
+      <button class="btn blue" id="goHome" style="margin-top:8px;">Home</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ========== STORAGE ========== */
+const Save = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem('aq_' + k)) ?? d; } catch { return d; } },
+  set(k, v) { localStorage.setItem('aq_' + k, JSON.stringify(v)); }
+};
+let totalStars = Save.get('stars', 0);
+let bestStreak = Save.get('best', 0);
+
+/* ========== SOUND ========== */
+let audioCtx;
+function beep(freq = 600, dur = 0.12, type = 'square', vol = 0.15) {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.value = vol;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.stop(audioCtx.currentTime + dur);
+  } catch (e) {}
+}
+const SFX = {
+  correct() { beep(660, 0.1); setTimeout(() => beep(880, 0.15), 90); },
+  wrong()   { beep(220, 0.2, 'sawtooth'); },
+  click()   { beep(500, 0.05); },
+  win()     { beep(523, 0.1); setTimeout(() => beep(659, 0.1), 100); setTimeout(() => beep(784, 0.2), 200); },
+  lose()    { beep(300, 0.2, 'sawtooth'); setTimeout(() => beep(200, 0.3, 'sawtooth'), 200); }
+};
+
+/* ========== SPEECH ========== */
+function speak(text) {
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.85; u.pitch = 1.1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+/* ========== SCREEN MGMT ========== */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ========== CONTENT (Grade 2-3) ========== */
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function shuffle(a) { return a.slice().sort(() => Math.random() - 0.5); }
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+/* MATH: returns { prompt, answer, choices } */
+function makeMathQ() {
+  const types = ['add', 'add', 'sub', 'sub', 'mul', 'mul', 'div', 'place', 'frac', 'word', 'mul', 'compare'];
+  const t = pick(types);
+  let prompt, answer;
+
+  if (t === 'add') {
+    const a = rand(15, 199), b = rand(10, 99);
+    prompt = `${a} + ${b} = ?`; answer = a + b;
+  } else if (t === 'sub') {
+    const a = rand(50, 200), b = rand(10, a - 1);
+    prompt = `${a} − ${b} = ?`; answer = a - b;
+  } else if (t === 'mul') {
+    const a = rand(2, 10), b = rand(2, 10);
+    prompt = `${a} × ${b} = ?`; answer = a * b;
+  } else if (t === 'div') {
+    const b = rand(2, 9), q = rand(2, 10);
+    prompt = `${b * q} ÷ ${b} = ?`; answer = q;
+  } else if (t === 'place') {
+    const n = rand(100, 999);
+    const place = pick(['hundreds', 'tens', 'ones']);
+    const s = String(n);
+    answer = place === 'hundreds' ? +s[0] : place === 'tens' ? +s[1] : +s[2];
+    prompt = `In ${n}, what digit is in the ${place} place?`;
+  } else if (t === 'frac') {
+    const denoms = [[1,2,'one half'],[1,4,'one quarter'],[3,4,'three quarters'],[1,3,'one third'],[2,3,'two thirds'],[1,5,'one fifth']];
+    const [num, den, name] = pick(denoms);
+    const total = den * rand(2, 5);
+    answer = total * num / den;
+    prompt = `What is ${name} of ${total}?`;
+  } else if (t === 'compare') {
+    const a = rand(100, 999), b = rand(100, 999);
+    if (a === b) return makeMathQ();
+    prompt = `Which is bigger?`;
+    answer = a > b ? a : b;
+    return {
+      prompt, answer,
+      choices: shuffle([a, b, Math.min(a,b) - rand(1,20), Math.max(a,b) + rand(1,20)])
+    };
+  } else if (t === 'word') {
+    const wp = [
+      () => { const a=rand(8,30), b=rand(5,20); return [`Aarav has ${a} marbles. He gives ${b} to his friend. How many left?`, a-b]; },
+      () => { const a=rand(2,9), b=rand(2,8);  return [`There are ${a} boxes with ${b} candies each. How many candies in total?`, a*b]; },
+      () => { const a=rand(20,80), b=rand(10,50); return [`A bus has ${a} kids. ${b} more get on. How many now?`, a+b]; },
+      () => { const a=rand(2,8), b=rand(3,9);  return [`A pizza has ${a*b} slices, shared by ${a} kids. How many slices each?`, b]; },
+      () => { const a=rand(3,7), b=rand(2,5);  return [`Aarav reads ${a} pages each day for ${b} days. How many pages total?`, a*b]; }
+    ];
+    [prompt, answer] = pick(wp)();
+  }
+
+  // build distractor choices
+  const choices = new Set([answer]);
+  while (choices.size < 4) {
+    const off = rand(1, Math.max(5, Math.floor(answer * 0.3) || 5));
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    const c = answer + sign * off;
+    if (c > 0 || answer === 0) choices.add(c);
+  }
+  return { prompt, answer, choices: shuffle([...choices]) };
+}
+
+/* ENGLISH: vocab, synonyms, antonyms, grammar, reading */
+const SYNONYMS = [
+  ['big','large','huge','tiny'], ['happy','glad','joyful','sad'], ['fast','quick','rapid','slow'],
+  ['smart','clever','wise','silly'], ['begin','start','commence','finish'], ['end','finish','stop','start'],
+  ['scared','afraid','frightened','brave'], ['angry','mad','furious','calm'], ['pretty','beautiful','lovely','ugly'],
+  ['nice','kind','friendly','mean'], ['little','small','tiny','huge'], ['quiet','silent','still','loud'],
+  ['shout','yell','scream','whisper'], ['cold','freezing','chilly','hot'], ['hot','warm','boiling','cold'],
+  ['look','see','watch','hear'], ['walk','stroll','march','run'], ['easy','simple','effortless','hard']
+];
+const ANTONYMS = [
+  ['hot','cold'],['happy','sad'],['big','small'],['fast','slow'],['day','night'],['up','down'],
+  ['young','old'],['light','dark'],['empty','full'],['rich','poor'],['hard','easy'],['open','close'],
+  ['near','far'],['begin','end'],['win','lose'],['push','pull'],['buy','sell'],['true','false'],
+  ['friend','enemy'],['love','hate'],['kind','mean'],['safe','dangerous']
+];
+const GRAMMAR_NOUNS = ['dog','school','book','apple','teacher','park','river','car','phone','window','garden','pencil','bird','mountain','friend','city','game','chair'];
+const GRAMMAR_VERBS = ['run','jump','eat','read','swim','write','sing','dance','play','laugh','fly','climb','build','draw','catch','throw'];
+const GRAMMAR_ADJ   = ['happy','tall','blue','sweet','noisy','soft','bright','hungry','cold','funny','clever','tiny','huge'];
+const SIGHT = ['because','through','enough','people','though','knew','laugh','beautiful','friend','where','their','again'];
+
+function makeEnglishQ() {
+  const t = pick(['syn', 'ant', 'syn', 'ant', 'grammar', 'fillblank', 'reading', 'plural', 'past']);
+
+  if (t === 'syn') {
+    const row = pick(SYNONYMS);
+    const word = row[0];
+    const correct = row[1];
+    const wrongs = [row[3], pick(SYNONYMS.filter(r => r !== row))[3], pick(GRAMMAR_NOUNS)];
+    return {
+      prompt: `Which word means the SAME as "${word}"?`,
+      answer: correct,
+      choices: shuffle([correct, ...wrongs.slice(0, 3)])
+    };
+  }
+  if (t === 'ant') {
+    const [a, b] = pick(ANTONYMS);
+    const correct = b;
+    const others = ANTONYMS.filter(p => p[0] !== a).flat().filter(w => w !== a && w !== b);
+    return {
+      prompt: `Which word means the OPPOSITE of "${a}"?`,
+      answer: correct,
+      choices: shuffle([correct, pick(others), pick(others), pick(others)].filter((v,i,arr) => arr.indexOf(v) === i).slice(0,4))
+    };
+  }
+  if (t === 'grammar') {
+    const kind = pick(['noun','verb','adjective']);
+    const correct = kind === 'noun' ? pick(GRAMMAR_NOUNS) : kind === 'verb' ? pick(GRAMMAR_VERBS) : pick(GRAMMAR_ADJ);
+    const pool = [pick(GRAMMAR_NOUNS), pick(GRAMMAR_VERBS), pick(GRAMMAR_ADJ), pick(GRAMMAR_NOUNS), pick(GRAMMAR_VERBS), pick(GRAMMAR_ADJ)]
+      .filter(w => w !== correct);
+    return {
+      prompt: `Which one is a ${kind.toUpperCase()}?`,
+      answer: correct,
+      choices: shuffle([correct, ...new Set(pool)].slice(0, 4))
+    };
+  }
+  if (t === 'fillblank') {
+    const items = [
+      ['I ___ to school every day.', 'go', ['goes','went','going']],
+      ['She ___ a red apple.', 'ate', ['eat','eating','eats']],
+      ['The dog ___ very loud.', 'barks', ['bark','barking','barked']],
+      ['We ___ playing in the park.', 'are', ['is','am','be']],
+      ['He ___ his homework yesterday.', 'finished', ['finish','finishes','finishing']],
+      ['___ you like ice cream?', 'Do', ['Does','Is','Are']],
+      ['There ___ many stars in the sky.', 'are', ['is','was','be']],
+      ['She is ___ than her brother.', 'taller', ['tall','tallest','more tall']]
+    ];
+    const [prompt, ans, wrongs] = pick(items);
+    return { prompt, answer: ans, choices: shuffle([ans, ...wrongs]) };
+  }
+  if (t === 'plural') {
+    const items = [['child','children'],['mouse','mice'],['foot','feet'],['tooth','teeth'],['man','men'],['woman','women'],['goose','geese'],['leaf','leaves'],['baby','babies'],['box','boxes'],['fish','fish'],['city','cities']];
+    const [w, p] = pick(items);
+    const wrongs = [w + 's', w + 'es', w + 'ies'].filter(x => x !== p);
+    return {
+      prompt: `What is the plural of "${w}"?`,
+      answer: p,
+      choices: shuffle([p, ...wrongs].slice(0,4))
+    };
+  }
+  if (t === 'past') {
+    const items = [['run','ran'],['eat','ate'],['go','went'],['see','saw'],['take','took'],['give','gave'],['write','wrote'],['ride','rode'],['catch','caught'],['teach','taught'],['buy','bought'],['bring','brought']];
+    const [v, past] = pick(items);
+    const wrongs = [v+'ed', v+'d', v+'ing'].filter(x => x !== past);
+    return {
+      prompt: `What is the past tense of "${v}"?`,
+      answer: past,
+      choices: shuffle([past, ...wrongs].slice(0,4))
+    };
+  }
+  if (t === 'reading') {
+    const stories = [
+      { txt:'Maya planted a small seed in her garden. She watered it every day. After two weeks, a tiny green leaf popped out.', q:'How long until the leaf appeared?', a:'two weeks', d:['two days','two months','one hour'] },
+      { txt:'The little fox was hungry. He saw a bunch of grapes high up. He jumped and jumped, but he could not reach.', q:'Why did the fox jump?', a:'to reach the grapes', d:['to play','to scare a bird','to sleep'] },
+      { txt:'Sam baked cookies for his class. He made twelve cookies. There are ten kids. How many cookies are left for Sam?', q:'How many cookies for Sam?', a:'2', d:['10','12','22'] },
+      { txt:'The sun was hot. The ice cream melted fast. It dripped onto the sidewalk.', q:'Why did the ice cream melt?', a:'the sun was hot', d:['it was old','someone dropped it','it was cold'] },
+      { txt:'Owls sleep in the day. They hunt at night. Their big eyes help them see in the dark.', q:'When do owls hunt?', a:'at night', d:['in the morning','at noon','in the afternoon'] }
+    ];
+    const s = pick(stories);
+    return {
+      prompt: `${s.txt}\n\n${s.q}`,
+      answer: s.a,
+      choices: shuffle([s.a, ...s.d])
+    };
+  }
+}
+
+function makeQ(subject) {
+  if (subject === 'math') return makeMathQ();
+  if (subject === 'english') return makeEnglishQ();
+  return Math.random() < 0.5 ? makeMathQ() : makeEnglishQ();
+}
+
+/* ========== STATE ========== */
+const State = {
+  subject: 'mixed',
+  mode: 'space',
+  lives: 3,
+  score: 0,
+  streak: 0,
+  maxStreak: 0
+};
+
+function updateHomeStats() {
+  document.getElementById('totalStars').textContent = totalStars;
+  document.getElementById('bestStreak').textContent = bestStreak;
+}
+updateHomeStats();
+
+/* subject pick */
+let chosenSubject = 'mixed';
+document.querySelectorAll('[data-subject]').forEach(b => {
+  b.addEventListener('click', () => {
+    chosenSubject = b.dataset.subject;
+    document.querySelectorAll('[data-subject]').forEach(x => x.style.outline = '');
+    b.style.outline = '4px solid #fff';
+    SFX.click();
+  });
+});
+// default subject highlighted
+setTimeout(() => document.querySelector('[data-subject="mixed"]').style.outline = '4px solid #fff', 50);
+
+document.querySelectorAll('[data-mode]').forEach(c => {
+  c.addEventListener('click', () => {
+    SFX.click();
+    State.subject = chosenSubject;
+    State.mode = c.dataset.mode;
+    State.lives = 3; State.score = 0; State.streak = 0; State.maxStreak = 0;
+    if (State.mode === 'spell') startSpell();
+    else if (State.mode === 'runner') startRunner();
+    else startQuizMode();
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('Reset all stars?')) {
+    totalStars = 0; bestStreak = 0;
+    Save.set('stars', 0); Save.set('best', 0);
+    updateHomeStats();
+  }
+});
+
+/* ========== QUIZ MODE (space + monster) ========== */
+function startQuizMode() {
+  show('play');
+  renderQuiz();
+}
+
+function renderQuiz() {
+  document.getElementById('lives').textContent = State.lives;
+  document.getElementById('score').textContent = State.score;
+  document.getElementById('streak').textContent = State.streak;
+
+  const area = document.getElementById('gameArea');
+  area.innerHTML = '';
+  const q = makeQ(State.subject);
+  State.currentQ = q;
+
+  if (State.mode === 'space') renderSpace(area, q);
+  else renderMonster(area, q);
+}
+
+function renderSpace(area, q) {
+  area.innerHTML = `
+    <div class="qcard">
+      <div class="qsmall">🚀 Shoot the alien with the right answer!</div>
+      <div class="qprompt">${q.prompt.replace(/\n/g,'<br>')}</div>
+    </div>
+    <div style="flex:1; position:relative; background: radial-gradient(circle at 50% 0%, #1a237e, #000); border-radius:16px; overflow:hidden;" id="spaceArea">
+    </div>
+  `;
+  const sp = document.getElementById('spaceArea');
+  // stars background
+  let starHtml = '';
+  for (let i = 0; i < 25; i++) {
+    starHtml += `<div style="position:absolute; width:2px; height:2px; background:#fff; left:${Math.random()*100}%; top:${Math.random()*100}%; opacity:${Math.random()};"></div>`;
+  }
+  sp.innerHTML = starHtml;
+
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ans';
+    btn.textContent = c;
+    btn.style.position = 'absolute';
+    const colors = ['#9c27b0','#e91e63','#ff5722','#00bcd4'];
+    btn.style.background = `linear-gradient(180deg, ${colors[i]}, #000)`;
+    btn.style.minWidth = '70px';
+    // arrange aliens
+    const cols = 2;
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    btn.style.left = (15 + col * 50) + '%';
+    btn.style.top  = (15 + row * 35) + '%';
+    btn.style.transform = 'translate(-50%, 0)';
+    btn.innerHTML = `👾<br>${c}`;
+    btn.addEventListener('click', () => handleAnswer(c, btn));
+    sp.appendChild(btn);
+  });
+}
+
+function renderMonster(area, q) {
+  if (!State.monsterHP) { State.monsterHP = 100; State.monsterMax = 100; State.monsterLevel = 1; }
+  const monsters = ['🐉','👹','👺','🧟','👻','🦖','🐲','👽','🤖'];
+  const mEmoji = monsters[(State.monsterLevel - 1) % monsters.length];
+
+  area.innerHTML = `
+    <div class="battle">
+      <div style="display:flex; justify-content:space-between;">
+        <div>Monster Lv. ${State.monsterLevel}</div>
+        <div>HP: ${State.monsterHP}/${State.monsterMax}</div>
+      </div>
+      <div class="hpbar"><div class="hpfill" id="hpfill" style="width:${(State.monsterHP/State.monsterMax)*100}%"></div></div>
+      <div class="monster" id="monsterEl">${mEmoji}</div>
+      <div class="qcard" style="margin-top:auto;">
+        <div class="qprompt">${q.prompt.replace(/\n/g,'<br>')}</div>
+        <div class="answers" id="ansGrid"></div>
+      </div>
+    </div>
+  `;
+  const grid = document.getElementById('ansGrid');
+  q.choices.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'ans';
+    b.textContent = c;
+    b.addEventListener('click', () => handleAnswer(c, b));
+    grid.appendChild(b);
+  });
+}
+
+function handleAnswer(choice, btn) {
+  if (btn.classList.contains('disabled')) return;
+  const q = State.currentQ;
+  document.querySelectorAll('.ans').forEach(b => b.classList.add('disabled'));
+
+  if (String(choice) === String(q.answer)) {
+    btn.classList.add('correct');
+    SFX.correct();
+    State.streak++;
+    State.maxStreak = Math.max(State.maxStreak, State.streak);
+    State.score += 10 + State.streak * 2;
+
+    if (State.mode === 'monster') {
+      State.monsterHP -= 25;
+      const mEl = document.getElementById('monsterEl');
+      if (mEl) mEl.classList.add('hit');
+      const hp = document.getElementById('hpfill');
+      if (hp) hp.style.width = Math.max(0, (State.monsterHP/State.monsterMax)*100) + '%';
+      floatText(btn, '+25 DMG');
+      if (State.monsterHP <= 0) {
+        State.monsterLevel++;
+        State.monsterMax = 100 + State.monsterLevel * 25;
+        State.monsterHP = State.monsterMax;
+        State.score += 50;
+        setTimeout(() => alert(`🏆 Monster defeated! Level ${State.monsterLevel} appears!`), 400);
+      }
+    } else {
+      floatText(btn, '+' + (10 + State.streak * 2));
+    }
+    setTimeout(renderQuiz, 700);
+  } else {
+    btn.classList.add('wrong');
+    SFX.wrong();
+    State.lives--;
+    State.streak = 0;
+    // highlight correct
+    document.querySelectorAll('.ans').forEach(b => {
+      if (String(b.textContent).trim() === String(q.answer) || (b.innerHTML && b.innerHTML.includes('>'+q.answer))) {
+        b.classList.add('correct');
+      }
+    });
+    if (State.lives <= 0) {
+      setTimeout(endGame, 900);
+    } else {
+      setTimeout(renderQuiz, 1300);
+    }
+  }
+}
+
+function floatText(target, text) {
+  const r = target.getBoundingClientRect();
+  const app = document.getElementById('app').getBoundingClientRect();
+  const f = document.createElement('div');
+  f.className = 'floaty';
+  f.textContent = text;
+  f.style.left = (r.left - app.left + r.width/2) + 'px';
+  f.style.top  = (r.top - app.top) + 'px';
+  document.getElementById('app').appendChild(f);
+  setTimeout(() => f.remove(), 1000);
+}
+
+document.getElementById('quitBtn').addEventListener('click', () => {
+  if (confirm('Quit and go home?')) endGame(true);
+});
+
+function endGame(quit) {
+  if (!quit) SFX.lose();
+  const stars = Math.floor(State.score / 20);
+  totalStars += stars;
+  bestStreak = Math.max(bestStreak, State.maxStreak);
+  Save.set('stars', totalStars); Save.set('best', bestStreak);
+
+  document.getElementById('resultEmoji').textContent = State.score >= 100 ? '🏆' : State.score >= 50 ? '🌟' : '💪';
+  document.getElementById('resultTitle').textContent = State.score >= 100 ? 'Amazing!' : State.score >= 50 ? 'Great Job!' : 'Good Try!';
+  document.getElementById('resultMsg').textContent = `Score: ${State.score} • Best streak: ${State.maxStreak}`;
+  document.getElementById('resultStars').textContent = '⭐'.repeat(Math.min(stars, 10)) + ` (${stars})`;
+  if (!quit) SFX.win();
+  show('result');
+  updateHomeStats();
+  // reset monster state
+  State.monsterHP = null;
+}
+
+document.getElementById('playAgain').addEventListener('click', () => {
+  State.lives = 3; State.score = 0; State.streak = 0; State.maxStreak = 0;
+  if (State.mode === 'spell') startSpell();
+  else if (State.mode === 'runner') startRunner();
+  else startQuizMode();
+});
+document.getElementById('goHome').addEventListener('click', () => {
+  show('home');
+  State.monsterHP = null;
+});
+
+/* ========== SPELLING BEE ========== */
+const SPELL_WORDS = [
+  ['because','tells why','I cried _____ I was sad.'],
+  ['friend','someone you like','My best _____ is fun.'],
+  ['school','where you learn','I go to _____ daily.'],
+  ['through','passing across','We walked _____ the park.'],
+  ['enough','as much as needed','I had _____ food.'],
+  ['people','more than one person','Many _____ came.'],
+  ['beautiful','very pretty','The flower is _____.'],
+  ['knew','past tense of know','I _____ the answer.'],
+  ['laugh','what you do at jokes','Jokes make me _____.'],
+  ['where','asks about a place','_____ is my hat?'],
+  ['their','belongs to them','It is _____ ball.'],
+  ['again','one more time','Do it _____.'],
+  ['quiet','not loud','Be _____ in class.'],
+  ['library','place with books','Books are at the _____.'],
+  ['family','people you live with','I love my _____.'],
+  ['doctor','helps when sick','The _____ checked me.'],
+  ['country','a nation','India is a _____.'],
+  ['favorite','most liked','Pizza is my _____.'],
+  ['question','something you ask','I have a _____.'],
+  ['answer','reply to a question','What is the _____?'],
+  ['mountain','very tall hill','The _____ is high.'],
+  ['together','with each other','We play _____.'],
+  ['important','really matters','School is _____.'],
+  ['thought','past tense of think','I _____ about it.'],
+  ['neighbor','person nearby','My _____ is kind.'],
+  ['birthday','day you were born','Happy _____ to you!'],
+  ['adventure','exciting trip','We had an _____.'],
+  ['breakfast','morning meal','I eat _____ early.']
+];
+
+function startSpell() {
+  show('spell');
+  State.lives = 3; State.score = 0;
+  State.spellQueue = shuffle(SPELL_WORDS);
+  document.getElementById('spellLives').textContent = State.lives;
+  document.getElementById('spellScore').textContent = State.score;
+  nextSpellWord();
+  buildKeyboard();
+}
+
+function nextSpellWord() {
+  if (!State.spellQueue.length) State.spellQueue = shuffle(SPELL_WORDS);
+  const [word, hint, sentence] = State.spellQueue.shift();
+  State.currentSpell = word;
+  State.typedSpell = '';
+  document.getElementById('spellHint').textContent = `Hint: ${hint}`;
+  document.getElementById('spellMeaning').textContent = sentence.replace(word, '_____');
+  document.getElementById('spellFeedback').textContent = '';
+  updateSpellDisplay();
+  setTimeout(() => speak(word + '. ' + sentence), 300);
+}
+
+function updateSpellDisplay() {
+  const word = State.currentSpell;
+  const typed = State.typedSpell;
+  let html = '';
+  for (let i = 0; i < word.length; i++) {
+    html += typed[i] ? `<span style="color:#ffeb3b">${typed[i]}</span>` : '_';
+  }
+  document.getElementById('spellWord').innerHTML = html;
+}
+
+function buildKeyboard() {
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  const rows = ['QWERTYU','IOPASDF','GHJKLZX','CVBNM'];
+  rows.join('').split('').forEach(letter => {
+    const k = document.createElement('button');
+    k.className = 'key';
+    k.textContent = letter;
+    k.addEventListener('click', () => typeLetter(letter.toLowerCase()));
+    kb.appendChild(k);
+  });
+  const back = document.createElement('button');
+  back.className = 'key wide';
+  back.textContent = '⌫';
+  back.addEventListener('click', () => {
+    State.typedSpell = State.typedSpell.slice(0, -1);
+    updateSpellDisplay();
+  });
+  kb.appendChild(back);
+  const enter = document.createElement('button');
+  enter.className = 'key wide';
+  enter.textContent = '✓';
+  enter.style.background = 'linear-gradient(180deg,#66bb6a,#2e7d32)';
+  enter.style.color = '#fff';
+  enter.addEventListener('click', checkSpell);
+  kb.appendChild(enter);
+}
+
+function typeLetter(l) {
+  if (State.typedSpell.length >= State.currentSpell.length) return;
+  State.typedSpell += l;
+  updateSpellDisplay();
+  SFX.click();
+  if (State.typedSpell.length === State.currentSpell.length) {
+    setTimeout(checkSpell, 200);
+  }
+}
+
+function checkSpell() {
+  const fb = document.getElementById('spellFeedback');
+  if (State.typedSpell === State.currentSpell) {
+    SFX.correct();
+    fb.textContent = '✅ Correct!'; fb.style.color = '#aaff66';
+    State.score += 20;
+    document.getElementById('spellScore').textContent = State.score;
+    setTimeout(nextSpellWord, 1100);
+  } else {
+    SFX.wrong();
+    fb.innerHTML = `❌ It's "<span style="color:#ffeb3b">${State.currentSpell}</span>"`; fb.style.color = '#ff8888';
+    State.lives--;
+    document.getElementById('spellLives').textContent = State.lives;
+    if (State.lives <= 0) {
+      setTimeout(() => {
+        State.maxStreak = 0;
+        endGame();
+      }, 1700);
+    } else {
+      setTimeout(nextSpellWord, 1700);
+    }
+  }
+}
+
+document.getElementById('speakBtn').addEventListener('click', () => {
+  speak(State.currentSpell);
+});
+document.getElementById('spellQuit').addEventListener('click', () => {
+  if (confirm('Quit and go home?')) { State.maxStreak = 0; endGame(true); }
+});
+
+/* ========== TREASURE RUNNER ========== */
+function startRunner() {
+  show('play');
+  State.lives = 3; State.score = 0; State.streak = 0; State.maxStreak = 0;
+  document.getElementById('lives').textContent = State.lives;
+  document.getElementById('score').textContent = State.score;
+  document.getElementById('streak').textContent = State.streak;
+  const area = document.getElementById('gameArea');
+  area.innerHTML = `
+    <div class="qcard" id="runnerQ">
+      <div class="qsmall">🏃 Tap a box to grab the right treasure!</div>
+      <div class="qprompt" id="runnerPrompt">...</div>
+    </div>
+    <div style="flex:1; position:relative; background: linear-gradient(180deg, #87ceeb 0%, #98fb98 60%, #8b4513 60%, #654321 100%); border-radius:16px; overflow:hidden;" id="runnerArea">
+      <div id="runnerHero" style="position:absolute; left:30px; bottom:40px; font-size:50px; transition:transform 0.3s;">🦸</div>
+    </div>
+  `;
+  runnerNext();
+}
+function runnerNext() {
+  const q = makeQ(State.subject);
+  State.currentQ = q;
+  document.getElementById('runnerPrompt').innerHTML = q.prompt.replace(/\n/g,'<br>');
+  const ar = document.getElementById('runnerArea');
+  // remove old chests
+  ar.querySelectorAll('.chest').forEach(c => c.remove());
+  const treasures = ['🎁','💎','🏆','⭐','💰','🍩'];
+  q.choices.forEach((c, i) => {
+    const el = document.createElement('button');
+    el.className = 'chest ans';
+    el.style.position = 'absolute';
+    el.style.bottom = (50 + Math.random()*120) + 'px';
+    el.style.left = (20 + i * 22) + '%';
+    el.style.minWidth = '70px';
+    el.style.background = 'rgba(255,255,255,0.85)';
+    el.style.color = '#222';
+    el.innerHTML = `<div style="font-size:28px">${treasures[i % treasures.length]}</div><div>${c}</div>`;
+    el.addEventListener('click', () => {
+      const hero = document.getElementById('runnerHero');
+      hero.style.transform = `translateX(${el.offsetLeft - 30}px)`;
+      setTimeout(() => handleAnswer(c, el), 350);
+    });
+    ar.appendChild(el);
+  });
+  // override handleAnswer follow-up: after correct/wrong call runnerNext
+  setTimeout(() => {
+    document.getElementById('lives').textContent = State.lives;
+    document.getElementById('score').textContent = State.score;
+    document.getElementById('streak').textContent = State.streak;
+  }, 0);
+}
+// Hook: when in runner mode, after answer feedback, call runnerNext instead of renderQuiz
+const _origRender = renderQuiz;
+window.renderQuiz = function() {
+  if (State.mode === 'runner') runnerNext();
+  else _origRender();
+};
+// (because we used renderQuiz directly inside handleAnswer via setTimeout(renderQuiz,...) we need to handle)
+// Re-bind: handleAnswer uses 'renderQuiz' identifier from outer scope at call time of setTimeout. That refers to the const declared. To support runner, override behavior:
+// Simpler: after correct/wrong in runner mode, call runnerNext from within a wrapper.
+
+// Patch: replace the setTimeout(renderQuiz,...) calls by overriding renderQuiz reference is tricky because const. So instead, intercept handleAnswer for runner: redefine handleAnswer for runner:
+// We'll detect mode in handleAnswer and call appropriate next function.
+</script>
+<script>
+// Replace handleAnswer with version that branches on mode
+window.handleAnswer = function(choice, btn) {
+  if (btn.classList.contains('disabled')) return;
+  const q = State.currentQ;
+  document.querySelectorAll('.ans').forEach(b => b.classList.add('disabled'));
+  const correct = String(choice) === String(q.answer);
+  if (correct) {
+    btn.classList.add('correct');
+    SFX.correct();
+    State.streak++;
+    State.maxStreak = Math.max(State.maxStreak, State.streak);
+    State.score += 10 + State.streak * 2;
+    if (State.mode === 'monster') {
+      State.monsterHP -= 25;
+      const mEl = document.getElementById('monsterEl');
+      if (mEl) mEl.classList.add('hit');
+      const hp = document.getElementById('hpfill');
+      if (hp) hp.style.width = Math.max(0, (State.monsterHP/State.monsterMax)*100) + '%';
+      floatText(btn, '+25 DMG');
+      if (State.monsterHP <= 0) {
+        State.monsterLevel++;
+        State.monsterMax = 100 + State.monsterLevel * 25;
+        State.monsterHP = State.monsterMax;
+        State.score += 50;
+        setTimeout(() => alert(`🏆 Monster defeated! Level ${State.monsterLevel} appears!`), 400);
+      }
+    } else {
+      floatText(btn, '+' + (10 + State.streak * 2));
+    }
+  } else {
+    btn.classList.add('wrong');
+    SFX.wrong();
+    State.lives--;
+    State.streak = 0;
+    document.querySelectorAll('.ans').forEach(b => {
+      const txt = (b.textContent || '').trim();
+      if (txt === String(q.answer) || txt.endsWith(String(q.answer))) {
+        b.classList.add('correct');
+      }
+    });
+  }
+  document.getElementById('lives').textContent = State.lives;
+  document.getElementById('score').textContent = State.score;
+  document.getElementById('streak').textContent = State.streak;
+
+  const delay = correct ? 700 : 1300;
+  setTimeout(() => {
+    if (State.lives <= 0) { endGame(); return; }
+    if (State.mode === 'runner') runnerNext();
+    else if (State.mode === 'space') { renderQuiz(); }
+    else if (State.mode === 'monster') { renderQuiz(); }
+    else renderQuiz();
+  }, delay);
+};
+</script>
+</body>
+</html>
