@@ -288,6 +288,40 @@
     height: 14px; background: rgba(0,0,0,0.5); border-radius: 7px; overflow: hidden;
     border: 2px solid rgba(255,255,255,0.4); margin-top: 4px;
   }
+  .lesson-card {
+    background: rgba(255,255,255,0.10); border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 12px; padding: 10px; cursor: pointer;
+    transition: transform 0.1s; display: flex; flex-direction: column; gap: 4px;
+  }
+  .lesson-card:active { transform: scale(0.96); }
+  .lesson-card.mastered { border-color: gold; background: rgba(255,215,0,0.15); }
+  .lesson-card .top { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: bold; }
+  .lesson-card .em { font-size: 22px; }
+  .lesson-card .stats { font-size: 11px; opacity: 0.85; }
+  .lesson-card .barwrap { height: 8px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; }
+  .lesson-card .barfill { height: 100%; background: linear-gradient(90deg, #66bb6a, #2e7d32); transition: width 0.4s; }
+
+  .profile-row {
+    background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 14px; padding: 10px 12px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    cursor: pointer;
+  }
+  .profile-row:active { transform: scale(0.97); }
+  .profile-row.current { border-color: gold; background: rgba(255,215,0,0.2); }
+
+  .pack-collection {
+    margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;
+    background: rgba(0,0,0,0.4); padding: 6px; border-radius: 10px;
+  }
+  .collected-slot {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; border: 1.5px solid #fff;
+    background: rgba(255,255,255,0.1);
+  }
+  .collected-slot.locked { filter: grayscale(1) brightness(0.4); border-color: #555; }
+  .collected-slot.has { background: rgba(255,215,0,0.25); border-color: gold; }
   .level-fill {
     height: 100%; background: linear-gradient(90deg, #ffeb3b, #ff9800);
     transition: width 0.5s;
@@ -297,11 +331,28 @@
 <body>
 <div id="app">
 
+  <!-- PROFILE PICKER (first screen if no profile) -->
+  <div id="profileScreen" class="screen">
+    <h1>👤 Who's Playing?</h1>
+    <div class="hero-banner">
+      <div style="font-size:14px;">Pick your profile to load YOUR coins, items, and lessons!</div>
+    </div>
+    <div id="profileList" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <h2 style="margin-top:8px;">Or Create New</h2>
+    <div style="display:flex; gap:8px;">
+      <input class="input" id="newProfileName" placeholder="Type your name" style="flex:1; letter-spacing:1px;" />
+      <button class="btn green" id="createProfileBtn">Create</button>
+    </div>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn small" id="importBtn">📥 Import Save Code</button>
+    </div>
+  </div>
+
   <!-- HOME -->
-  <div id="home" class="screen active">
+  <div id="home" class="screen">
     <div class="hero-banner">
       <h1>⚡ AARAV'S QUEST ARENA ⚡</h1>
-      <div style="font-size:14px; margin-top:4px;">3 Worlds · Learn · Battle · Win</div>
+      <div style="font-size:14px; margin-top:4px;">Welcome, <b id="profileNameTop">Player</b>!  <button class="btn small" id="switchProfileBtn">Switch</button></div>
       <div style="display:flex; justify-content:space-around; margin-top:8px; font-size:14px;">
         <div>🪙 <b id="coinsTop">0</b></div>
         <div>🏅 Lv.<b id="levelTop">1</b></div>
@@ -314,6 +365,7 @@
     <div class="row" style="gap:8px;">
       <button class="btn purple" id="shopBtn">🎁 Pack Shop</button>
       <button class="btn blue" id="inventoryBtn">🎒 My Items</button>
+      <button class="btn green" id="lessonsBtn">📚 Lessons</button>
     </div>
     <div style="text-align:center; background:rgba(0,0,0,0.4); border-radius:14px; padding:8px; border:2px solid #ff9800; font-size:13px;">
       🔥 <b>COMBO MODE:</b> Answer 5 in a row = 2x · 10 = 3x · 15 = 4x · 20 = 5x · 25 = 6x!<br>
@@ -391,6 +443,23 @@
     <div class="inv-grid" id="invAuras">No auras yet — open packs!</div>
     <div class="footer-row">
       <button class="btn red" id="invBack">Back</button>
+    </div>
+  </div>
+
+  <!-- LESSONS -->
+  <div id="lessonsScreen" class="screen">
+    <h1>📚 3rd Grade Lessons</h1>
+    <div class="hero-banner">
+      <div style="font-size:14px;">Practice a specific skill — track your progress per topic.</div>
+      <div style="font-size:13px; margin-top:6px;">Total questions answered: <b id="totalAnswered">0</b> · Accuracy: <b id="totalAccuracy">--</b>%</div>
+    </div>
+    <h2>🔢 Math</h2>
+    <div id="lessonGridMath" class="grid" style="grid-template-columns:1fr 1fr; gap:8px;"></div>
+    <h2>📖 English</h2>
+    <div id="lessonGridEng" class="grid" style="grid-template-columns:1fr 1fr; gap:8px;"></div>
+    <div class="footer-row">
+      <button class="btn red" id="lessonsBack">Back</button>
+      <button class="btn green" id="resetLessonsBtn">Reset Progress</button>
     </div>
   </div>
 
@@ -522,22 +591,89 @@
 <script>
 'use strict';
 
-/* ============================================================ STORAGE ============================================================ */
-const Save = {
-  get(k, d) { try { const v = localStorage.getItem('aq3_' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('aq3_' + k, JSON.stringify(v)); } catch {} }
+/* ============================================================ PROFILES + STORAGE ============================================================ */
+const G = {
+  get(k, d) { try { const v = localStorage.getItem('aq_g_' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('aq_g_' + k, JSON.stringify(v)); } catch {} }
 };
-let totalStars = Save.get('stars', 0);
-let bestScore = Save.get('best', 0);
-let chosenChar = Save.get('char', 0);
-let playerName = Save.get('name', '');
-let coins = Save.get('coins', 50000); // starter coins to try packs
-let level = Save.get('level', 1);
-let inventory = Save.get('inv', []);   // array of item ids
-if (Save.get('coins', null) === null) Save.set('coins', coins);
-let equippedTrail = Save.get('trail', null);
-let equippedAura = Save.get('aura', null);
-let bestCombo = Save.get('bestCombo', 0);
+let profiles = G.get('profiles', []);
+let currentProfile = G.get('currentProfile', null);
+const Save = {
+  prefix: () => 'aq3_' + (currentProfile || 'default') + '_',
+  get(k, d) { try { const v = localStorage.getItem(Save.prefix() + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(Save.prefix() + k, JSON.stringify(v)); } catch {} }
+};
+let totalStars = 0, bestScore = 0, chosenChar = 0, playerName = 'Player';
+let coins = 50000, level = 1, inventory = [], equippedTrail = null, equippedAura = null, bestCombo = 0;
+let lessonStats = {}; // { skillId: { correct, attempts } }
+function loadProfileData() {
+  totalStars = Save.get('stars', 0);
+  bestScore = Save.get('best', 0);
+  chosenChar = Save.get('char', 0);
+  playerName = Save.get('name', currentProfile || 'Player');
+  coins = Save.get('coins', 50000);
+  if (Save.get('coins', null) === null) Save.set('coins', coins);
+  level = Save.get('level', 1);
+  inventory = Save.get('inv', []);
+  equippedTrail = Save.get('trail', null);
+  equippedAura = Save.get('aura', null);
+  bestCombo = Save.get('bestCombo', 0);
+  lessonStats = Save.get('lessonStats', {});
+}
+function createProfile(name) {
+  name = (name||'').trim().slice(0, 16);
+  if (!name) return false;
+  if (profiles.find(p => p.name.toLowerCase() === name.toLowerCase())) return 'exists';
+  profiles.push({ name, created: Date.now() });
+  G.set('profiles', profiles);
+  switchProfile(name);
+  return true;
+}
+function switchProfile(name) {
+  currentProfile = name; G.set('currentProfile', name);
+  loadProfileData();
+}
+function deleteProfile(name) {
+  if (!confirm(`Delete profile "${name}" and all its progress?`)) return;
+  profiles = profiles.filter(p => p.name !== name);
+  G.set('profiles', profiles);
+  const prefix = 'aq3_' + name + '_';
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(prefix)) localStorage.removeItem(k);
+  }
+  if (currentProfile === name) {
+    currentProfile = profiles[0]?.name || null;
+    G.set('currentProfile', currentProfile);
+    if (currentProfile) loadProfileData();
+  }
+  refreshProfileScreen();
+}
+function exportSave() {
+  const data = { profile: currentProfile, stars: totalStars, best: bestScore, coins, level, inv: inventory, bestCombo, lessonStats, char: chosenChar, trail: equippedTrail, aura: equippedAura };
+  const code = btoa(JSON.stringify(data));
+  prompt('Copy this code, paste on another device → Profile → Import:', code);
+}
+function importSave(code) {
+  try {
+    const data = JSON.parse(atob(code.trim()));
+    if (!data.profile) throw new Error('Invalid');
+    if (!profiles.find(p => p.name === data.profile)) {
+      profiles.push({ name: data.profile, created: Date.now() });
+      G.set('profiles', profiles);
+    }
+    switchProfile(data.profile);
+    Save.set('stars', data.stars || 0); Save.set('best', data.best || 0);
+    Save.set('coins', data.coins || 0); Save.set('level', data.level || 1);
+    Save.set('inv', data.inv || []); Save.set('bestCombo', data.bestCombo || 0);
+    Save.set('lessonStats', data.lessonStats || {}); Save.set('char', data.char || 0);
+    Save.set('trail', data.trail || null); Save.set('aura', data.aura || null);
+    loadProfileData();
+    showToast('✅ Save imported for ' + data.profile);
+    refreshHomeStats();
+  } catch (e) { alert('Invalid save code'); }
+}
+if (currentProfile) loadProfileData();
 
 /* COMBO SYSTEM */
 let streak = 0;
@@ -602,10 +738,7 @@ function updateComboHUD() {
   el.style.borderColor = c.color;
   el.innerHTML = `${c.emoji} ${streak}🔥 <b>${c.mult}x</b>${c.name ? ' · ' + c.name : ''}`;
 }
-if (!playerName) {
-  playerName = (prompt('What is your name?') || 'Player').trim().slice(0, 12) || 'Player';
-  Save.set('name', playerName);
-}
+// Profile system handles playerName now (see Profile screen)
 
 /* ============================================================ AUDIO ============================================================ */
 let audioCtx;
@@ -730,65 +863,162 @@ function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 function shuffle(a) { return a.slice().sort(() => Math.random() - 0.5); }
 function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
-function makeMathQ() {
-  const t = pick(['add','add','sub','sub','mul','mul','mul','div','place','frac','word','compare']);
-  let prompt, answer;
-  if (t==='add') { const a=rand(15,199),b=rand(10,99); prompt=`${a} + ${b} = ?`; answer=a+b; }
-  else if (t==='sub') { const a=rand(50,200),b=rand(10,a-1); prompt=`${a} − ${b} = ?`; answer=a-b; }
-  else if (t==='mul') { const a=rand(2,10),b=rand(2,10); prompt=`${a} × ${b} = ?`; answer=a*b; }
-  else if (t==='div') { const b=rand(2,9),q=rand(2,10); prompt=`${b*q} ÷ ${b} = ?`; answer=q; }
-  else if (t==='place') { const n=rand(100,999),p=pick(['hundreds','tens','ones']); const s=String(n); answer=p==='hundreds'?+s[0]:p==='tens'?+s[1]:+s[2]; prompt=`In ${n}, what digit is in the ${p} place?`; }
-  else if (t==='frac') { const f=pick([[1,2,'half'],[1,4,'quarter'],[3,4,'three quarters'],[1,3,'a third'],[2,3,'two thirds']]); const tot=f[1]*rand(2,5); answer=tot*f[0]/f[1]; prompt=`What is ${f[2]} of ${tot}?`; }
-  else if (t==='compare') { const a=rand(100,999),b=rand(100,999); if(a===b) return makeMathQ(); prompt='Which is bigger?'; answer=Math.max(a,b); return { prompt,answer,choices:shuffle([a,b,Math.min(a,b)-rand(1,15),Math.max(a,b)+rand(1,15)]) }; }
-  else if (t==='word') {
-    const wp = [
-      () => { const a=rand(8,30),b=rand(5,20); return [`Aarav has ${a} stickers. He gives ${b} away. How many left?`, a-b]; },
-      () => { const a=rand(2,9),b=rand(2,8); return [`${a} boxes hold ${b} candies each. How many candies total?`, a*b]; },
-      () => { const a=rand(20,80),b=rand(10,50); return [`A bus has ${a} kids. ${b} more get on. How many now?`, a+b]; },
-      () => { const a=rand(2,8),b=rand(3,9); return [`A pizza has ${a*b} slices for ${a} kids. Slices each?`, b]; },
-      () => { const a=rand(3,7),b=rand(2,5); return [`Read ${a} pages a day for ${b} days. Total pages?`, a*b]; }
-    ];
-    [prompt,answer] = pick(wp)();
-  }
+/* Build distractor choices */
+function buildChoices(answer, n = 4) {
   const choices = new Set([answer]);
-  while (choices.size < 4) {
+  let tries = 0;
+  while (choices.size < n && tries < 30) {
+    tries++;
     const off = rand(1, Math.max(5, Math.floor(Math.abs(answer) * 0.3) || 5));
     const c = answer + (Math.random() < 0.5 ? -1 : 1) * off;
     if (c > 0 || answer === 0) choices.add(c);
   }
-  return { prompt, answer, choices: shuffle([...choices]) };
+  return shuffle([...choices]);
 }
 
-const SYN = [['big','large','tiny'],['happy','glad','sad'],['fast','quick','slow'],['smart','clever','silly'],['begin','start','finish'],['scared','afraid','brave'],['angry','mad','calm'],['little','small','huge'],['quiet','silent','loud'],['shout','yell','whisper'],['cold','chilly','hot'],['pretty','lovely','ugly'],['nice','kind','mean']];
-const ANT = [['hot','cold'],['happy','sad'],['big','small'],['fast','slow'],['day','night'],['up','down'],['young','old'],['light','dark'],['empty','full'],['hard','easy'],['near','far'],['win','lose'],['push','pull'],['true','false'],['friend','enemy'],['kind','mean']];
-const NOUNS=['dog','book','park','car','phone','garden','pencil','bird','friend','city','chair','school'];
-const VERBS=['run','jump','eat','read','swim','sing','dance','play','fly','climb','draw','catch'];
-const ADJS=['happy','tall','blue','sweet','noisy','soft','bright','hungry','funny','clever','tiny'];
+/* ============== 3RD GRADE LESSON CATALOG (Common Core aligned) ============== */
+const SYN = [['big','large','tiny'],['happy','glad','sad'],['fast','quick','slow'],['smart','clever','silly'],['begin','start','finish'],['scared','afraid','brave'],['angry','mad','calm'],['little','small','huge'],['quiet','silent','loud'],['shout','yell','whisper'],['cold','chilly','hot'],['pretty','lovely','ugly'],['nice','kind','mean'],['brave','bold','timid'],['tired','sleepy','awake'],['sick','ill','healthy']];
+const ANT = [['hot','cold'],['happy','sad'],['big','small'],['fast','slow'],['day','night'],['up','down'],['young','old'],['light','dark'],['empty','full'],['hard','easy'],['near','far'],['win','lose'],['push','pull'],['true','false'],['friend','enemy'],['kind','mean'],['brave','scared'],['rich','poor']];
+const NOUNS = ['dog','book','park','car','phone','garden','pencil','bird','friend','city','chair','school','river','mountain','teacher','window'];
+const VERBS = ['run','jump','eat','read','swim','sing','dance','play','fly','climb','draw','catch','build','laugh'];
+const ADJS = ['happy','tall','blue','sweet','noisy','soft','bright','hungry','funny','clever','tiny','brave'];
+const ADVERBS = ['quickly','slowly','carefully','loudly','softly','happily','quietly','suddenly'];
 
-function makeEnglishQ() {
-  const t = pick(['syn','ant','grammar','fillblank','plural','past','reading']);
-  if (t==='syn') { const r=pick(SYN); const correct=r[1]; const others=pick(SYN.filter(x=>x!==r))[1]; return { prompt:`Which means SAME as "${r[0]}"?`, answer:correct, choices:shuffle([correct,r[2],others,pick(NOUNS)]) }; }
-  if (t==='ant') { const [a,b]=pick(ANT); const others=ANT.filter(p=>p[0]!==a).flat().filter(w=>w!==a&&w!==b); return { prompt:`Which means OPPOSITE of "${a}"?`, answer:b, choices:shuffle([b,pick(others),pick(others),pick(others)].filter((v,i,arr)=>arr.indexOf(v)===i).slice(0,4)) }; }
-  if (t==='grammar') { const k=pick(['noun','verb','adjective']); const correct=k==='noun'?pick(NOUNS):k==='verb'?pick(VERBS):pick(ADJS); const pool=[pick(NOUNS),pick(VERBS),pick(ADJS),pick(NOUNS),pick(VERBS),pick(ADJS)].filter(w=>w!==correct); return { prompt:`Which is a ${k.toUpperCase()}?`, answer:correct, choices:shuffle([correct,...new Set(pool)].slice(0,4)) }; }
-  if (t==='fillblank') {
-    const items = [['I ___ to school every day.','go',['goes','went','going']],['She ___ a red apple.','ate',['eat','eating','eats']],['The dog ___ very loud.','barks',['bark','barking','barked']],['We ___ playing in the park.','are',['is','am','be']],['He ___ his homework yesterday.','finished',['finish','finishes','finishing']],['___ you like ice cream?','Do',['Does','Is','Are']],['She is ___ than her brother.','taller',['tall','tallest','more tall']]];
-    const [p,a,w]=pick(items); return { prompt:p, answer:a, choices:shuffle([a,...w]) };
-  }
-  if (t==='plural') { const items=[['child','children'],['mouse','mice'],['foot','feet'],['tooth','teeth'],['man','men'],['leaf','leaves'],['baby','babies'],['box','boxes'],['city','cities']]; const [w,p]=pick(items); const wrongs=[w+'s',w+'es',w+'ies'].filter(x=>x!==p); return { prompt:`Plural of "${w}"?`, answer:p, choices:shuffle([p,...wrongs].slice(0,4)) }; }
-  if (t==='past') { const items=[['run','ran'],['eat','ate'],['go','went'],['see','saw'],['take','took'],['give','gave'],['write','wrote'],['catch','caught'],['teach','taught'],['buy','bought']]; const [v,p]=pick(items); const wrongs=[v+'ed',v+'d',v+'ing'].filter(x=>x!==p); return { prompt:`Past tense of "${v}"?`, answer:p, choices:shuffle([p,...wrongs].slice(0,4)) }; }
-  if (t==='reading') {
-    const stories = [
-      { txt:'Maya planted a seed and watered it daily. After two weeks, a leaf appeared.', q:'How long until the leaf?', a:'two weeks', d:['two days','one hour','two months'] },
-      { txt:'Sam baked 12 cookies for 10 classmates. How many are left for Sam?', q:'Cookies left?', a:'2', d:['10','12','22'] },
-      { txt:'Owls sleep in the day and hunt at night. Their big eyes help them see in the dark.', q:'When do owls hunt?', a:'at night', d:['morning','noon','afternoon'] }
-    ];
-    const s=pick(stories); return { prompt:`${s.txt}\n${s.q}`, answer:s.a, choices:shuffle([s.a,...s.d]) };
-  }
-}
+const LESSONS = [
+  // ===== MATH (3rd grade Common Core) =====
+  { id: 'm_add',   subj: 'math', name: 'Addition (3-digit)',          emoji: '➕',  gen: () => { const a=rand(100,899),b=rand(50,200); return { prompt:`${a} + ${b} = ?`, answer:a+b, choices:buildChoices(a+b) }; } },
+  { id: 'm_sub',   subj: 'math', name: 'Subtraction (3-digit)',       emoji: '➖',  gen: () => { const a=rand(150,900),b=rand(20,a-10); return { prompt:`${a} − ${b} = ?`, answer:a-b, choices:buildChoices(a-b) }; } },
+  { id: 'm_mul25', subj: 'math', name: 'Times Tables: 2, 5, 10',      emoji: '✖️',  gen: () => { const a=pick([2,5,10]),b=rand(2,10); return { prompt:`${a} × ${b} = ?`, answer:a*b, choices:buildChoices(a*b) }; } },
+  { id: 'm_mul34', subj: 'math', name: 'Times Tables: 3, 4',          emoji: '✖️',  gen: () => { const a=pick([3,4]),b=rand(2,10); return { prompt:`${a} × ${b} = ?`, answer:a*b, choices:buildChoices(a*b) }; } },
+  { id: 'm_mul69', subj: 'math', name: 'Times Tables: 6, 7, 8, 9',    emoji: '✖️',  gen: () => { const a=pick([6,7,8,9]),b=rand(2,10); return { prompt:`${a} × ${b} = ?`, answer:a*b, choices:buildChoices(a*b) }; } },
+  { id: 'm_div',   subj: 'math', name: 'Division (within 100)',       emoji: '➗',  gen: () => { const b=rand(2,9),q=rand(2,10); return { prompt:`${b*q} ÷ ${b} = ?`, answer:q, choices:buildChoices(q) }; } },
+  { id: 'm_word',  subj: 'math', name: 'Word Problems',               emoji: '📝',  gen: () => { const wp = [() => { const a=rand(8,30),b=rand(5,20); return [`Aarav has ${a} stickers. He gives ${b} away. How many left?`, a-b]; }, () => { const a=rand(2,9),b=rand(2,8); return [`${a} boxes hold ${b} candies each. Total candies?`, a*b]; }, () => { const a=rand(20,80),b=rand(10,50); return [`A bus has ${a} kids. ${b} more get on. How many now?`, a+b]; }, () => { const a=rand(2,8),b=rand(3,9); return [`A pizza has ${a*b} slices for ${a} kids. Each gets?`, b]; }, () => { const a=rand(3,7),b=rand(2,5); return [`Read ${a} pages a day for ${b} days. Total?`, a*b]; }, () => { const a=rand(3,8); return [`There are 4 wheels on a car. How many on ${a} cars?`, 4*a]; }]; const [p,ans] = pick(wp)(); return { prompt:p, answer:ans, choices:buildChoices(ans) }; } },
+  { id: 'm_frac',  subj: 'math', name: 'Fractions (1/2, 1/3, 1/4)',   emoji: '🍕',  gen: () => { const f=pick([[1,2,'half'],[1,4,'quarter'],[3,4,'three quarters'],[1,3,'a third'],[2,3,'two thirds'],[1,5,'a fifth']]); const tot=f[1]*rand(2,6); const a = tot*f[0]/f[1]; return { prompt:`What is ${f[2]} of ${tot}?`, answer:a, choices:buildChoices(a) }; } },
+  { id: 'm_place', subj: 'math', name: 'Place Value',                 emoji: '🔢',  gen: () => { const n=rand(100,999),p=pick(['hundreds','tens','ones']); const s=String(n); const a=p==='hundreds'?+s[0]:p==='tens'?+s[1]:+s[2]; return { prompt:`In ${n}, what digit is in the ${p} place?`, answer:a, choices:[0,1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5).slice(0,4).includes(a)?shuffle([a,...[0,1,2,3,4,5,6,7,8,9].filter(x=>x!==a).sort(()=>Math.random()-0.5).slice(0,3)]):shuffle([a,...[0,1,2,3,4,5,6,7,8,9].filter(x=>x!==a).sort(()=>Math.random()-0.5).slice(0,3)]) }; } },
+  { id: 'm_round', subj: 'math', name: 'Rounding to 10s/100s',        emoji: '🔄',  gen: () => { const n=rand(13,985); const to=pick([10,100]); const a=Math.round(n/to)*to; return { prompt:`Round ${n} to the nearest ${to}.`, answer:a, choices:buildChoices(a).map(c=>Math.max(0,c)) }; } },
+  { id: 'm_compare',subj: 'math', name: 'Compare Numbers',            emoji: '⚖️',  gen: () => { const a=rand(100,999),b=rand(100,999); if(a===b) return LESSONS.find(l=>l.id==='m_compare').gen(); const ans=Math.max(a,b); return { prompt:`Which number is BIGGER?`, answer:ans, choices:shuffle([a,b,Math.min(a,b)-rand(1,15),Math.max(a,b)+rand(1,15)]) }; } },
+  { id: 'm_time',  subj: 'math', name: 'Telling Time',                emoji: '🕐',  gen: () => { const h=rand(1,12), m=pick([0,5,10,15,20,25,30,35,40,45,50,55]); const correct = `${h}:${String(m).padStart(2,'0')}`; const wrongs = [`${h}:${String((m+5)%60).padStart(2,'0')}`,`${(h%12)+1}:${String(m).padStart(2,'0')}`,`${h}:${String((m+30)%60).padStart(2,'0')}`].filter(x=>x!==correct); return { prompt:`If the hour hand points just past ${h} and minute hand at ${m===0?'12':m/5}, what time is it?`, answer:correct, choices:shuffle([correct,...wrongs.slice(0,3)]) }; } },
+  { id: 'm_money', subj: 'math', name: 'Money',                       emoji: '💰',  gen: () => { const wp = [() => { const a=rand(2,9),b=rand(1,5); return [`A toy costs $${a}. You buy ${b} toys. Total?`, a*b]; }, () => { const a=rand(15,40); return [`You have $${a*2}. You spend $${a}. How much left?`, a]; }, () => { const a=rand(3,8); return [`How many quarters make $${a}? (1 quarter = 25¢)`, a*4]; }]; const [p,ans] = pick(wp)(); return { prompt:p, answer:ans, choices:buildChoices(ans) }; } },
+
+  // ===== ENGLISH (3rd grade) =====
+  { id: 'e_syn',   subj: 'english', name: 'Synonyms',                 emoji: '🟰',  gen: () => { const r=pick(SYN); return { prompt:`Which means the SAME as "${r[0]}"?`, answer:r[1], choices:shuffle([r[1],r[2],pick(SYN.filter(x=>x!==r))[1],pick(NOUNS)]) }; } },
+  { id: 'e_ant',   subj: 'english', name: 'Antonyms (Opposites)',     emoji: '↔️',  gen: () => { const [a,b]=pick(ANT); const others=ANT.filter(p=>p[0]!==a).flat().filter(w=>w!==a&&w!==b); return { prompt:`Which means the OPPOSITE of "${a}"?`, answer:b, choices:shuffle([b,pick(others),pick(others),pick(others)].filter((v,i,arr)=>arr.indexOf(v)===i).slice(0,4)) }; } },
+  { id: 'e_noun',  subj: 'english', name: 'Nouns',                    emoji: '📦',  gen: () => { const correct=pick(NOUNS); const wrongs=[pick(VERBS),pick(VERBS),pick(ADJS)]; return { prompt:`Which one is a NOUN?`, answer:correct, choices:shuffle([correct,...wrongs]) }; } },
+  { id: 'e_verb',  subj: 'english', name: 'Verbs (Action Words)',     emoji: '🏃',  gen: () => { const correct=pick(VERBS); const wrongs=[pick(NOUNS),pick(ADJS),pick(NOUNS)]; return { prompt:`Which one is a VERB?`, answer:correct, choices:shuffle([correct,...wrongs]) }; } },
+  { id: 'e_adj',   subj: 'english', name: 'Adjectives',               emoji: '🌈',  gen: () => { const correct=pick(ADJS); const wrongs=[pick(NOUNS),pick(VERBS),pick(NOUNS)]; return { prompt:`Which one is an ADJECTIVE?`, answer:correct, choices:shuffle([correct,...wrongs]) }; } },
+  { id: 'e_adv',   subj: 'english', name: 'Adverbs',                  emoji: '⚡',  gen: () => { const correct=pick(ADVERBS); const wrongs=[pick(NOUNS),pick(VERBS),pick(ADJS)]; return { prompt:`Which one is an ADVERB?`, answer:correct, choices:shuffle([correct,...wrongs]) }; } },
+  { id: 'e_plural',subj: 'english', name: 'Plurals (Irregular)',      emoji: '➕',  gen: () => { const items=[['child','children'],['mouse','mice'],['foot','feet'],['tooth','teeth'],['man','men'],['woman','women'],['leaf','leaves'],['baby','babies'],['box','boxes'],['city','cities'],['knife','knives'],['fish','fish']]; const [w,p]=pick(items); const wrongs=[w+'s',w+'es',w+'ies'].filter(x=>x!==p); return { prompt:`What is the plural of "${w}"?`, answer:p, choices:shuffle([p,...wrongs].slice(0,4)) }; } },
+  { id: 'e_past',  subj: 'english', name: 'Past Tense Verbs',         emoji: '⏰',  gen: () => { const items=[['run','ran'],['eat','ate'],['go','went'],['see','saw'],['take','took'],['give','gave'],['write','wrote'],['catch','caught'],['teach','taught'],['buy','bought'],['bring','brought'],['think','thought'],['find','found']]; const [v,p]=pick(items); const wrongs=[v+'ed',v+'d',v+'ing'].filter(x=>x!==p); return { prompt:`Past tense of "${v}"?`, answer:p, choices:shuffle([p,...wrongs].slice(0,4)) }; } },
+  { id: 'e_blank', subj: 'english', name: 'Fill in the Blank',        emoji: '___', gen: () => { const items = [['I ___ to school every day.','go',['goes','went','going']],['She ___ a red apple.','ate',['eat','eating','eats']],['The dogs ___ very loud.','bark',['barks','barking','barked']],['We ___ playing in the park.','are',['is','am','be']],['He ___ his homework yesterday.','finished',['finish','finishes','finishing']],['___ you like ice cream?','Do',['Does','Is','Are']],['She is ___ than her brother.','taller',['tall','tallest','more tall']]]; const [p,a,w]=pick(items); return { prompt:p, answer:a, choices:shuffle([a,...w]) }; } },
+  { id: 'e_prefix',subj: 'english', name: 'Prefixes',                 emoji: '🔤',  gen: () => { const items=[['un + happy =','unhappy','un'],['re + play =','replay','re'],['pre + school =','preschool','pre'],['un + lock =','unlock','un'],['re + write =','rewrite','re'],['dis + like =','dislike','dis']]; const [p,a]=pick(items); return { prompt:p, answer:a, choices:shuffle([a,'untied','rewrite','disliked'].filter((v,i,arr)=>arr.indexOf(v)===i).slice(0,4)) }; } },
+  { id: 'e_suffix',subj: 'english', name: 'Suffixes',                 emoji: '🔡',  gen: () => { const items=[['help + ful =','helpful'],['kind + ness =','kindness'],['quick + ly =','quickly'],['sing + er =','singer'],['friend + ly =','friendly'],['care + less =','careless']]; const [p,a]=pick(items); const wrongs=['quickness','helping','sang','friended','carely'].filter(x=>x!==a); return { prompt:p, answer:a, choices:shuffle([a,...wrongs.slice(0,3)]) }; } },
+  { id: 'e_read',  subj: 'english', name: 'Reading Comprehension',    emoji: '📖',  gen: () => { const stories = [{ txt:'Maya planted a seed and watered it daily. After two weeks, a leaf appeared.', q:'How long until the leaf?', a:'two weeks', d:['two days','one hour','two months'] },{ txt:'Sam baked 12 cookies for 10 classmates. How many are left for Sam?', q:'Cookies left?', a:'2', d:['10','12','22'] },{ txt:'Owls sleep in the day and hunt at night. Their big eyes help them see in the dark.', q:'When do owls hunt?', a:'at night', d:['morning','noon','afternoon'] },{ txt:'Lucas wanted a puppy. He saved $5 a week. After 8 weeks, he had enough money.', q:'How much money did he save?', a:'$40', d:['$5','$8','$13'] },{ txt:'The library has 240 books. 80 are about animals. The rest are about science.', q:'How many science books?', a:'160', d:['80','120','240'] }]; const s=pick(stories); return { prompt:`${s.txt}\n${s.q}`, answer:s.a, choices:shuffle([s.a,...s.d]) }; } }
+];
+const LESSON_BY_ID = {}; LESSONS.forEach(l => LESSON_BY_ID[l.id] = l);
+
+let currentLesson = null; // null = mixed
 function makeQ(subject) {
-  if (subject==='math') return makeMathQ();
-  if (subject==='english') return makeEnglishQ();
-  return Math.random()<0.5 ? makeMathQ() : makeEnglishQ();
+  let lesson = currentLesson;
+  if (!lesson) {
+    const pool = LESSONS.filter(l => subject === 'mixed' || l.subj === subject);
+    lesson = pick(pool);
+  }
+  const q = lesson.gen();
+  q.lessonId = lesson.id;
+  return q;
+}
+function recordAnswer(lessonId, correct) {
+  if (!lessonId) return;
+  if (!lessonStats[lessonId]) lessonStats[lessonId] = { correct: 0, attempts: 0 };
+  lessonStats[lessonId].attempts++;
+  if (correct) lessonStats[lessonId].correct++;
+  Save.set('lessonStats', lessonStats);
+}
+
+/* ==== EXPLANATIONS for wrong answers (2nd-grade friendly) ==== */
+function explainQ(q, lessonId) {
+  const ans = q.answer;
+  const nums = (q.prompt.match(/\d+/g) || []).map(Number);
+  const w1 = (q.prompt.match(/"([^"]+)"/) || [])[1] || '';
+  switch (lessonId) {
+    case 'm_add': if (nums.length>=2) {
+      const [a,b] = nums;
+      return `🧮 <b>${a} + ${b} = ${ans}</b><br>👉 Stack them up like this:<br><span style="font-family:monospace; font-size:18px;">&nbsp;&nbsp;${a}<br>+&nbsp;${b}<br>━━━<br>&nbsp;${ans}</span><br>Start with the small numbers on the right (ones), then go left! 🌟`;
+    } break;
+    case 'm_sub': if (nums.length>=2) {
+      const [a,b] = nums;
+      return `🧮 <b>${a} − ${b} = ${ans}</b><br>👉 Imagine you have ${a} cookies 🍪 and you eat ${b}. You'd have ${ans} left!<br>Take away the small numbers first (ones), then bigger ones. If you can't, BORROW from the next!`;
+    } break;
+    case 'm_mul25': case 'm_mul34': case 'm_mul69':
+      if (nums.length>=2) {
+        const [a,b] = nums;
+        return `✖️ <b>${a} × ${b} = ${ans}</b><br>👉 That's <b>${a} groups of ${b}!</b> 📦📦📦<br>Like having ${a} boxes with ${b} candies in each box.<br>Total candies = ${ans} 🍬`;
+      } break;
+    case 'm_div': if (nums.length>=2) {
+      const [a,b] = nums;
+      return `➗ <b>${a} ÷ ${b} = ${ans}</b><br>👉 Share ${a} cookies 🍪 with ${b} friends. Each friend gets <b>${ans} cookies</b>!<br>Trick: ${b} × ${ans} = ${a} ✨`;
+    } break;
+    case 'm_word': return `📝 <b>Answer: ${ans}</b><br>👉 Read again slowly. Look for:<br>• Numbers in the story 🔢<br>• Words like "total" "left" "each"<br>That tells you to + or − or ×!`;
+    case 'm_frac': return `🍕 <b>Answer: ${ans}</b><br>👉 To find <b>half</b>, cut in 2 equal pieces. To find <b>a quarter</b>, cut in 4. Each piece is the same size! 🍰`;
+    case 'm_place': return `🔢 <b>Answer: ${ans}</b><br>👉 In a number like 347:<br>• <b>3</b> is in HUNDREDS place<br>• <b>4</b> is in TENS place<br>• <b>7</b> is in ONES place (the last one!)`;
+    case 'm_round': if (nums.length>=2) {
+      const [n,to] = nums;
+      return `🔄 <b>${n} rounds to ${ans}</b><br>👉 Look at the next digit:<br>• 0, 1, 2, 3, 4 → round DOWN ⬇️<br>• 5, 6, 7, 8, 9 → round UP ⬆️`;
+    } break;
+    case 'm_compare': return `⚖️ <b>${ans} is bigger!</b><br>👉 Compare the HUNDREDS first 🔢<br>If they tie, check TENS, then ONES.<br>The number with the bigger digit wins!`;
+    case 'm_time': return `🕐 <b>The time is ${ans}</b><br>👉 The little hand shows the HOUR. The big hand shows MINUTES.<br>Big hand on 12 = :00, on 6 = :30, on 3 = :15!`;
+    case 'm_money': return `💰 <b>Answer: ${ans}</b><br>👉 Add the prices to find total. Subtract to see how much is LEFT.<br>Tip: 4 quarters 🪙🪙🪙🪙 = $1!`;
+
+    case 'e_syn': return `🟰 <b>"${ans}" means the SAME as "${w1}"!</b><br>👉 Synonyms are word-twins! 👯<br>Like <b>happy</b> and <b>glad</b> — both mean feeling good! 😄`;
+    case 'e_ant': return `↔️ <b>"${ans}" is the OPPOSITE of "${w1}"!</b><br>👉 Antonyms are word-enemies! ⚔️<br>Like <b>hot</b> 🔥 and <b>cold</b> ❄️ — totally different!`;
+    case 'e_noun': return `📦 <b>"${ans}" is a NOUN!</b><br>👉 A noun names a:<br>👤 PERSON (mom, teacher)<br>🏫 PLACE (school, park)<br>🎾 THING (ball, book)<br>🐶 ANIMAL (dog, bird)`;
+    case 'e_verb': return `🏃 <b>"${ans}" is a VERB!</b><br>👉 A verb is something you DO!<br>Like: run 🏃, eat 🍔, sing 🎤, jump ⛹️, sleep 😴<br>If you can DO it, it's a verb!`;
+    case 'e_adj': return `🌈 <b>"${ans}" is an ADJECTIVE!</b><br>👉 Adjectives DESCRIBE nouns!<br>Like a <b>big</b> dog, a <b>blue</b> sky, a <b>sweet</b> apple.<br>They tell us how things look, feel, or taste! 🎨`;
+    case 'e_adv': return `⚡ <b>"${ans}" is an ADVERB!</b><br>👉 Adverbs tell HOW you do something!<br>Run <b>quickly</b> 💨, sing <b>loudly</b> 📢, walk <b>slowly</b> 🐢<br>Most end in <b>"-ly"</b>!`;
+    case 'e_plural': return `➕ <b>Plural of "${w1}" is "${ans}"!</b><br>👉 Plural means MORE than one!<br>Most words just add <b>s</b> (cat → cats).<br>But some change weirdly: mouse 🐭 → mice, foot 🦶 → feet!`;
+    case 'e_past': return `⏰ <b>Past tense of "${w1}" is "${ans}"!</b><br>👉 Past = something that already HAPPENED.<br>Today I <b>${w1}</b>, yesterday I <b>${ans}</b>.<br>Some verbs change a lot — those are special! ✨`;
+    case 'e_blank': return `✏️ <b>The word is "${ans}"!</b><br>👉 Read the sentence out loud 🗣️<br>The right word will SOUND right!<br>Try each choice — which one fits?`;
+    case 'e_prefix': return `🔤 <b>Answer: "${ans}"!</b><br>👉 Prefixes go at the START of words:<br>• <b>un-</b> = NOT (unhappy = not happy)<br>• <b>re-</b> = AGAIN (replay = play again)<br>• <b>pre-</b> = BEFORE (preschool = before school)`;
+    case 'e_suffix': return `🔡 <b>Answer: "${ans}"!</b><br>👉 Suffixes go at the END of words:<br>• <b>-ful</b> = FULL OF (helpful = full of help)<br>• <b>-ly</b> = HOW (quickly = in a quick way)<br>• <b>-er</b> = PERSON (singer = one who sings)`;
+    case 'e_read': return `📖 <b>Answer: "${ans}"!</b><br>👉 The answer is HIDING in the story! 🔍<br>Read it again slowly. Underline numbers and key words.<br>Then match them to the question!`;
+  }
+  return `✨ The answer is <b>"${ans}"</b>. Read it carefully — you'll get it next time! 💪`;
+}
+
+/* ==== RETENTION QUEUE — wrong questions come back later ==== */
+const Retention = {
+  queue: [],
+  add(q) {
+    if (!q || !q.lessonId) return;
+    // mark a fresh copy as a retention question
+    const copy = { ...q, _retention: true };
+    this.queue.push({ q: copy, addedAt: performance.now() });
+    if (this.queue.length > 8) this.queue.shift();
+  },
+  pull(minAge = 5000) {
+    const now = performance.now();
+    for (let i = 0; i < this.queue.length; i++) {
+      if (now - this.queue[i].addedAt > minAge) return this.queue.splice(i, 1)[0].q;
+    }
+    return null;
+  },
+  reset() { this.queue = []; },
+  size() { return this.queue.length; }
+};
+
+function showRetentionBanner(text) {
+  const b = document.createElement('div');
+  b.style.cssText = `
+    position: fixed; top: 30%; left: 50%; transform: translate(-50%,-50%) scale(0);
+    background: linear-gradient(180deg, #ffeb3b, #ff6f00); color: #222;
+    padding: 18px 28px; border-radius: 22px; font-weight: bold;
+    font-size: clamp(20px,4vw,28px); border: 5px solid #fff;
+    box-shadow: 0 0 60px gold; z-index: 200; text-align: center;
+    animation: comboBanner 1.6s ease-out forwards; white-space: nowrap;`;
+  b.innerHTML = text;
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 1600);
+  [880, 1100, 1320, 1500].forEach((f, i) => setTimeout(() => beep(f, 0.12), i * 90));
 }
 
 /* ============================================================ CANVAS / SHARED ============================================================ */
@@ -834,6 +1064,58 @@ let mainLoopId = null;
 
 function rectOverlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 
+/* SPIKE / OBSTACLE — bright, pulsing, with warning sign */
+function drawSpike(o) {
+  const t = performance.now();
+  const pulse = 1 + Math.sin(t / 220) * 0.06;
+  const cx = o.x + o.w / 2;
+  // ground danger patch (red shadow)
+  ctx.fillStyle = 'rgba(255,30,30,0.3)';
+  ctx.beginPath(); ctx.ellipse(cx, o.y + o.h + 2, o.w*0.7, 6, 0, 0, Math.PI*2); ctx.fill();
+  // glowing background halo
+  const grad = ctx.createRadialGradient(cx, o.y + o.h/2, 4, cx, o.y + o.h/2, o.w * 0.9);
+  grad.addColorStop(0, 'rgba(255,80,0,0.55)');
+  grad.addColorStop(1, 'rgba(255,80,0,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(o.x - 12, o.y - 18, o.w + 24, o.h + 24);
+  // spikes themselves — red/orange gradient
+  ctx.save();
+  ctx.translate(cx, o.y + o.h);
+  ctx.scale(pulse, pulse);
+  ctx.translate(-cx, -(o.y + o.h));
+  for (let i = 0; i < o.w; i += 8) {
+    const sx = o.x + i;
+    const lg = ctx.createLinearGradient(sx, o.y, sx, o.y + o.h);
+    lg.addColorStop(0, '#fff176');
+    lg.addColorStop(0.4, '#ff5722');
+    lg.addColorStop(1, '#b71c1c');
+    ctx.fillStyle = lg;
+    ctx.beginPath();
+    ctx.moveTo(sx, o.y + o.h);
+    ctx.lineTo(sx + 4, o.y);
+    ctx.lineTo(sx + 8, o.y + o.h);
+    ctx.closePath();
+    ctx.fill();
+    // dark outline for definition
+    ctx.strokeStyle = '#3e2723';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // bright tip
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(sx + 4, o.y + 2, 1.2, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  // warning sign hovering above
+  const bob = Math.sin(t/160) * 3;
+  ctx.font = 'bold 20px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  // black outline for visibility
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 4;
+  ctx.strokeText('⚠️', cx, o.y - 14 + bob);
+  ctx.fillText('⚠️', cx, o.y - 14 + bob);
+}
+
 let trailParticles = [];
 function emitTrail(p) {
   if (!equippedTrail) return;
@@ -869,13 +1151,23 @@ function renderAura(p, camX = 0, camY = 0) {
 }
 
 /* ============================================================ QUESTION OVERLAY (canvas modes) ============================================================ */
-let qTimerId = null, qCallback = null;
-function showQuestion(subject, sub, callback) {
+let qTimerId = null, qCallback = null, qSubText = '';
+function showQuestion(subject, sub, callback, forcedQ) {
   Game.paused = true;
-  const q = makeQ(subject);
+  // chance to pull from retention queue first
+  let q = forcedQ;
+  if (!q && Math.random() < 0.45) q = Retention.pull();
+  if (!q) q = makeQ(subject);
   Game.currentQ = q; qCallback = callback;
+  qSubText = q._retention ? '🧠 Remember this one? Big bonus if you get it!' : (sub || 'Answer to continue!');
+  renderQuestionOverlay(q, qSubText);
+}
+function renderQuestionOverlay(q, sub) {
   document.getElementById('qPrompt').innerHTML = q.prompt.replace(/\n/g, '<br>');
-  document.getElementById('qSub').textContent = sub || 'Answer to continue!';
+  document.getElementById('qSub').textContent = sub;
+  document.getElementById('qSub').style.color = q._retention ? '#ffd700' : '';
+  const panel = document.querySelector('#qOverlay .q-panel');
+  if (panel) panel.style.borderColor = q._retention ? '#ffd700' : 'gold';
   const grid = document.getElementById('qAnswers'); grid.innerHTML = '';
   q.choices.forEach(c => {
     const b = document.createElement('button'); b.className = 'q-ans'; b.textContent = c;
@@ -887,7 +1179,7 @@ function showQuestion(subject, sub, callback) {
   const tEl = document.getElementById('qTimer'); tEl.style.width = '100%';
   if (qTimerId) clearInterval(qTimerId);
   qTimerId = setInterval(() => {
-    t -= 0.4; tEl.style.width = Math.max(0, t) + '%';
+    t -= 0.35; tEl.style.width = Math.max(0, t) + '%';
     if (t <= 0) { clearInterval(qTimerId); answerQ('___timeout___', null); }
   }, 100);
 }
@@ -895,39 +1187,90 @@ function answerQ(choice, btn) {
   if (qTimerId) { clearInterval(qTimerId); qTimerId = null; }
   const q = Game.currentQ;
   const correct = String(choice) === String(q.answer);
+  recordAnswer(q.lessonId, correct);
   if (btn) {
     btn.classList.add(correct ? 'correct' : 'wrong');
     document.querySelectorAll('.q-ans').forEach(b => b.disabled = true);
   }
   if (correct) SFX.correct(); else SFX.wrong();
-  setTimeout(() => {
-    document.getElementById('qOverlay').classList.remove('active');
-    Game.paused = false;
-    const cb = qCallback; qCallback = null;
-    if (cb) cb(correct);
-  }, 700);
+
+  if (correct) {
+    if (q._retention) showRetentionBanner('🧠 YOU REMEMBERED!<br>+ BIG BONUS!');
+    setTimeout(() => {
+      document.getElementById('qOverlay').classList.remove('active');
+      Game.paused = false;
+      const cb = qCallback; qCallback = null;
+      if (cb) cb(true, q._retention);
+    }, q._retention ? 1500 : 700);
+  } else {
+    // Show explanation, queue for later, no retry
+    Retention.add(q);
+    setTimeout(() => {
+      const grid = document.getElementById('qAnswers');
+      grid.innerHTML = `
+        <div style="grid-column:1/-1; background:linear-gradient(180deg,#fff8e1,#ffe082); color:#3e2723; padding:14px; border-radius:14px; font-size:15px; line-height:1.6; border:4px solid #ff9800; text-align:left;">
+          <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟</div>
+          ${explainQ(q, q.lessonId)}
+        </div>
+        <button class="q-ans" style="grid-column:1/-1; background:linear-gradient(180deg,#42a5f5,#1565c0);" id="contBtn">🧠 Got it! (We'll ask you again later!)</button>
+      `;
+      document.getElementById('qSub').innerHTML = q._retention ? "Don't worry — you'll see this again!" : "Don't worry — you'll see this again!";
+      document.getElementById('contBtn').addEventListener('click', () => {
+        document.getElementById('qOverlay').classList.remove('active');
+        Game.paused = false;
+        const cb = qCallback; qCallback = null;
+        if (cb) cb(false, q._retention);
+      });
+    }, 700);
+  }
 }
 
 /* ============================================================ GALAXY SHOOTER ============================================================ */
 const Galaxy = {
-  ship: null, aliens: [], lasers: [], stars: [], wave: 0, currentQ: null, qActive: false, lastFire: 0
+  ship: null, aliens: [], lasers: [], stars: [], wave: 0, currentQ: null, qActive: false, lastFire: 0, retry: false
 };
+
+function showGalaxyExplanation(q) {
+  const overlay = document.getElementById('qOverlay');
+  document.getElementById('qPrompt').innerHTML = q.prompt.replace(/\n/g, '<br>');
+  document.getElementById('qSub').textContent = "Don't worry — we'll ask you this again later!";
+  document.getElementById('qTimer').style.width = '100%';
+  const grid = document.getElementById('qAnswers');
+  grid.innerHTML = `
+    <div style="grid-column:1/-1; background:linear-gradient(180deg,#fff8e1,#ffe082); color:#3e2723; padding:14px; border-radius:14px; font-size:15px; line-height:1.6; border:4px solid #ff9800; text-align:left;">
+      <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟</div>
+      ${explainQ(q, q.lessonId)}
+    </div>
+    <button class="q-ans" style="grid-column:1/-1; background:linear-gradient(180deg,#42a5f5,#1565c0);" id="galaxyContBtn">🧠 Got it! Keep playing</button>
+  `;
+  overlay.classList.add('active');
+  document.getElementById('galaxyContBtn').addEventListener('click', () => {
+    overlay.classList.remove('active');
+    Game.paused = false;
+    Galaxy.aliens.forEach(x => x.alive = false);
+    spawnGalaxyWave();
+  });
+}
 
 function startGalaxy() {
   Game.mode = 'galaxy'; Game.lives = 3; Game.score = 0;
-  resetStreak();
+  resetStreak(); Retention.reset();
   Galaxy.ship = { x: W/2, y: H - 100, w: 40, h: 40, vx: 0 };
-  Galaxy.aliens = []; Galaxy.lasers = []; Galaxy.stars = []; Galaxy.wave = 0; Galaxy.qActive = false;
+  Galaxy.aliens = []; Galaxy.lasers = []; Galaxy.stars = []; Galaxy.wave = 0; Galaxy.qActive = false; Galaxy.retry = false;
   particles = [];
   for (let i = 0; i < 80; i++) Galaxy.stars.push({ x: Math.random()*W, y: Math.random()*H, s: Math.random()*2+0.5, sp: Math.random()*0.5+0.2 });
   spawnGalaxyWave();
   startMainLoop();
 }
 
-function spawnGalaxyWave() {
+function spawnGalaxyWave(reuseQ) {
   Galaxy.wave++;
   Galaxy.aliens = [];
-  const q = makeQ(Game.subject); Galaxy.currentQ = q;
+  // 40% chance to bring back a retention question (if any waiting)
+  let q = reuseQ;
+  if (!q && Math.random() < 0.4) q = Retention.pull();
+  if (!q) q = makeQ(Game.subject);
+  Galaxy.currentQ = q;
   const cols = q.choices.length;
   const colW = W / (cols + 1);
   q.choices.forEach((choice, i) => {
@@ -976,18 +1319,29 @@ function updateGalaxy(t) {
       if (l.x > a.x && l.x < a.x + a.w && l.y > a.y && l.y < a.y + a.h) {
         a.alive = false; SFX.explode();
         for (let i=0;i<10;i++) particles.push({ x: a.x+30+(Math.random()-0.5)*40, y: a.y+30+(Math.random()-0.5)*40, vx:(Math.random()-0.5)*4, vy:(Math.random()-0.5)*4, life:30, text:'💥', color:'#ff5722' });
+        const wasRetention = Galaxy.currentQ?._retention;
         if (a.correct) {
           bumpStreak();
-          const pts = 50 * comboMult();
+          recordAnswer(Galaxy.currentQ?.lessonId, true);
+          const bonus = wasRetention ? 3 : 1;
+          const pts = 50 * comboMult() * bonus;
           Game.score += pts;
-          particles.push({ x: a.x+30, y: a.y, vx:0, vy:-2, life:50, text:'+'+pts+(comboMult()>1?' 🔥':'')+'!', color:'#4caf50' });
+          if (wasRetention) {
+            showRetentionBanner('🧠 YOU REMEMBERED!<br>+' + pts + ' points!');
+          } else {
+            particles.push({ x: a.x+30, y: a.y, vx:0, vy:-2, life:50, text:'+'+pts+(comboMult()>1?' 🔥':''), color:'#4caf50' });
+          }
           // clear remaining aliens, next wave
           Galaxy.aliens.forEach(x => x.alive = false);
-          setTimeout(spawnGalaxyWave, 600);
+          setTimeout(spawnGalaxyWave, wasRetention ? 1500 : 600);
         } else {
-          Game.lives--; SFX.wrong(); resetStreak();
-          particles.push({ x: a.x+30, y: a.y, vx:0, vy:-2, life:40, text:'WRONG -1 ❤', color:'#f44336' });
-          if (Game.lives <= 0) { setTimeout(() => endGame('dead'), 600); }
+          // First wrong — show explanation, queue for retention, soft penalty (just streak)
+          SFX.wrong();
+          recordAnswer(Galaxy.currentQ?.lessonId, false);
+          resetStreak();
+          Retention.add(Galaxy.currentQ);
+          Game.paused = true;
+          showGalaxyExplanation(Galaxy.currentQ);
         }
         return false;
       }
@@ -1088,7 +1442,7 @@ const Boss = {
 
 function startBoss() {
   Game.mode = 'boss'; Game.lives = 3; Game.score = 0;
-  resetStreak();
+  resetStreak(); Retention.reset();
   Boss.player = {
     x: W/2 - 18, y: H - 200, w: 36, h: 44,
     vx: 0, vy: 0, onGround: false, facing: 1,
@@ -1273,12 +1627,17 @@ function physicsBoss(p, dt, t) {
   // bonus question
   if (t > Boss.nextBonusQ && !Game.paused) {
     Boss.nextBonusQ = t + 99999;
-    showQuestion(Game.subject, '⭐ Bonus! Correct = +1 ❤ or 2x next hit', (correct) => {
+    showQuestion(Game.subject, '⭐ Bonus! Correct = +1 ❤ or 2x next hit', (correct, wasRetention) => {
       if (correct) {
         bumpStreak();
-        Game.score += 50 * comboMult();
-        // 50/50: heal or double-hit
-        if (Math.random() < 0.5 && Game.lives < 5) {
+        const bonus = wasRetention ? 3 : 1; // 3x for retention!
+        Game.score += 50 * comboMult() * bonus;
+        if (wasRetention) {
+          // retention reward: extra heart!
+          if (Game.lives < 5) Game.lives++;
+          Boss.doubleHit = 3;
+          particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:60, text:'🧠 RETENTION! +1❤ +3x DMG', color:'#ffd700' });
+        } else if (Math.random() < 0.5 && Game.lives < 5) {
           Game.lives++;
           particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'+1 ❤', color:'#f44336' });
         } else {
@@ -1286,9 +1645,11 @@ function physicsBoss(p, dt, t) {
           particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'2x DAMAGE!', color:'#ffeb3b' });
         }
       } else {
+        // wrong: small penalty (lose streak only, no life lost — they got the explanation)
         resetStreak();
+        particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'🧠 Try later!', color:'#ffd700' });
       }
-      Boss.nextBonusQ = performance.now() + 14000;
+      Boss.nextBonusQ = performance.now() + 12000;
     });
   }
 
@@ -1433,7 +1794,7 @@ const Adv = {
 
 function startAdventure() {
   Game.mode = 'adventure'; Game.lives = 3; Game.score = 0;
-  resetStreak();
+  resetStreak(); Retention.reset();
   Adv.player = { x: 80, y: H - 200, w: 36, h: 44, vx:0, vy:0, onGround:false, facing:1, char: CHARACTERS[chosenChar], invuln:0, frame:0, jumps:0 };
   Adv.platforms = []; Adv.obstacles = []; Adv.coins = []; Adv.gates = [];
   Adv.cam.x = 0; Adv.distance = 0; particles = [];
@@ -1493,15 +1854,21 @@ function physicsAdv(p, dt) {
   for (const g of Adv.gates) {
     if (!g.passed && p.x + p.w > g.x && p.x < g.x + g.w) {
       if (p.vx > 0) { p.x = g.x - p.w; p.vx = 0; }
-      showQuestion(Game.subject, 'Answer to open the gate!', (correct) => {
+      showQuestion(Game.subject, 'Answer to open the gate!', (correct, wasRetention) => {
         if (correct) {
           bumpStreak();
           g.passed = true;
-          const pts = 25 * comboMult();
+          const bonus = wasRetention ? 3 : 1;
+          const pts = 25 * comboMult() * bonus;
           Game.score += pts;
-          particles.push({ x: p.x, y: p.y, vx:0,vy:-2, life:50, text:'+'+pts+(comboMult()>1?' 🔥':'')+'!', color:'#4caf50' });
+          particles.push({ x: p.x, y: p.y, vx:0,vy:-2, life:60, text:'+'+pts+(wasRetention?' 🧠':comboMult()>1?' 🔥':''), color:'#4caf50' });
         }
-        else { resetStreak(); Game.lives--; p.x -= 50; p.invuln = 90; particles.push({ x: p.x, y: p.y, vx:0,vy:-2, life:50, text:'-1 ❤', color:'#f44336' }); if (Game.lives <= 0) endGame('dead'); }
+        else {
+          // wrong: gate stays open anyway (don't block forever), but soft penalty
+          g.passed = true; // unlock so kid can keep playing
+          resetStreak();
+          particles.push({ x: p.x, y: p.y, vx:0,vy:-2, life:60, text:'🧠 We will ask again!', color:'#ffd700' });
+        }
       });
       break;
     }
@@ -1560,10 +1927,7 @@ function renderAdv() {
     ctx.strokeStyle = '#f57f17'; ctx.lineWidth = 1.5; ctx.stroke();
   }
   for (const o of Adv.obstacles) {
-    ctx.fillStyle = '#9e9e9e';
-    for (let i = 0; i < o.w; i += 8) {
-      ctx.beginPath(); ctx.moveTo(o.x+i, o.y+o.h); ctx.lineTo(o.x+i+4, o.y); ctx.lineTo(o.x+i+8, o.y+o.h); ctx.closePath(); ctx.fill();
-    }
+    drawSpike(o);
   }
   if (Adv.flagX) {
     const fx = Adv.flagX, groundY = H - 80;
@@ -1673,8 +2037,8 @@ const Gems = {
 };
 
 function startGems() {
-  Game.mode = 'gems'; Game.score = 0; resetStreak();
-  Gems.board = []; Gems.selected = null; Gems.moves = 30; Gems.score = 0; Gems.busy = false; Gems.qActive = false;
+  Game.mode = 'gems'; Game.score = 0; resetStreak(); Retention.reset();
+  Gems.board = []; Gems.selected = null; Gems.moves = 30; Gems.score = 0; Gems.busy = false; Gems.qActive = false; Gems.qRetry = false;
   Gems.nextQAt = Date.now() + 18000;
   for (let r = 0; r < Gems.size; r++) {
     Gems.board[r] = [];
@@ -1829,9 +2193,13 @@ function gemTick() {
 function showGemQuestion() {
   const overlay = document.getElementById('gemQOverlay');
   overlay.style.display = 'flex';
-  const q = makeQ(Game.subject); Gems.currentQ = q;
+  // 45% chance to bring back retention question
+  let q = null;
+  if (Math.random() < 0.45) q = Retention.pull();
+  if (!q) q = makeQ(Game.subject);
+  Gems.currentQ = q;
   document.getElementById('gemQPrompt').innerHTML = q.prompt.replace(/\n/g, '<br>');
-  document.getElementById('gemQSub').textContent = '⭐ Correct = clear a row! Wrong = lose 3 moves';
+  document.getElementById('gemQSub').textContent = q._retention ? '🧠 Remember this? Big bonus!' : '⭐ Correct = clear a row!';
   const grid = document.getElementById('gemQAnswers'); grid.innerHTML = '';
   q.choices.forEach(c => {
     const b = document.createElement('button'); b.className = 'q-ans'; b.textContent = c;
@@ -1850,18 +2218,43 @@ function showGemQuestion() {
 async function answerGemQ(choice, btn) {
   if (Gems.qTimerId) { clearInterval(Gems.qTimerId); Gems.qTimerId = null; }
   const q = Gems.currentQ; const correct = String(choice) === String(q.answer);
+  const wasRetention = q._retention;
+  recordAnswer(q.lessonId, correct);
   if (btn) {
     btn.classList.add(correct ? 'correct' : 'wrong');
     document.querySelectorAll('#gemQAnswers .q-ans').forEach(b => b.disabled = true);
   }
-  if (correct) {
-    SFX.correct(); bumpStreak();
-    // clear a random row
-    const r = rand(0, Gems.size - 1);
-    for (let c = 0; c < Gems.size; c++) Gems.board[r][c] = null;
-    Gems.score += 100 * comboMult();
-    Game.score = Gems.score;
-  } else { SFX.wrong(); resetStreak(); Gems.moves = Math.max(0, Gems.moves - 3); }
+  if (!correct) {
+    // Wrong: show explanation, queue for later, soft penalty
+    SFX.wrong(); resetStreak();
+    Retention.add(q);
+    setTimeout(() => {
+      const grid = document.getElementById('gemQAnswers');
+      grid.innerHTML = `
+        <div style="grid-column:1/-1; background:linear-gradient(180deg,#fff8e1,#ffe082); color:#3e2723; padding:14px; border-radius:14px; font-size:15px; line-height:1.6; border:4px solid #ff9800; text-align:left;">
+          <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟</div>
+          ${explainQ(q, q.lessonId)}
+        </div>
+        <button class="q-ans" style="grid-column:1/-1; background:linear-gradient(180deg,#42a5f5,#1565c0);" id="gemContBtn">🧠 Got it! Keep playing</button>
+      `;
+      document.getElementById('gemQSub').textContent = "Don't worry — we'll ask you again later!";
+      document.getElementById('gemContBtn').addEventListener('click', () => {
+        document.getElementById('gemQOverlay').style.display = 'none';
+        Gems.qActive = false; Gems.nextQAt = Date.now() + 14000 + Math.random() * 4000;
+      });
+    }, 700);
+    return;
+  }
+  // Correct
+  SFX.correct();
+  bumpStreak();
+  const bonus = wasRetention ? 3 : 1;
+  if (wasRetention) showRetentionBanner('🧠 YOU REMEMBERED!<br>+ BIG BONUS!');
+  // clear a random row
+  const r = rand(0, Gems.size - 1);
+  for (let c = 0; c < Gems.size; c++) Gems.board[r][c] = null;
+  Gems.score += 100 * comboMult() * bonus;
+  Game.score = Gems.score;
   setTimeout(() => {
     document.getElementById('gemQOverlay').style.display = 'none';
     Gems.qActive = false; Gems.nextQAt = Date.now() + 16000 + Math.random() * 6000;
@@ -1888,6 +2281,7 @@ document.querySelectorAll('[data-mode]').forEach(c => {
   c.addEventListener('click', () => {
     SFX.click(); ensureAudio();
     Game.subject = chosenSubject;
+    currentLesson = null; // home modes are mixed lessons
     const m = c.dataset.mode;
     if (m === 'galaxy') startGalaxy();
     else if (m === 'boss') startBoss();
@@ -2070,10 +2464,18 @@ function refreshShop() {
     const card = document.createElement('div');
     const locked = coins < pack.cost;
     card.className = 'pack-card ' + pack.color + (locked ? ' locked' : '');
+    const owned = pack.items.filter(it => inventory.includes(it.id)).length;
+    const total = pack.items.length;
+    // Build the collection slots: each pack item shows owned (color) or locked (gray)
+    const slotsHtml = pack.items.map(it => {
+      const has = inventory.includes(it.id);
+      return `<div class="collected-slot ${has ? 'has' : 'locked'}" title="${has ? it.name + ' (' + it.rarity + ')' : '???'}">${has ? it.emoji : '?'}</div>`;
+    }).join('');
     card.innerHTML = `
       <div class="emoji">${pack.emoji}</div>
       <div class="nm">${pack.name}</div>
-      <div style="font-size:11px; opacity:0.85; margin-top:3px;">${pack.items.length} items</div>
+      <div style="font-size:11px; opacity:0.85; margin-top:3px;">${owned}/${total} collected</div>
+      <div class="pack-collection">${slotsHtml}</div>
       <div class="cost">🪙 ${pack.cost.toLocaleString()}</div>
     `;
     card.addEventListener('click', () => openPack(key));
@@ -2084,12 +2486,11 @@ function refreshShop() {
 function refreshInventory() {
   const trailGrid = document.getElementById('invTrails');
   const auraGrid = document.getElementById('invAuras');
-  const trails = inventory.map(id => ALL_ITEMS[id]).filter(i => i && i.kind === 'trail');
-  const auras = inventory.map(id => ALL_ITEMS[id]).filter(i => i && i.kind === 'aura');
+  const allTrails = Object.values(ALL_ITEMS).filter(i => i.kind === 'trail');
+  const allAuras = Object.values(ALL_ITEMS).filter(i => i.kind === 'aura');
   function build(grid, items, equipped, kind) {
-    if (!items.length) { grid.innerHTML = `<div style="opacity:0.7; font-size:13px; text-align:center; padding:10px;">No ${kind}s yet — open packs!</div>`; return; }
     grid.innerHTML = '';
-    // add "none" option
+    // None option (always shown)
     const none = document.createElement('div');
     none.className = 'inv-item' + (!equipped ? ' equipped' : '');
     none.innerHTML = `<div class="emoji">🚫</div><div class="nm">None</div>`;
@@ -2099,11 +2500,22 @@ function refreshInventory() {
       refreshInventory();
     });
     grid.appendChild(none);
+    // sort: owned first, then by rarity
+    const rarityOrder = { legendary: 0, epic: 1, rare: 2, common: 3 };
+    items.sort((a, b) => {
+      const oa = inventory.includes(a.id) ? 0 : 1;
+      const ob = inventory.includes(b.id) ? 0 : 1;
+      if (oa !== ob) return oa - ob;
+      return rarityOrder[a.rarity] - rarityOrder[b.rarity];
+    });
     items.forEach(it => {
+      const owned = inventory.includes(it.id);
       const el = document.createElement('div');
       el.className = 'inv-item' + (equipped === it.id ? ' equipped' : '');
-      el.innerHTML = `<div class="emoji">${it.emoji}</div><div class="nm">${it.name}</div><div style="font-size:9px; opacity:0.7;">${it.rarity}</div>`;
+      if (!owned) el.style.opacity = '0.35';
+      el.innerHTML = `<div class="emoji">${owned ? it.emoji : '🔒'}</div><div class="nm">${owned ? it.name : '???'}</div><div style="font-size:9px; opacity:0.7;">${it.rarity}</div>`;
       el.addEventListener('click', () => {
+        if (!owned) { showToast('Not unlocked yet — open packs!'); return; }
         if (kind === 'trail') { equippedTrail = it.id; Save.set('trail', it.id); }
         else { equippedAura = it.id; Save.set('aura', it.id); }
         refreshInventory();
@@ -2111,8 +2523,8 @@ function refreshInventory() {
       grid.appendChild(el);
     });
   }
-  build(trailGrid, trails, equippedTrail, 'trail');
-  build(auraGrid, auras, equippedAura, 'aura');
+  build(trailGrid, allTrails, equippedTrail, 'trail');
+  build(auraGrid, allAuras, equippedAura, 'aura');
 }
 
 document.getElementById('shopBtn').addEventListener('click', () => {
@@ -2164,6 +2576,122 @@ function refreshHomeStats() {
   document.getElementById('levelFill').style.width = pct + '%';
   document.getElementById('levelText').textContent = `${totalStars}/${need} ⭐ to next level`;
 }
+
+/* ============================================================ PROFILE SCREEN ============================================================ */
+function refreshProfileScreen() {
+  const list = document.getElementById('profileList');
+  if (!profiles.length) {
+    list.innerHTML = '<div style="text-align:center; opacity:0.7; padding:20px;">No profiles yet — create one below!</div>';
+    return;
+  }
+  list.innerHTML = '';
+  profiles.forEach(p => {
+    // load that profile's stats
+    const prefix = 'aq3_' + p.name + '_';
+    const stars = JSON.parse(localStorage.getItem(prefix + 'stars') || '0');
+    const lv = JSON.parse(localStorage.getItem(prefix + 'level') || '1');
+    const cn = JSON.parse(localStorage.getItem(prefix + 'coins') || '0');
+    const row = document.createElement('div');
+    row.className = 'profile-row' + (p.name === currentProfile ? ' current' : '');
+    row.innerHTML = `
+      <div>
+        <div style="font-size:18px; font-weight:bold;">👤 ${p.name}</div>
+        <div style="font-size:12px; opacity:0.85;">Lv.${lv} · ⭐${stars} · 🪙${cn.toLocaleString()}</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn small green" data-act="play">Play</button>
+        <button class="btn small red" data-act="del">🗑</button>
+      </div>
+    `;
+    row.querySelector('[data-act="play"]').addEventListener('click', (e) => {
+      e.stopPropagation(); SFX.click();
+      switchProfile(p.name);
+      goHome();
+    });
+    row.querySelector('[data-act="del"]').addEventListener('click', (e) => {
+      e.stopPropagation(); deleteProfile(p.name);
+    });
+    list.appendChild(row);
+  });
+}
+
+function showProfileScreen() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('profileScreen').classList.add('active');
+  refreshProfileScreen();
+}
+
+function goHome() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('home').classList.add('active');
+  document.getElementById('profileNameTop').textContent = playerName || currentProfile || 'Player';
+  refreshHomeStats();
+}
+
+document.getElementById('createProfileBtn').addEventListener('click', () => {
+  const name = document.getElementById('newProfileName').value;
+  const r = createProfile(name);
+  if (r === 'exists') alert('That name is taken — pick another or tap that profile');
+  else if (!r) alert('Please type a name');
+  else { document.getElementById('newProfileName').value = ''; goHome(); }
+});
+document.getElementById('newProfileName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('createProfileBtn').click();
+});
+document.getElementById('switchProfileBtn').addEventListener('click', showProfileScreen);
+document.getElementById('importBtn').addEventListener('click', () => {
+  const code = prompt('Paste your save code:');
+  if (code) importSave(code);
+});
+
+/* ============================================================ LESSONS SCREEN ============================================================ */
+function refreshLessonsScreen() {
+  const mathBox = document.getElementById('lessonGridMath');
+  const engBox = document.getElementById('lessonGridEng');
+  mathBox.innerHTML = ''; engBox.innerHTML = '';
+  let totalAns = 0, totalCorrect = 0;
+  LESSONS.forEach(L => {
+    const stats = lessonStats[L.id] || { correct: 0, attempts: 0 };
+    totalAns += stats.attempts; totalCorrect += stats.correct;
+    const acc = stats.attempts ? Math.round(100 * stats.correct / stats.attempts) : 0;
+    const mastered = stats.correct >= 20 && acc >= 80;
+    const card = document.createElement('div');
+    card.className = 'lesson-card' + (mastered ? ' mastered' : '');
+    card.innerHTML = `
+      <div class="top"><span class="em">${L.emoji}</span> ${L.name}${mastered ? ' 🏆' : ''}</div>
+      <div class="stats">${stats.correct}/${stats.attempts} correct · ${acc}% accuracy</div>
+      <div class="barwrap"><div class="barfill" style="width:${Math.min(100, (stats.correct/20)*100)}%"></div></div>
+      <div style="font-size:10px; opacity:0.8;">${stats.correct >= 20 ? 'Mastered!' : `${20 - stats.correct} more correct to master`}</div>
+    `;
+    card.addEventListener('click', () => startLessonPractice(L));
+    (L.subj === 'math' ? mathBox : engBox).appendChild(card);
+  });
+  document.getElementById('totalAnswered').textContent = totalAns;
+  document.getElementById('totalAccuracy').textContent = totalAns ? Math.round(100 * totalCorrect / totalAns) : '--';
+}
+
+function startLessonPractice(lesson) {
+  // launch a quick game in galaxy mode with only this lesson's questions
+  currentLesson = lesson;
+  Game.subject = lesson.subj;
+  document.getElementById('lessonsScreen').classList.remove('active');
+  startGalaxy();
+}
+
+document.getElementById('lessonsBtn').addEventListener('click', () => {
+  document.getElementById('home').classList.remove('active');
+  document.getElementById('lessonsScreen').classList.add('active');
+  refreshLessonsScreen();
+});
+document.getElementById('lessonsBack').addEventListener('click', () => {
+  document.getElementById('lessonsScreen').classList.remove('active');
+  document.getElementById('home').classList.add('active');
+});
+document.getElementById('resetLessonsBtn').addEventListener('click', () => {
+  if (confirm('Reset all lesson progress for this profile?')) {
+    lessonStats = {}; Save.set('lessonStats', {}); refreshLessonsScreen();
+  }
+});
 
 /* ============================================================ MULTIPLAYER ============================================================ */
 const Net = {
@@ -2267,6 +2795,18 @@ function showToast(msg) {
 }
 
 resize();
+
+// Initial routing: show profile picker if no profile chosen, else home
+if (!currentProfile || !profiles.length) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('profileScreen').classList.add('active');
+  refreshProfileScreen();
+} else {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('home').classList.add('active');
+  document.getElementById('profileNameTop').textContent = playerName || currentProfile;
+  refreshHomeStats();
+}
 </script>
 </body>
 </html>
