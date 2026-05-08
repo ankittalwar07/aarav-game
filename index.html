@@ -878,6 +878,30 @@ function buildChoices(answer, n = 4) {
   return shuffle([...choices]);
 }
 
+/* HARD distractors: same tens & ones, only hundreds digit different.
+   Forces the kid to actually compute the whole sum, not guess from last digit. */
+function buildHardChoices(answer) {
+  const choices = new Set([answer]);
+  const lastTwo = answer % 100;
+  const hundreds = Math.floor(answer / 100);
+  // try various hundreds digits to keep last 2 digits identical
+  const offsets = shuffle([-3, -2, -1, 1, 2, 3, 4]);
+  for (const off of offsets) {
+    if (choices.size >= 4) break;
+    const newH = hundreds + off;
+    if (newH >= 0) {
+      const d = newH * 100 + lastTwo;
+      if (d > 0 && d !== answer) choices.add(d);
+    }
+  }
+  // fallback for edge cases (small answers)
+  while (choices.size < 4) {
+    const d = answer + (Math.random() < 0.5 ? -1 : 1) * rand(20, 200);
+    if (d > 0 && d !== answer) choices.add(d);
+  }
+  return shuffle([...choices]);
+}
+
 /* ============== 3RD GRADE LESSON CATALOG (Common Core aligned) ============== */
 const SYN = [['big','large','tiny'],['happy','glad','sad'],['fast','quick','slow'],['smart','clever','silly'],['begin','start','finish'],['scared','afraid','brave'],['angry','mad','calm'],['little','small','huge'],['quiet','silent','loud'],['shout','yell','whisper'],['cold','chilly','hot'],['pretty','lovely','ugly'],['nice','kind','mean'],['brave','bold','timid'],['tired','sleepy','awake'],['sick','ill','healthy']];
 const ANT = [['hot','cold'],['happy','sad'],['big','small'],['fast','slow'],['day','night'],['up','down'],['young','old'],['light','dark'],['empty','full'],['hard','easy'],['near','far'],['win','lose'],['push','pull'],['true','false'],['friend','enemy'],['kind','mean'],['brave','scared'],['rich','poor']];
@@ -888,8 +912,8 @@ const ADVERBS = ['quickly','slowly','carefully','loudly','softly','happily','qui
 
 const LESSONS = [
   // ===== MATH (3rd grade Common Core) =====
-  { id: 'm_add',   subj: 'math', name: 'Addition (3-digit)',          emoji: '➕',  gen: () => { const a=rand(100,899),b=rand(50,200); return { prompt:`${a} + ${b} = ?`, answer:a+b, choices:buildChoices(a+b) }; } },
-  { id: 'm_sub',   subj: 'math', name: 'Subtraction (3-digit)',       emoji: '➖',  gen: () => { const a=rand(150,900),b=rand(20,a-10); return { prompt:`${a} − ${b} = ?`, answer:a-b, choices:buildChoices(a-b) }; } },
+  { id: 'm_add',   subj: 'math', name: 'Addition (3-digit)',          emoji: '➕',  gen: () => { const a=rand(120,799),b=rand(80,199); return { prompt:`${a} + ${b} = ?`, answer:a+b, choices:buildHardChoices(a+b) }; } },
+  { id: 'm_sub',   subj: 'math', name: 'Subtraction (3-digit)',       emoji: '➖',  gen: () => { const a=rand(300,999),b=rand(50,a-100); return { prompt:`${a} − ${b} = ?`, answer:a-b, choices:buildHardChoices(a-b) }; } },
   { id: 'm_mul25', subj: 'math', name: 'Times Tables: 2, 5, 10',      emoji: '✖️',  gen: () => { const a=pick([2,5,10]),b=rand(2,10); return { prompt:`${a} × ${b} = ?`, answer:a*b, choices:buildChoices(a*b) }; } },
   { id: 'm_mul34', subj: 'math', name: 'Times Tables: 3, 4',          emoji: '✖️',  gen: () => { const a=pick([3,4]),b=rand(2,10); return { prompt:`${a} × ${b} = ?`, answer:a*b, choices:buildChoices(a*b) }; } },
   { id: 'm_mul69', subj: 'math', name: 'Times Tables: 6, 7, 8, 9',    emoji: '✖️',  gen: () => { const a=pick([6,7,8,9]),b=rand(2,10); return { prompt:`${a} × ${b} = ?`, answer:a*b, choices:buildChoices(a*b) }; } },
@@ -898,7 +922,7 @@ const LESSONS = [
   { id: 'm_frac',  subj: 'math', name: 'Fractions (1/2, 1/3, 1/4)',   emoji: '🍕',  gen: () => { const f=pick([[1,2,'half'],[1,4,'quarter'],[3,4,'three quarters'],[1,3,'a third'],[2,3,'two thirds'],[1,5,'a fifth']]); const tot=f[1]*rand(2,6); const a = tot*f[0]/f[1]; return { prompt:`What is ${f[2]} of ${tot}?`, answer:a, choices:buildChoices(a) }; } },
   { id: 'm_place', subj: 'math', name: 'Place Value',                 emoji: '🔢',  gen: () => { const n=rand(100,999),p=pick(['hundreds','tens','ones']); const s=String(n); const a=p==='hundreds'?+s[0]:p==='tens'?+s[1]:+s[2]; return { prompt:`In ${n}, what digit is in the ${p} place?`, answer:a, choices:[0,1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5).slice(0,4).includes(a)?shuffle([a,...[0,1,2,3,4,5,6,7,8,9].filter(x=>x!==a).sort(()=>Math.random()-0.5).slice(0,3)]):shuffle([a,...[0,1,2,3,4,5,6,7,8,9].filter(x=>x!==a).sort(()=>Math.random()-0.5).slice(0,3)]) }; } },
   { id: 'm_round', subj: 'math', name: 'Rounding to 10s/100s',        emoji: '🔄',  gen: () => { const n=rand(13,985); const to=pick([10,100]); const a=Math.round(n/to)*to; return { prompt:`Round ${n} to the nearest ${to}.`, answer:a, choices:buildChoices(a).map(c=>Math.max(0,c)) }; } },
-  { id: 'm_compare',subj: 'math', name: 'Compare Numbers',            emoji: '⚖️',  gen: () => { const a=rand(100,999),b=rand(100,999); if(a===b) return LESSONS.find(l=>l.id==='m_compare').gen(); const ans=Math.max(a,b); return { prompt:`Which number is BIGGER?`, answer:ans, choices:shuffle([a,b,Math.min(a,b)-rand(1,15),Math.max(a,b)+rand(1,15)]) }; } },
+  { id: 'm_compare',subj: 'math', name: 'Compare Numbers',            emoji: '⚖️',  gen: () => { const set=new Set(); while(set.size<4) set.add(rand(100,999)); const nums=[...set]; const ans=Math.max(...nums); return { prompt:`Which number is the BIGGEST? 🔢`, answer:ans, choices:shuffle(nums) }; } },
   { id: 'm_time',  subj: 'math', name: 'Telling Time',                emoji: '🕐',  gen: () => { const h=rand(1,12), m=pick([0,5,10,15,20,25,30,35,40,45,50,55]); const correct = `${h}:${String(m).padStart(2,'0')}`; const wrongs = [`${h}:${String((m+5)%60).padStart(2,'0')}`,`${(h%12)+1}:${String(m).padStart(2,'0')}`,`${h}:${String((m+30)%60).padStart(2,'0')}`].filter(x=>x!==correct); return { prompt:`If the hour hand points just past ${h} and minute hand at ${m===0?'12':m/5}, what time is it?`, answer:correct, choices:shuffle([correct,...wrongs.slice(0,3)]) }; } },
   { id: 'm_money', subj: 'math', name: 'Money',                       emoji: '💰',  gen: () => { const wp = [() => { const a=rand(2,9),b=rand(1,5); return [`A toy costs $${a}. You buy ${b} toys. Total?`, a*b]; }, () => { const a=rand(15,40); return [`You have $${a*2}. You spend $${a}. How much left?`, a]; }, () => { const a=rand(3,8); return [`How many quarters make $${a}? (1 quarter = 25¢)`, a*4]; }]; const [p,ans] = pick(wp)(); return { prompt:p, answer:ans, choices:buildChoices(ans) }; } },
 
@@ -945,11 +969,13 @@ function explainQ(q, lessonId) {
   switch (lessonId) {
     case 'm_add': if (nums.length>=2) {
       const [a,b] = nums;
-      return `🧮 <b>${a} + ${b} = ${ans}</b><br>👉 Stack them up like this:<br><span style="font-family:monospace; font-size:18px;">&nbsp;&nbsp;${a}<br>+&nbsp;${b}<br>━━━<br>&nbsp;${ans}</span><br>Start with the small numbers on the right (ones), then go left! 🌟`;
+      const aH = Math.floor(a/100), aT = Math.floor((a%100)/10), aO = a%10;
+      const bH = Math.floor(b/100), bT = Math.floor((b%100)/10), bO = b%10;
+      return `🧮 <b>${a} + ${b} = ${ans}</b><br>👉 You MUST add ALL three columns — don't just guess!<br><span style="font-family:monospace; font-size:18px; display:inline-block; background:#fff; padding:6px 12px; border-radius:8px;">&nbsp;${aH}&nbsp;${aT}&nbsp;${aO}<br>+&nbsp;${bH}&nbsp;${bT}&nbsp;${bO}<br>━━━━━━<br>&nbsp;${Math.floor(ans/100)}&nbsp;${Math.floor((ans%100)/10)}&nbsp;${ans%10}</span><br>Step 1: Ones (${aO}+${bO})<br>Step 2: Tens (${aT}+${bT})<br>Step 3: Hundreds (${aH}+${bH})<br>Carry over if 10+! 🌟`;
     } break;
     case 'm_sub': if (nums.length>=2) {
       const [a,b] = nums;
-      return `🧮 <b>${a} − ${b} = ${ans}</b><br>👉 Imagine you have ${a} cookies 🍪 and you eat ${b}. You'd have ${ans} left!<br>Take away the small numbers first (ones), then bigger ones. If you can't, BORROW from the next!`;
+      return `🧮 <b>${a} − ${b} = ${ans}</b><br>👉 You MUST subtract ALL columns!<br><span style="font-family:monospace; font-size:18px; display:inline-block; background:#fff; padding:6px 12px; border-radius:8px;">&nbsp;${a}<br>−&nbsp;${b}<br>━━━━<br>&nbsp;${ans}</span><br>If you have ${a} cookies 🍪 and eat ${b}, you'd have ${ans} left!<br>Subtract right-to-left. If a digit is too small, BORROW from the next column!`;
     } break;
     case 'm_mul25': case 'm_mul34': case 'm_mul69':
       if (nums.length>=2) {
@@ -967,7 +993,7 @@ function explainQ(q, lessonId) {
       const [n,to] = nums;
       return `🔄 <b>${n} rounds to ${ans}</b><br>👉 Look at the next digit:<br>• 0, 1, 2, 3, 4 → round DOWN ⬇️<br>• 5, 6, 7, 8, 9 → round UP ⬆️`;
     } break;
-    case 'm_compare': return `⚖️ <b>${ans} is bigger!</b><br>👉 Compare the HUNDREDS first 🔢<br>If they tie, check TENS, then ONES.<br>The number with the bigger digit wins!`;
+    case 'm_compare': return `⚖️ <b>${ans} is the BIGGEST!</b><br>👉 To compare numbers:<br>1. Look at HUNDREDS digit first 🔢<br>2. If they match, look at TENS<br>3. If those match, look at ONES<br>The number with the bigger digit wins! 🏆`;
     case 'm_time': return `🕐 <b>The time is ${ans}</b><br>👉 The little hand shows the HOUR. The big hand shows MINUTES.<br>Big hand on 12 = :00, on 6 = :30, on 3 = :15!`;
     case 'm_money': return `💰 <b>Answer: ${ans}</b><br>👉 Add the prices to find total. Subtract to see how much is LEFT.<br>Tip: 4 quarters 🪙🪙🪙🪙 = $1!`;
 
