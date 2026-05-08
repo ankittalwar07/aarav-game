@@ -204,6 +204,8 @@
   .pack-card.cyber  { background: linear-gradient(135deg, #263238, #00b8d4); }
   .pack-card.pirate { background: linear-gradient(135deg, #4e342e, #ffb300); }
   .pack-card.wizard { background: linear-gradient(135deg, #311b92, #ce93d8); }
+  .pack-card.circus { background: linear-gradient(135deg, #d81b60, #ff6f00, #ffeb3b); }
+  .pack-card.magic_school { background: linear-gradient(135deg, #1a237e, #6a1b9a, #ad1457); }
 
   /* PACK OPENING */
   #packOpen {
@@ -985,26 +987,58 @@ function explainQ(q, lessonId) {
   return `✨ The answer is <b>"${ans}"</b>. Read it carefully — you'll get it next time! 💪`;
 }
 
-/* ==== RETENTION QUEUE — wrong questions come back later ==== */
+/* ==== RETENTION QUEUE — same SKILL, NEW question (tests concept not memory) ==== */
 const Retention = {
-  queue: [],
+  queue: [], // [{ lessonId, addedAt }]
   add(q) {
     if (!q || !q.lessonId) return;
-    // mark a fresh copy as a retention question
-    const copy = { ...q, _retention: true };
-    this.queue.push({ q: copy, addedAt: performance.now() });
-    if (this.queue.length > 8) this.queue.shift();
+    this.queue.push({ lessonId: q.lessonId, addedAt: performance.now() });
+    if (this.queue.length > 10) this.queue.shift();
   },
   pull(minAge = 5000) {
     const now = performance.now();
     for (let i = 0; i < this.queue.length; i++) {
-      if (now - this.queue[i].addedAt > minAge) return this.queue.splice(i, 1)[0].q;
+      if (now - this.queue[i].addedAt > minAge) {
+        const item = this.queue.splice(i, 1)[0];
+        const L = LESSON_BY_ID[item.lessonId];
+        if (!L) return null;
+        // generate a FRESH question of the same skill (so Aarav must understand, not memorize)
+        const fresh = L.gen();
+        fresh.lessonId = item.lessonId;
+        fresh._retention = true;
+        return fresh;
+      }
     }
     return null;
   },
   reset() { this.queue = []; },
   size() { return this.queue.length; }
 };
+
+/* ==== VOICE READING — read explanations aloud ==== */
+function speak(text) {
+  try {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.85;
+    u.pitch = 1.1;
+    u.volume = 1;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function toSpeech(html) {
+  // strip HTML, emojis, and extra whitespace
+  return html
+    .replace(/<br\s*\/?>/gi, '. ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+    .replace(/[\u{2600}-\u{27BF}]/gu, '')
+    .replace(/[👉💡🌟✨🎯❤️]/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 function showRetentionBanner(text) {
   const b = document.createElement('div');
@@ -1154,12 +1188,12 @@ function renderAura(p, camX = 0, camY = 0) {
 let qTimerId = null, qCallback = null, qSubText = '';
 function showQuestion(subject, sub, callback, forcedQ) {
   Game.paused = true;
-  // chance to pull from retention queue first
   let q = forcedQ;
   if (!q && Math.random() < 0.45) q = Retention.pull();
   if (!q) q = makeQ(subject);
   Game.currentQ = q; qCallback = callback;
-  qSubText = q._retention ? '🧠 Remember this one? Big bonus if you get it!' : (sub || 'Answer to continue!');
+  qSubText = q._retention ? '🧠 Same skill, new question! Big bonus if you get it!' : (sub || 'Answer to continue!');
+  if (q._retention) speak('Remember this skill? Try again!');
   renderQuestionOverlay(q, qSubText);
 }
 function renderQuestionOverlay(q, sub) {
@@ -1203,19 +1237,23 @@ function answerQ(choice, btn) {
       if (cb) cb(true, q._retention);
     }, q._retention ? 1500 : 700);
   } else {
-    // Show explanation, queue for later, no retry
+    // Show explanation, queue same SKILL for later (new question), no retry
     Retention.add(q);
+    const explainHtml = explainQ(q, q.lessonId);
+    speak(toSpeech(explainHtml));
     setTimeout(() => {
       const grid = document.getElementById('qAnswers');
       grid.innerHTML = `
         <div style="grid-column:1/-1; background:linear-gradient(180deg,#fff8e1,#ffe082); color:#3e2723; padding:14px; border-radius:14px; font-size:15px; line-height:1.6; border:4px solid #ff9800; text-align:left;">
-          <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟</div>
-          ${explainQ(q, q.lessonId)}
+          <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟 <button id="speakAgainBtn" style="background:#1565c0; color:#fff; border:none; border-radius:8px; padding:4px 10px; font-size:13px; cursor:pointer;">🔊 Read Again</button></div>
+          ${explainHtml}
         </div>
-        <button class="q-ans" style="grid-column:1/-1; background:linear-gradient(180deg,#42a5f5,#1565c0);" id="contBtn">🧠 Got it! (We'll ask you again later!)</button>
+        <button class="q-ans" style="grid-column:1/-1; background:linear-gradient(180deg,#42a5f5,#1565c0);" id="contBtn">🧠 Got it! Keep playing</button>
       `;
-      document.getElementById('qSub').innerHTML = q._retention ? "Don't worry — you'll see this again!" : "Don't worry — you'll see this again!";
+      document.getElementById('qSub').textContent = "We'll test you on this skill again later!";
+      document.getElementById('speakAgainBtn').addEventListener('click', (e) => { e.stopPropagation(); speak(toSpeech(explainHtml)); });
       document.getElementById('contBtn').addEventListener('click', () => {
+        speechSynthesis && speechSynthesis.cancel();
         document.getElementById('qOverlay').classList.remove('active');
         Game.paused = false;
         const cb = qCallback; qCallback = null;
@@ -1233,18 +1271,22 @@ const Galaxy = {
 function showGalaxyExplanation(q) {
   const overlay = document.getElementById('qOverlay');
   document.getElementById('qPrompt').innerHTML = q.prompt.replace(/\n/g, '<br>');
-  document.getElementById('qSub').textContent = "Don't worry — we'll ask you this again later!";
+  document.getElementById('qSub').textContent = "We'll test you on this skill again later!";
   document.getElementById('qTimer').style.width = '100%';
+  const explainHtml = explainQ(q, q.lessonId);
+  speak(toSpeech(explainHtml));
   const grid = document.getElementById('qAnswers');
   grid.innerHTML = `
     <div style="grid-column:1/-1; background:linear-gradient(180deg,#fff8e1,#ffe082); color:#3e2723; padding:14px; border-radius:14px; font-size:15px; line-height:1.6; border:4px solid #ff9800; text-align:left;">
-      <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟</div>
-      ${explainQ(q, q.lessonId)}
+      <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟 <button id="galaxySpeakBtn" style="background:#1565c0; color:#fff; border:none; border-radius:8px; padding:4px 10px; font-size:13px; cursor:pointer;">🔊 Read Again</button></div>
+      ${explainHtml}
     </div>
     <button class="q-ans" style="grid-column:1/-1; background:linear-gradient(180deg,#42a5f5,#1565c0);" id="galaxyContBtn">🧠 Got it! Keep playing</button>
   `;
   overlay.classList.add('active');
+  document.getElementById('galaxySpeakBtn').addEventListener('click', (e) => { e.stopPropagation(); speak(toSpeech(explainHtml)); });
   document.getElementById('galaxyContBtn').addEventListener('click', () => {
+    speechSynthesis && speechSynthesis.cancel();
     overlay.classList.remove('active');
     Game.paused = false;
     Galaxy.aliens.forEach(x => x.alive = false);
@@ -2225,20 +2267,24 @@ async function answerGemQ(choice, btn) {
     document.querySelectorAll('#gemQAnswers .q-ans').forEach(b => b.disabled = true);
   }
   if (!correct) {
-    // Wrong: show explanation, queue for later, soft penalty
+    // Wrong: show explanation, queue same SKILL for later (new question), soft penalty
     SFX.wrong(); resetStreak();
     Retention.add(q);
+    const explainHtml = explainQ(q, q.lessonId);
+    speak(toSpeech(explainHtml));
     setTimeout(() => {
       const grid = document.getElementById('gemQAnswers');
       grid.innerHTML = `
         <div style="grid-column:1/-1; background:linear-gradient(180deg,#fff8e1,#ffe082); color:#3e2723; padding:14px; border-radius:14px; font-size:15px; line-height:1.6; border:4px solid #ff9800; text-align:left;">
-          <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟</div>
-          ${explainQ(q, q.lessonId)}
+          <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn! 🌟 <button id="gemSpeakBtn" style="background:#1565c0; color:#fff; border:none; border-radius:8px; padding:4px 10px; font-size:13px; cursor:pointer;">🔊 Read Again</button></div>
+          ${explainHtml}
         </div>
         <button class="q-ans" style="grid-column:1/-1; background:linear-gradient(180deg,#42a5f5,#1565c0);" id="gemContBtn">🧠 Got it! Keep playing</button>
       `;
-      document.getElementById('gemQSub').textContent = "Don't worry — we'll ask you again later!";
+      document.getElementById('gemQSub').textContent = "We'll test you on this skill again later!";
+      document.getElementById('gemSpeakBtn').addEventListener('click', (e) => { e.stopPropagation(); speak(toSpeech(explainHtml)); });
       document.getElementById('gemContBtn').addEventListener('click', () => {
+        speechSynthesis && speechSynthesis.cancel();
         document.getElementById('gemQOverlay').style.display = 'none';
         Gems.qActive = false; Gems.nextQAt = Date.now() + 14000 + Math.random() * 4000;
       });
@@ -2291,7 +2337,12 @@ document.querySelectorAll('[data-mode]').forEach(c => {
 });
 
 document.getElementById('quitBtn').addEventListener('click', () => {
-  if (confirm('Quit and go home?')) { Game.active = false; document.getElementById('gameWrap').classList.remove('active'); document.getElementById('home').classList.add('active'); }
+  if (confirm('Quit and go home?')) {
+    Game.active = false;
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    document.getElementById('gameWrap').classList.remove('active');
+    document.getElementById('home').classList.add('active');
+  }
 });
 document.getElementById('resAgain').addEventListener('click', () => {
   document.getElementById('result').classList.remove('active');
@@ -2374,6 +2425,30 @@ const PACKS = {
       { id: 'w2', kind: 'trail', emoji: '⭐', name: 'Star Magic', rarity: 'rare' },
       { id: 'w3', kind: 'aura', emoji: '🔮', name: 'Crystal Ball', rarity: 'epic' },
       { id: 'w4', kind: 'aura', emoji: '🧙', name: 'Archmage', rarity: 'legendary' }
+    ]
+  },
+  circus: {
+    name: 'Big Top Circus', emoji: '🎪', cost: 27000, color: 'circus',
+    items: [
+      { id: 'cir1', kind: 'trail', emoji: '🎈', name: 'Balloon Float',   rarity: 'common' },
+      { id: 'cir2', kind: 'trail', emoji: '🤡', name: 'Clown Bounce',    rarity: 'common' },
+      { id: 'cir3', kind: 'aura',  emoji: '🎩', name: 'Top Hat',         rarity: 'rare' },
+      { id: 'cir4', kind: 'aura',  emoji: '🦁', name: 'Circus Lion',     rarity: 'rare' },
+      { id: 'cir5', kind: 'trail', emoji: '🎡', name: 'Ferris Spin',     rarity: 'epic' },
+      { id: 'cir6', kind: 'aura',  emoji: '🐘', name: 'Big Elephant',    rarity: 'epic' },
+      { id: 'cir7', kind: 'aura',  emoji: '🎪', name: 'Ringmaster',      rarity: 'legendary' }
+    ]
+  },
+  magic_school: {
+    name: 'Magic Academy', emoji: '🪄', cost: 33000, color: 'magic_school',
+    items: [
+      { id: 'ms1', kind: 'trail', emoji: '✨',  name: 'Spell Sparks',  rarity: 'common' },
+      { id: 'ms2', kind: 'trail', emoji: '🪄',  name: 'Wand Wisp',     rarity: 'common' },
+      { id: 'ms3', kind: 'aura',  emoji: '🦉',  name: 'Owl Helper',    rarity: 'rare' },
+      { id: 'ms4', kind: 'aura',  emoji: '🧹',  name: 'Broomstick',    rarity: 'rare' },
+      { id: 'ms5', kind: 'trail', emoji: '⚗️',  name: 'Potion Drip',   rarity: 'epic' },
+      { id: 'ms6', kind: 'aura',  emoji: '🦄',  name: 'Unicorn',       rarity: 'epic' },
+      { id: 'ms7', kind: 'aura',  emoji: '🏰',  name: 'Castle Magic',  rarity: 'legendary' }
     ]
   }
 };
