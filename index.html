@@ -312,6 +312,9 @@
   .rarity.rare { background: #1976d2; }
   .rarity.epic { background: #8e24aa; }
   .rarity.legendary { background: linear-gradient(90deg, #ff6f00, #ffeb3b, #ff6f00); color: #222; animation: rainbowText 2s linear infinite; }
+  .rarity.kio { background: linear-gradient(90deg, #00e5ff, #ffea00, #00e5ff); color: #222; animation: rainbowText 2.5s linear infinite; }
+  .rarity.chroma { background: linear-gradient(90deg, #ff00ff, #00ffff, #ffff00, #ff00ff); color: #fff; text-shadow: 1px 1px 0 #000; animation: rainbowText 1.5s linear infinite; }
+  .rarity.mythical { background: linear-gradient(90deg, #6a1b9a, #e91e63, #ff6f00, #ffd600, #e91e63, #6a1b9a); color: #fff; text-shadow: 1px 1px 0 #000; animation: rainbowText 1s linear infinite; box-shadow: 0 0 14px rgba(255,215,0,0.9); }
   @keyframes rainbowText { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
 
   /* LEVEL UP */
@@ -551,9 +554,9 @@
       <div><b>Spend coins → open packs → get items!</b></div>
       <ul style="margin:8px 0 0 18px; padding:0; font-size:13px; line-height:1.6;">
         <li>Each pack has <b>trails ✨</b> and <b>auras 🌟</b> you can equip on your hero.</li>
-        <li>Items come in 4 rarities: <b>Common</b>, <b>Rare</b>, <b>Epic</b>, and <b>Legendary</b>.</li>
+        <li>Items come in <b>7 rarities</b>: Common · Rare · Epic · Legendary · <span style="color:#00e5ff;">Kio</span> · <span style="color:#ff00ff;">Chroma</span> · <span style="color:#ffd600;">Mythical</span> (rarest!).</li>
         <li>The rarer an item, the harder it is to get — but more powerful looking!</li>
-        <li>Got a duplicate? You get coins back: <b>Common 300</b> · <b>Rare 800</b> · <b>Epic 2,000</b> · <b>Legendary 5,000</b>.</li>
+        <li>Got a duplicate? You get coins back: Common 300 · Rare 800 · Epic 2,000 · Legendary 5,000 · <b>Kio 10,000</b> · <b>Chroma 25,000</b> · <b>Mythical 75,000</b>.</li>
         <li>Earn coins by playing modes, answering questions correctly, and chaining combos!</li>
       </ul>
     </div>
@@ -2738,15 +2741,51 @@ const PACKS = {
   }
 };
 
+/* Inject Kio / Chroma / Mythical items into every pack */
+const RARE_EXTRA = {
+  galaxy:       [{k:'trail',e:'🪩',n:'Disco Stars'},      {k:'aura', e:'🌠',n:'Chroma Comet'},      {k:'aura', e:'🪐',n:'Mythic Stargate'}],
+  dragon:       [{k:'aura', e:'💎',n:'Diamond Dragon'},   {k:'trail',e:'🔥',n:'Chroma Inferno'},    {k:'aura', e:'🐉',n:'Mythic Wyrm'}],
+  ocean:        [{k:'trail',e:'🌀',n:'Whirlpool Trail'},  {k:'aura', e:'🐋',n:'Chroma Whale'},      {k:'aura', e:'🧜',n:'Mythic Mer-Lord'}],
+  cyber:        [{k:'aura', e:'💻',n:'Quantum Core'},     {k:'trail',e:'🌐',n:'Chroma Net'},        {k:'aura', e:'👁️',n:'Mythic Singularity'}],
+  pirate:       [{k:'trail',e:'⚔️',n:'Ghost Cutlass'},    {k:'aura', e:'🦑',n:'Chroma Kraken'},     {k:'aura', e:'🏝️',n:'Mythic Treasure Isle'}],
+  wizard:       [{k:'aura', e:'🌙',n:'Moon Sage'},        {k:'trail',e:'⚗️',n:'Chroma Brew'},       {k:'aura', e:'🦄',n:'Mythic Familiar'}],
+  circus:       [{k:'aura', e:'🎭',n:'Mystic Mask'},      {k:'aura', e:'🎠',n:'Chroma Carousel'},   {k:'aura', e:'🦋',n:'Mythic Acrobat'}],
+  magic_school: [{k:'trail',e:'📚',n:'Forbidden Tome'},   {k:'aura', e:'⚡',n:'Chroma Spell'},      {k:'aura', e:'🏰',n:'Mythic Headmaster'}],
+  dog:          [{k:'aura', e:'🦊',n:'Cyber Pup'},        {k:'trail',e:'🌈',n:'Chroma Hound'},      {k:'aura', e:'🐺',n:'Mythic Alpha'}],
+  ai:           [{k:'aura', e:'🛸',n:'Quantum Mind'},     {k:'aura', e:'💠',n:'Chroma Core'},       {k:'aura', e:'🌌',n:'Mythic AGI'}],
+  retro:        [{k:'trail',e:'🎰',n:'Jackpot Glow'},     {k:'trail',e:'🎨',n:'Chroma Pixel'},      {k:'aura', e:'🦖',n:'Mythic 8-Bit Beast'}],
+  elemental:    [{k:'aura', e:'☄️',n:'Cosmic Element'},   {k:'trail',e:'🌈',n:'Chroma Storm'},      {k:'aura', e:'☯️',n:'Mythic Balance'}],
+  atlas:        [{k:'aura', e:'🗿',n:'Lost Civilization'},{k:'aura', e:'🌋',n:'Chroma Volcano'},    {k:'aura', e:'🌠',n:'Mythic Atlas Star'}],
+  boddle:       [{k:'trail',e:'🧟',n:'Boddle Phantom'},   {k:'aura', e:'🌈',n:'Chroma Boddle'},     {k:'aura', e:'🐲',n:'Mythic Boddle God'}],
+  gimkit:       [{k:'trail',e:'💸',n:'Money Tornado'},    {k:'aura', e:'🌈',n:'Chroma Cash'},       {k:'aura', e:'🏰',n:'Mythic Kingdom'}],
+  blooket:      [{k:'aura', e:'🦖',n:'T-Rex Blook'},      {k:'aura', e:'🌈',n:'Chroma Megalodon'},  {k:'aura', e:'🦄',n:'Mythic Blook'}],
+  aarav:        [{k:'trail',e:'🗡️',n:'Excalibur Aarav'}, {k:'aura', e:'🌈',n:'Chroma Aarav'},      {k:'aura', e:'👑',n:'Mythic Aarav Emperor'}],
+  fun:          [{k:'trail',e:'🎢',n:'Mega Coaster'},     {k:'aura', e:'🌈',n:'Chroma Party'},      {k:'aura', e:'🌌',n:'Mythic Funverse'}],
+  dad:          [{k:'aura', e:'🍳',n:'Grill Master'},     {k:'aura', e:'🌈',n:'Chroma Tools'},      {k:'aura', e:'👴',n:'Mythic Grandpa'}],
+  veggie:       [{k:'trail',e:'🌶️',n:'Spicy Pepper'},    {k:'aura', e:'🌈',n:'Chroma Salad'},      {k:'aura', e:'🥗',n:'Mythic Garden God'}],
+  fruit:        [{k:'aura', e:'🥝',n:'Kiwi Burst'},       {k:'trail',e:'🌈',n:'Chroma Smoothie'},   {k:'aura', e:'🍒',n:'Mythic Fruit Lord'}]
+};
+const NEW_RARITIES = ['kio','chroma','mythical'];
+Object.entries(RARE_EXTRA).forEach(([key, list]) => {
+  const pack = PACKS[key];
+  if (!pack) return;
+  list.forEach((def, i) => {
+    pack.items.push({ id: key + '_' + NEW_RARITIES[i], kind: def.k, emoji: def.e, name: def.n, rarity: NEW_RARITIES[i] });
+  });
+});
+
 const ALL_ITEMS = {};
 Object.values(PACKS).forEach(p => p.items.forEach(it => ALL_ITEMS[it.id] = it));
 
 function rarityRoll() {
   const r = Math.random();
-  if (r < 0.50) return 'common';
-  if (r < 0.80) return 'rare';
-  if (r < 0.97) return 'epic';
-  return 'legendary';
+  if (r < 0.50)   return 'common';   // 50%
+  if (r < 0.78)   return 'rare';     // 28%
+  if (r < 0.92)   return 'epic';     // 14%
+  if (r < 0.97)   return 'legendary';// 5%
+  if (r < 0.99)   return 'kio';      // 2%
+  if (r < 0.998)  return 'chroma';   // 0.8%
+  return 'mythical';                 // 0.2%
 }
 
 function openPack(packKey) {
@@ -2759,7 +2798,7 @@ function openPack(packKey) {
   let targetRarity = rarityRoll();
   let pool = pack.items.filter(i => i.rarity === targetRarity);
   while (!pool.length) {
-    const order = ['legendary','epic','rare','common'];
+    const order = ['mythical','chroma','kio','legendary','epic','rare','common'];
     const idx = order.indexOf(targetRarity);
     targetRarity = order[Math.min(order.length - 1, idx + 1)];
     pool = pack.items.filter(i => i.rarity === targetRarity);
@@ -2782,7 +2821,8 @@ function revealItem(item, pack) {
   // duplicates give coins back
   let dupCoins = 0;
   if (dup) {
-    dupCoins = item.rarity === 'legendary' ? 5000 : item.rarity === 'epic' ? 2000 : item.rarity === 'rare' ? 800 : 300;
+    const DUP_COINS = { common: 300, rare: 800, epic: 2000, legendary: 5000, kio: 10000, chroma: 25000, mythical: 75000 };
+    dupCoins = DUP_COINS[item.rarity] || 300;
     coins += dupCoins; Save.set('coins', coins);
   }
   document.getElementById('packBox').style.display = 'none';
@@ -2931,12 +2971,13 @@ function refreshNews() {
     const item = document.createElement('div');
     item.className = 'news-pack-item ' + pack.color + (key === 'fun' ? ' best' : '');
     const legendaryCount = pack.items.filter(i => i.rarity === 'legendary').length;
+    const ultraCount = pack.items.filter(i => ['kio','chroma','mythical'].includes(i.rarity)).length;
     item.innerHTML = `
       <div class="np-emoji">${pack.emoji}</div>
       <div class="np-info">
         <div class="np-name">${pack.name}${key === 'fun' ? ' ⭐' : ''}</div>
         <div class="np-desc">${PACK_BLURBS[key]}</div>
-        <div class="np-cost">🪙 ${pack.cost.toLocaleString()} · ${pack.items.length} items · ${legendaryCount} legendary</div>
+        <div class="np-cost">🪙 ${pack.cost.toLocaleString()} · ${pack.items.length} items · ${legendaryCount} legendary · ${ultraCount} ultra-rare</div>
       </div>
     `;
     item.addEventListener('click', () => {
