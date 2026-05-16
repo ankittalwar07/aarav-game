@@ -208,6 +208,74 @@
   .pack-card.magic_school { background: linear-gradient(135deg, #1a237e, #6a1b9a, #ad1457); }
   .pack-card.dog { background: linear-gradient(135deg, #8d6e63, #d7ccc8, #ffab91); }
   .pack-card.ai  { background: linear-gradient(135deg, #00695c, #00bcd4, #b388ff); }
+  .pack-card.retro { background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff); }
+  .pack-card.elemental { background: linear-gradient(135deg, #ff4500, #00bfff, #228b22, #ffd700); }
+  .pack-card.atlas { background: linear-gradient(135deg, #6d4c1c, #d2b48c, #2e8b57); }
+  .pack-card.boddle { background: linear-gradient(135deg, #ff1744, #00e676, #ffea00); }
+  .pack-card.gimkit { background: linear-gradient(135deg, #1b5e20, #ffc107, #1976d2); }
+  .pack-card.blooket { background: linear-gradient(135deg, #03a9f4, #e91e63, #ffeb3b); }
+  .pack-card.aarav { background: linear-gradient(135deg, #ffd700, #ff6347, #9370db, #ff1493); }
+  .pack-card.fun { background: linear-gradient(135deg, #ff0080, #ff8c00, #ffd700, #00e676, #00bfff, #8a2be2); }
+  .pack-card.dad { background: linear-gradient(135deg, #3e2723, #795548, #a1887f); }
+
+  /* NEWS */
+  .news-btn {
+    position: relative;
+    background: linear-gradient(135deg, #ff8c00, #ff006e, #8338ec);
+    color: #fff;
+  }
+  .news-badge {
+    position: absolute;
+    top: -8px; right: -6px;
+    background: #ffd600;
+    color: #b71c1c;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 8px;
+    border: 2px solid #fff;
+    transform: rotate(8deg);
+    text-shadow: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    animation: news-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes news-pulse {
+    0%, 100% { transform: rotate(8deg) scale(1); }
+    50% { transform: rotate(8deg) scale(1.15); }
+  }
+  .news-card {
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #ffd600;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 8px 0;
+    font-size: 14px;
+  }
+  .news-pack-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .news-pack-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.3);
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+  }
+  .news-pack-item .np-emoji { font-size: 38px; flex-shrink: 0; }
+  .news-pack-item .np-info { flex: 1; min-width: 0; }
+  .news-pack-item .np-name { font-size: 16px; font-weight: bold; }
+  .news-pack-item .np-desc { font-size: 12px; opacity: 0.95; margin-top: 2px; line-height: 1.4; }
+  .news-pack-item .np-cost { font-size: 12px; margin-top: 4px; background: rgba(0,0,0,0.5); display: inline-block; padding: 2px 8px; border-radius: 10px; }
+  .news-pack-item.best {
+    border: 3px solid #ffd600;
+    box-shadow: 0 0 14px rgba(255, 214, 0, 0.8);
+    animation: best-glow 1.8s ease-in-out infinite;
+  }
+  @keyframes best-glow {
+    0%, 100% { box-shadow: 0 0 14px rgba(255, 214, 0, 0.8); }
+    50% { box-shadow: 0 0 24px rgba(255, 214, 0, 1); }
+  }
 
   /* PACK OPENING */
   #packOpen {
@@ -370,6 +438,7 @@
       <button class="btn purple" id="shopBtn">🎁 Pack Shop</button>
       <button class="btn blue" id="inventoryBtn">🎒 My Items</button>
       <button class="btn green" id="lessonsBtn">📚 Lessons</button>
+      <button class="btn news-btn" id="newsBtn">📰 News <span class="news-badge">NEW!</span></button>
     </div>
     <div style="text-align:center; background:rgba(0,0,0,0.4); border-radius:14px; padding:8px; border:2px solid #ff9800; font-size:13px;">
       🔥 <b>COMBO MODE:</b> Answer 5 in a row = 2x · 10 = 3x · 15 = 4x · 20 = 5x · 25 = 6x!<br>
@@ -464,6 +533,34 @@
     <div class="footer-row">
       <button class="btn red" id="lessonsBack">Back</button>
       <button class="btn green" id="resetLessonsBtn">Reset Progress</button>
+    </div>
+  </div>
+
+  <!-- NEWS -->
+  <div id="newsScreen" class="screen">
+    <h1>📰 News & What's New</h1>
+    <div class="hero-banner" style="background:linear-gradient(135deg,#ff0080,#ff8c00,#ffd700,#00bfff,#8a2be2);">
+      <div style="font-size:16px; font-weight:bold;">🎉 9 BRAND NEW PACKS JUST DROPPED! 🎉</div>
+      <div style="font-size:13px; margin-top:6px;">Tap any pack to learn more, then head to the Pack Shop to open them!</div>
+    </div>
+
+    <h2>🎁 How Packs Work</h2>
+    <div class="news-card">
+      <div><b>Spend coins → open packs → get items!</b></div>
+      <ul style="margin:8px 0 0 18px; padding:0; font-size:13px; line-height:1.6;">
+        <li>Each pack has <b>trails ✨</b> and <b>auras 🌟</b> you can equip on your hero.</li>
+        <li>Items come in 4 rarities: <b>Common</b>, <b>Rare</b>, <b>Epic</b>, and <b>Legendary</b>.</li>
+        <li>The rarer an item, the harder it is to get — but more powerful looking!</li>
+        <li>Got a duplicate? You get coins back: <b>Common 300</b> · <b>Rare 800</b> · <b>Epic 2,000</b> · <b>Legendary 5,000</b>.</li>
+        <li>Earn coins by playing modes, answering questions correctly, and chaining combos!</li>
+      </ul>
+    </div>
+
+    <h2>✨ The New Packs</h2>
+    <div class="news-pack-list" id="newsPackList"></div>
+
+    <div class="footer-row">
+      <button class="btn red" id="newsBack">Back</button>
     </div>
   </div>
 
@@ -2502,6 +2599,116 @@ const PACKS = {
       { id: 'ai6', kind: 'aura',  emoji: '🔬', name: 'Lab Genius',      rarity: 'epic' },
       { id: 'ai7', kind: 'aura',  emoji: '✨', name: 'Superintelligence', rarity: 'legendary' }
     ]
+  },
+  retro: {
+    name: 'Retro Pack', emoji: '🕹️', cost: 26000, color: 'retro',
+    items: [
+      { id: 'rt1', kind: 'trail', emoji: '👾', name: 'Pixel Burst',     rarity: 'common' },
+      { id: 'rt2', kind: 'trail', emoji: '🟪', name: 'Neon Blocks',     rarity: 'common' },
+      { id: 'rt3', kind: 'aura',  emoji: '📼', name: 'Cassette Glow',   rarity: 'rare' },
+      { id: 'rt4', kind: 'aura',  emoji: '🕹️', name: 'Joystick Power',  rarity: 'rare' },
+      { id: 'rt5', kind: 'trail', emoji: '💾', name: 'Floppy Dust',     rarity: 'epic' },
+      { id: 'rt6', kind: 'aura',  emoji: '🎮', name: 'Arcade King',     rarity: 'epic' },
+      { id: 'rt7', kind: 'aura',  emoji: '🌈', name: '80s Legend',      rarity: 'legendary' }
+    ]
+  },
+  elemental: {
+    name: 'Elemental Pack', emoji: '🌪️', cost: 32000, color: 'elemental',
+    items: [
+      { id: 'el1', kind: 'trail', emoji: '🔥', name: 'Flame Tail',      rarity: 'common' },
+      { id: 'el2', kind: 'trail', emoji: '💧', name: 'Water Splash',    rarity: 'common' },
+      { id: 'el3', kind: 'trail', emoji: '🌬️', name: 'Wind Whirl',      rarity: 'common' },
+      { id: 'el4', kind: 'aura',  emoji: '🪨', name: 'Stone Shield',    rarity: 'rare' },
+      { id: 'el5', kind: 'aura',  emoji: '❄️', name: 'Ice Crown',       rarity: 'rare' },
+      { id: 'el6', kind: 'trail', emoji: '⚡', name: 'Lightning Bolt',  rarity: 'epic' },
+      { id: 'el7', kind: 'aura',  emoji: '🌪️', name: 'Storm Lord',      rarity: 'legendary' }
+    ]
+  },
+  atlas: {
+    name: 'Atlas Pack', emoji: '🗺️', cost: 29000, color: 'atlas',
+    items: [
+      { id: 'at1', kind: 'trail', emoji: '📜', name: 'Old Scroll',      rarity: 'common' },
+      { id: 'at2', kind: 'trail', emoji: '🧭', name: 'Compass Spin',    rarity: 'common' },
+      { id: 'at3', kind: 'aura',  emoji: '🗺️', name: 'World Map',       rarity: 'rare' },
+      { id: 'at4', kind: 'aura',  emoji: '⛰️', name: 'Mountain Peak',   rarity: 'rare' },
+      { id: 'at5', kind: 'trail', emoji: '🏝️', name: 'Island Hop',      rarity: 'epic' },
+      { id: 'at6', kind: 'aura',  emoji: '🌍', name: 'Globe Trotter',   rarity: 'epic' },
+      { id: 'at7', kind: 'aura',  emoji: '🏛️', name: 'Atlas Titan',     rarity: 'legendary' }
+    ]
+  },
+  boddle: {
+    name: 'Boddle Pack', emoji: '🐲', cost: 31000, color: 'boddle',
+    items: [
+      { id: 'bd1', kind: 'trail', emoji: '🟢', name: 'Slime Trail',     rarity: 'common' },
+      { id: 'bd2', kind: 'trail', emoji: '🔢', name: 'Math Sparks',     rarity: 'common' },
+      { id: 'bd3', kind: 'aura',  emoji: '👹', name: 'Boddle Monster',  rarity: 'rare' },
+      { id: 'bd4', kind: 'aura',  emoji: '🦖', name: 'Boddle Beast',    rarity: 'rare' },
+      { id: 'bd5', kind: 'trail', emoji: '🧪', name: 'Potion Quiz',     rarity: 'epic' },
+      { id: 'bd6', kind: 'aura',  emoji: '🐉', name: 'Boddle Dragon',   rarity: 'epic' },
+      { id: 'bd7', kind: 'aura',  emoji: '👑', name: 'Boddle Champ',    rarity: 'legendary' }
+    ]
+  },
+  gimkit: {
+    name: 'Gimkit Pack', emoji: '💰', cost: 34000, color: 'gimkit',
+    items: [
+      { id: 'gk1', kind: 'trail', emoji: '💵', name: 'Cash Stream',     rarity: 'common' },
+      { id: 'gk2', kind: 'trail', emoji: '🎯', name: 'Quiz Hit',        rarity: 'common' },
+      { id: 'gk3', kind: 'aura',  emoji: '💰', name: 'Money Bag',       rarity: 'rare' },
+      { id: 'gk4', kind: 'aura',  emoji: '🐟', name: 'Fishtopia',       rarity: 'rare' },
+      { id: 'gk5', kind: 'trail', emoji: '🏰', name: 'Tag Domination',  rarity: 'epic' },
+      { id: 'gk6', kind: 'aura',  emoji: '🧊', name: 'Snowbrawl',       rarity: 'epic' },
+      { id: 'gk7', kind: 'aura',  emoji: '🏆', name: 'Gimkit GOAT',     rarity: 'legendary' }
+    ]
+  },
+  blooket: {
+    name: 'Blooket Pack', emoji: '🐔', cost: 36000, color: 'blooket',
+    items: [
+      { id: 'bk1', kind: 'trail', emoji: '🐔', name: 'Chicken Trail',   rarity: 'common' },
+      { id: 'bk2', kind: 'trail', emoji: '🥚', name: 'Egg Drop',        rarity: 'common' },
+      { id: 'bk3', kind: 'aura',  emoji: '🐰', name: 'Bunny Blook',     rarity: 'rare' },
+      { id: 'bk4', kind: 'aura',  emoji: '🐱', name: 'Cat Blook',       rarity: 'rare' },
+      { id: 'bk5', kind: 'trail', emoji: '🦄', name: 'Mythical Magic',  rarity: 'epic' },
+      { id: 'bk6', kind: 'aura',  emoji: '🐉', name: 'Chroma Dragon',   rarity: 'epic' },
+      { id: 'bk7', kind: 'aura',  emoji: '👑', name: 'King Blook',      rarity: 'legendary' }
+    ]
+  },
+  aarav: {
+    name: "Aarav's Quest Arena", emoji: '⚔️', cost: 45000, color: 'aarav',
+    items: [
+      { id: 'aq1', kind: 'trail', emoji: '⚔️', name: 'Sword Slash',     rarity: 'common' },
+      { id: 'aq2', kind: 'trail', emoji: '🛡️', name: 'Shield Shine',    rarity: 'common' },
+      { id: 'aq3', kind: 'aura',  emoji: '🏹', name: 'Archer Aim',      rarity: 'rare' },
+      { id: 'aq4', kind: 'aura',  emoji: '👑', name: 'Crown of Quests', rarity: 'rare' },
+      { id: 'aq5', kind: 'trail', emoji: '💥', name: 'Combo Strike',    rarity: 'epic' },
+      { id: 'aq6', kind: 'aura',  emoji: '🐎', name: 'Battle Steed',    rarity: 'epic' },
+      { id: 'aq7', kind: 'aura',  emoji: '🏆', name: 'Aarav The Brave', rarity: 'legendary' }
+    ]
+  },
+  fun: {
+    name: 'Fun Pack', emoji: '🎉', cost: 60000, color: 'fun',
+    items: [
+      { id: 'fn1', kind: 'trail', emoji: '🎈', name: 'Party Balloons',  rarity: 'common' },
+      { id: 'fn2', kind: 'trail', emoji: '🎊', name: 'Confetti Toss',   rarity: 'common' },
+      { id: 'fn3', kind: 'aura',  emoji: '🎁', name: 'Gift Glow',       rarity: 'rare' },
+      { id: 'fn4', kind: 'aura',  emoji: '🍭', name: 'Candy Halo',      rarity: 'rare' },
+      { id: 'fn5', kind: 'trail', emoji: '🌈', name: 'Rainbow Wake',    rarity: 'epic' },
+      { id: 'fn6', kind: 'aura',  emoji: '🦄', name: 'Unicorn Friend',  rarity: 'epic' },
+      { id: 'fn7', kind: 'trail', emoji: '✨', name: 'Pure Joy',        rarity: 'legendary' },
+      { id: 'fn8', kind: 'aura',  emoji: '🌟', name: 'Mega Star',       rarity: 'legendary' },
+      { id: 'fn9', kind: 'aura',  emoji: '🎉', name: 'Ultimate Fun',    rarity: 'legendary' }
+    ]
+  },
+  dad: {
+    name: 'Dad Pack', emoji: '👨', cost: 23000, color: 'dad',
+    items: [
+      { id: 'dd1', kind: 'trail', emoji: '☕', name: 'Coffee Steam',    rarity: 'common' },
+      { id: 'dd2', kind: 'trail', emoji: '📰', name: 'Newspaper',       rarity: 'common' },
+      { id: 'dd3', kind: 'aura',  emoji: '👔', name: 'Tie Time',        rarity: 'rare' },
+      { id: 'dd4', kind: 'aura',  emoji: '🍖', name: 'BBQ Master',      rarity: 'rare' },
+      { id: 'dd5', kind: 'trail', emoji: '🔧', name: 'Tool Box',        rarity: 'epic' },
+      { id: 'dd6', kind: 'aura',  emoji: '🚗', name: 'Dad Car',         rarity: 'epic' },
+      { id: 'dd7', kind: 'aura',  emoji: '👨', name: 'Super Dad',       rarity: 'legendary' }
+    ]
   }
 };
 
@@ -2671,6 +2878,54 @@ document.getElementById('inventoryBtn').addEventListener('click', () => {
 });
 document.getElementById('invBack').addEventListener('click', () => {
   document.getElementById('invScreen').classList.remove('active');
+  document.getElementById('home').classList.add('active');
+});
+
+/* NEWS */
+const NEW_PACKS = ['retro','elemental','atlas','boddle','gimkit','blooket','aarav','fun','dad'];
+const PACK_BLURBS = {
+  retro:     '80s arcade vibes — pixels, joysticks, neon, and cassette tape glow.',
+  elemental: 'Master fire, water, wind, stone, ice, and lightning. Become the Storm Lord.',
+  atlas:     'Maps, compasses, mountains, and globes for the explorer hero.',
+  boddle:    'Slimes, monsters, dragons & potions — earn the Boddle Champ crown.',
+  gimkit:    'Cash streams, money bags, Fishtopia & Snowbrawl gear. Be the Gimkit GOAT!',
+  blooket:   'Chickens, bunnies, cats, the Chroma Dragon, and the legendary King Blook.',
+  aarav:     'A pack themed after Aarav himself — swords, shields, and the Aarav The Brave aura.',
+  fun:       'THE BEST PACK! 9 items with THREE legendaries: Pure Joy, Mega Star & Ultimate Fun.',
+  dad:       'Coffee, newspapers, BBQ, tools, and the legendary Super Dad aura. Dad joke not included.'
+};
+function refreshNews() {
+  const list = document.getElementById('newsPackList');
+  list.innerHTML = '';
+  NEW_PACKS.forEach(key => {
+    const pack = PACKS[key];
+    if (!pack) return;
+    const item = document.createElement('div');
+    item.className = 'news-pack-item ' + pack.color + (key === 'fun' ? ' best' : '');
+    const legendaryCount = pack.items.filter(i => i.rarity === 'legendary').length;
+    item.innerHTML = `
+      <div class="np-emoji">${pack.emoji}</div>
+      <div class="np-info">
+        <div class="np-name">${pack.name}${key === 'fun' ? ' ⭐' : ''}</div>
+        <div class="np-desc">${PACK_BLURBS[key]}</div>
+        <div class="np-cost">🪙 ${pack.cost.toLocaleString()} · ${pack.items.length} items · ${legendaryCount} legendary</div>
+      </div>
+    `;
+    item.addEventListener('click', () => {
+      document.getElementById('newsScreen').classList.remove('active');
+      document.getElementById('shopScreen').classList.add('active');
+      refreshShop();
+    });
+    list.appendChild(item);
+  });
+}
+document.getElementById('newsBtn').addEventListener('click', () => {
+  document.getElementById('home').classList.remove('active');
+  document.getElementById('newsScreen').classList.add('active');
+  refreshNews();
+});
+document.getElementById('newsBack').addEventListener('click', () => {
+  document.getElementById('newsScreen').classList.remove('active');
   document.getElementById('home').classList.add('active');
 });
 
