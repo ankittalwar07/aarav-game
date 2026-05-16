@@ -217,6 +217,8 @@
   .pack-card.aarav { background: linear-gradient(135deg, #ffd700, #ff6347, #9370db, #ff1493); }
   .pack-card.fun { background: linear-gradient(135deg, #ff0080, #ff8c00, #ffd700, #00e676, #00bfff, #8a2be2); }
   .pack-card.dad { background: linear-gradient(135deg, #3e2723, #795548, #a1887f); }
+  .pack-card.veggie { background: linear-gradient(135deg, #1b5e20, #66bb6a, #cddc39); }
+  .pack-card.fruit { background: linear-gradient(135deg, #e91e63, #ff9800, #ffeb3b); }
 
   /* NEWS */
   .news-btn {
@@ -2709,6 +2711,30 @@ const PACKS = {
       { id: 'dd6', kind: 'aura',  emoji: '🚗', name: 'Dad Car',         rarity: 'epic' },
       { id: 'dd7', kind: 'aura',  emoji: '👨', name: 'Super Dad',       rarity: 'legendary' }
     ]
+  },
+  veggie: {
+    name: 'Veggie Pack', emoji: '🥦', cost: 21000, color: 'veggie',
+    items: [
+      { id: 'vg1', kind: 'trail', emoji: '🥕', name: 'Carrot Crunch',   rarity: 'common' },
+      { id: 'vg2', kind: 'trail', emoji: '🌽', name: 'Corn Pop',        rarity: 'common' },
+      { id: 'vg3', kind: 'aura',  emoji: '🥬', name: 'Lettuce Leaf',    rarity: 'rare' },
+      { id: 'vg4', kind: 'aura',  emoji: '🥒', name: 'Cool Cucumber',   rarity: 'rare' },
+      { id: 'vg5', kind: 'trail', emoji: '🍆', name: 'Eggplant Zap',    rarity: 'epic' },
+      { id: 'vg6', kind: 'aura',  emoji: '🥔', name: 'Spud Power',      rarity: 'epic' },
+      { id: 'vg7', kind: 'aura',  emoji: '🥦', name: 'Veggie King',     rarity: 'legendary' }
+    ]
+  },
+  fruit: {
+    name: 'Fruit Pack', emoji: '🍎', cost: 22000, color: 'fruit',
+    items: [
+      { id: 'fr1', kind: 'trail', emoji: '🍎', name: 'Apple Shine',     rarity: 'common' },
+      { id: 'fr2', kind: 'trail', emoji: '🍌', name: 'Banana Slip',     rarity: 'common' },
+      { id: 'fr3', kind: 'aura',  emoji: '🍓', name: 'Berry Sweet',     rarity: 'rare' },
+      { id: 'fr4', kind: 'aura',  emoji: '🍇', name: 'Grape Bunch',     rarity: 'rare' },
+      { id: 'fr5', kind: 'trail', emoji: '🍑', name: 'Peach Fuzz',      rarity: 'epic' },
+      { id: 'fr6', kind: 'aura',  emoji: '🍉', name: 'Melon Slice',     rarity: 'epic' },
+      { id: 'fr7', kind: 'aura',  emoji: '🍍', name: 'Pineapple King',  rarity: 'legendary' }
+    ]
   }
 };
 
@@ -2882,7 +2908,7 @@ document.getElementById('invBack').addEventListener('click', () => {
 });
 
 /* NEWS */
-const NEW_PACKS = ['retro','elemental','atlas','boddle','gimkit','blooket','aarav','fun','dad'];
+const NEW_PACKS = ['retro','elemental','atlas','boddle','gimkit','blooket','aarav','fun','dad','veggie','fruit'];
 const PACK_BLURBS = {
   retro:     '80s arcade vibes — pixels, joysticks, neon, and cassette tape glow.',
   elemental: 'Master fire, water, wind, stone, ice, and lightning. Become the Storm Lord.',
@@ -2892,7 +2918,9 @@ const PACK_BLURBS = {
   blooket:   'Chickens, bunnies, cats, the Chroma Dragon, and the legendary King Blook.',
   aarav:     'A pack themed after Aarav himself — swords, shields, and the Aarav The Brave aura.',
   fun:       'THE BEST PACK! 9 items with THREE legendaries: Pure Joy, Mega Star & Ultimate Fun.',
-  dad:       'Coffee, newspapers, BBQ, tools, and the legendary Super Dad aura. Dad joke not included.'
+  dad:       'Coffee, newspapers, BBQ, tools, and the legendary Super Dad aura. Dad joke not included.',
+  veggie:    'Carrots, corn, lettuce, cucumber, eggplant & spuds — crowned by the Veggie King.',
+  fruit:     'Apples, bananas, berries, grapes, peaches & melons — ruled by the Pineapple King.'
 };
 function refreshNews() {
   const list = document.getElementById('newsPackList');
