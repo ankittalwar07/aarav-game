@@ -1189,12 +1189,25 @@ function showRetentionBanner(text) {
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d'); ctx.imageSmoothingEnabled = false;
 let W = 0, H = 0;
+let bgGalaxy = null, bgBoss = null, bgAdv = null;
+let hudLeftEl = null, hudCenterEl = null;
+function setHUD(left, center) {
+  if (!hudLeftEl) { hudLeftEl = document.getElementById('hudLeft'); hudCenterEl = document.getElementById('hudCenter'); }
+  if (hudLeftEl.textContent !== left) hudLeftEl.textContent = left;
+  if (hudCenterEl.textContent !== center) hudCenterEl.textContent = center;
+}
 function resize() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   W = window.innerWidth; H = window.innerHeight;
   canvas.width = W * dpr; canvas.height = H * dpr;
   canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.imageSmoothingEnabled = false;
+  bgGalaxy = ctx.createLinearGradient(0, 0, 0, H);
+  bgGalaxy.addColorStop(0, '#000020'); bgGalaxy.addColorStop(1, '#1a0e3d');
+  bgBoss = ctx.createLinearGradient(0, 0, 0, H);
+  bgBoss.addColorStop(0, '#1a0e3d'); bgBoss.addColorStop(0.6, '#7b1f1f'); bgBoss.addColorStop(1, '#000');
+  bgAdv = ctx.createLinearGradient(0, 0, 0, H);
+  bgAdv.addColorStop(0, '#4fc3f7'); bgAdv.addColorStop(0.7, '#81d4fa'); bgAdv.addColorStop(1, '#fff59d');
 }
 window.addEventListener('resize', resize);
 
@@ -1532,9 +1545,7 @@ canvas.addEventListener('click', (e) => {
 });
 
 function renderGalaxy() {
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#000020'); grad.addColorStop(1, '#1a0e3d');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = bgGalaxy; ctx.fillRect(0, 0, W, H);
   // stars
   ctx.fillStyle = '#fff';
   for (const s of Galaxy.stars) { ctx.globalAlpha = 0.3 + s.sp; ctx.fillRect(s.x, s.y, s.s, s.s); }
@@ -1601,8 +1612,7 @@ function renderGalaxy() {
   ctx.closePath(); ctx.fill();
 
   // hud
-  document.getElementById('hudLeft').textContent = `❤️ ${Game.lives} · ⭐ ${Game.score}`;
-  document.getElementById('hudCenter').textContent = `Wave ${Galaxy.wave}`;
+  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `Wave ${Galaxy.wave}`);
 }
 
 /* ============================================================ DON'T LOOK DOWN BOSS ============================================================ */
@@ -1840,9 +1850,7 @@ function physicsBoss(p, dt, t) {
 }
 
 function renderBoss() {
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#1a0e3d'); grad.addColorStop(0.6, '#7b1f1f'); grad.addColorStop(1, '#000');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = bgBoss; ctx.fillRect(0, 0, W, H);
   // far stars
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   for (let i = 0; i < 30; i++) {
@@ -1926,12 +1934,12 @@ function renderBoss() {
   }
   // particles
   particles = particles.filter(pt => pt.life > 0);
+  ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
   for (const pt of particles) {
     pt.life--; pt.y += pt.vy; pt.vy += 0.05;
     ctx.globalAlpha = Math.max(0, pt.life / 50);
     ctx.fillStyle = pt.color || '#fff';
-    ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
     ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y);
     ctx.globalAlpha = 1;
   }
@@ -1954,8 +1962,7 @@ function renderBoss() {
   ctx.restore();
 
   // hud
-  document.getElementById('hudLeft').textContent = `❤️ ${Game.lives} · ⭐ ${Game.score}`;
-  document.getElementById('hudCenter').textContent = `🐲 Lv.${Boss.level} · 📏 ${Math.floor(Boss.height)}`;
+  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `🐲 Lv.${Boss.level} · 📏 ${Math.floor(Boss.height)}`);
 }
 
 /* ============================================================ ADVENTURE (simple runner with gates) ============================================================ */
@@ -2065,9 +2072,7 @@ function physicsAdv(p, dt) {
 }
 
 function renderAdv() {
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#4fc3f7'); grad.addColorStop(0.7, '#81d4fa'); grad.addColorStop(1, '#fff59d');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = bgAdv; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   for (let i = 0; i < 6; i++) {
     const cx2 = ((i * 280 - Adv.cam.x * 0.2) % (W + 200)) - 100;
@@ -2117,16 +2122,16 @@ function renderAdv() {
     ctx.globalAlpha = 1;
   }
   particles = particles.filter(pt => pt.life > 0);
+  ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
   for (const pt of particles) {
     pt.life--; pt.y += pt.vy; pt.vy += 0.05;
     ctx.globalAlpha = Math.max(0, pt.life / 50);
-    ctx.fillStyle = pt.color || '#fff'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+    ctx.fillStyle = pt.color || '#fff';
     ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y); ctx.globalAlpha = 1;
   }
   ctx.restore();
-  document.getElementById('hudLeft').textContent = `❤️ ${Game.lives} · ⭐ ${Game.score}`;
-  document.getElementById('hudCenter').textContent = `🏃 ${Math.floor(Adv.distance/30)}m`;
+  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `🏃 ${Math.floor(Adv.distance/30)}m`);
 }
 
 /* ============================================================ MAIN LOOP ============================================================ */
