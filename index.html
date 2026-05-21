@@ -219,6 +219,9 @@
   .pack-card.dad { background: linear-gradient(135deg, #3e2723, #795548, #a1887f); }
   .pack-card.veggie { background: linear-gradient(135deg, #1b5e20, #66bb6a, #cddc39); }
   .pack-card.fruit { background: linear-gradient(135deg, #e91e63, #ff9800, #ffeb3b); }
+  .pack-card.hero { background: linear-gradient(135deg, #d50000, #0091ea, #ffd600); }
+  .pack-card.cosmic { background: linear-gradient(135deg, #000000, #4a148c, #0091ea, #ffd600); }
+  .pack-card.ultimate { background: linear-gradient(135deg, #ffd600, #ff6f00, #d50000, #aa00ff, #0091ea, #ffd600); }
 
   /* NEWS */
   .news-btn {
@@ -2743,6 +2746,46 @@ const PACKS = {
       { id: 'fr6', kind: 'aura',  emoji: '🍉', name: 'Melon Slice',     rarity: 'epic' },
       { id: 'fr7', kind: 'aura',  emoji: '🍍', name: 'Pineapple King',  rarity: 'legendary' }
     ]
+  },
+  hero: {
+    name: 'Hero Pack', emoji: '🦸', cost: 100000, color: 'hero',
+    items: [
+      { id: 'hr1', kind: 'trail', emoji: '💪', name: 'Power Surge',     rarity: 'common' },
+      { id: 'hr2', kind: 'trail', emoji: '🦸', name: 'Hero Dash',       rarity: 'common' },
+      { id: 'hr3', kind: 'aura',  emoji: '🛡️', name: 'Hero Shield',     rarity: 'rare' },
+      { id: 'hr4', kind: 'aura',  emoji: '⚡', name: 'Speedster',       rarity: 'rare' },
+      { id: 'hr5', kind: 'trail', emoji: '🔥', name: 'Burning Cape',    rarity: 'epic' },
+      { id: 'hr6', kind: 'aura',  emoji: '🦅', name: 'Eagle Soar',      rarity: 'epic' },
+      { id: 'hr7', kind: 'aura',  emoji: '🦸', name: 'Super Hero',      rarity: 'legendary' },
+      { id: 'hr8', kind: 'aura',  emoji: '🦹', name: 'Mega Hero',       rarity: 'legendary' }
+    ]
+  },
+  cosmic: {
+    name: 'Cosmic Pack', emoji: '🌌', cost: 100000, color: 'cosmic',
+    items: [
+      { id: 'cm1', kind: 'trail', emoji: '☄️', name: 'Comet Tail',      rarity: 'common' },
+      { id: 'cm2', kind: 'trail', emoji: '⭐', name: 'Star Spark',      rarity: 'common' },
+      { id: 'cm3', kind: 'aura',  emoji: '🌙', name: 'Moon Halo',       rarity: 'rare' },
+      { id: 'cm4', kind: 'aura',  emoji: '☀️', name: 'Sun Crown',       rarity: 'rare' },
+      { id: 'cm5', kind: 'trail', emoji: '🌠', name: 'Shooting Star',   rarity: 'epic' },
+      { id: 'cm6', kind: 'aura',  emoji: '🪐', name: 'Planet Orbit',    rarity: 'epic' },
+      { id: 'cm7', kind: 'aura',  emoji: '🌌', name: 'Galaxy God',      rarity: 'legendary' },
+      { id: 'cm8', kind: 'aura',  emoji: '🕳️', name: 'Black Hole',      rarity: 'legendary' }
+    ]
+  },
+  ultimate: {
+    name: 'Ultimate Pack', emoji: '💫', cost: 100000, color: 'ultimate',
+    items: [
+      { id: 'ult1', kind: 'trail', emoji: '✨', name: 'Pure Shine',     rarity: 'common' },
+      { id: 'ult2', kind: 'trail', emoji: '💎', name: 'Diamond Dust',   rarity: 'common' },
+      { id: 'ult3', kind: 'aura',  emoji: '👑', name: 'Royal Crown',    rarity: 'rare' },
+      { id: 'ult4', kind: 'aura',  emoji: '🏆', name: 'Champion',       rarity: 'rare' },
+      { id: 'ult5', kind: 'trail', emoji: '💫', name: 'Star Flow',      rarity: 'epic' },
+      { id: 'ult6', kind: 'aura',  emoji: '🔱', name: 'Trident',        rarity: 'epic' },
+      { id: 'ult7', kind: 'aura',  emoji: '⚜️', name: 'Royal Sigil',    rarity: 'legendary' },
+      { id: 'ult8', kind: 'aura',  emoji: '💫', name: 'Ultimate Form',  rarity: 'legendary' },
+      { id: 'ult9', kind: 'aura',  emoji: '🌟', name: 'Pure Power',     rarity: 'legendary' }
+    ]
   }
 };
 
@@ -2768,7 +2811,10 @@ const RARE_EXTRA = {
   fun:          [{k:'trail',e:'🎢',n:'Mega Coaster'},     {k:'aura', e:'🌈',n:'Chroma Party'},      {k:'aura', e:'🌌',n:'Mythic Funverse'}],
   dad:          [{k:'aura', e:'🍳',n:'Grill Master'},     {k:'aura', e:'🌈',n:'Chroma Tools'},      {k:'aura', e:'👴',n:'Mythic Grandpa'}],
   veggie:       [{k:'trail',e:'🌶️',n:'Spicy Pepper'},    {k:'aura', e:'🌈',n:'Chroma Salad'},      {k:'aura', e:'🥗',n:'Mythic Garden God'}],
-  fruit:        [{k:'aura', e:'🥝',n:'Kiwi Burst'},       {k:'trail',e:'🌈',n:'Chroma Smoothie'},   {k:'aura', e:'🍒',n:'Mythic Fruit Lord'}]
+  fruit:        [{k:'aura', e:'🥝',n:'Kiwi Burst'},       {k:'trail',e:'🌈',n:'Chroma Smoothie'},   {k:'aura', e:'🍒',n:'Mythic Fruit Lord'}],
+  hero:         [{k:'aura', e:'🦾',n:'Bionic Hero'},      {k:'aura', e:'🌈',n:'Chroma Cape'},       {k:'aura', e:'🦸',n:'Mythic Avenger'}],
+  cosmic:       [{k:'trail',e:'💫',n:'Quasar Stream'},    {k:'aura', e:'🌈',n:'Chroma Nebula'},     {k:'aura', e:'🌌',n:'Mythic Universe'}],
+  ultimate:     [{k:'trail',e:'🎆',n:'Ultra Burst'},      {k:'aura', e:'🌈',n:'Chroma Champion'},   {k:'aura', e:'💫',n:'Mythic Ultimate'}]
 };
 const NEW_RARITIES = ['kio','chroma','mythical'];
 Object.entries(RARE_EXTRA).forEach(([key, list]) => {
@@ -2953,7 +2999,7 @@ document.getElementById('invBack').addEventListener('click', () => {
 });
 
 /* NEWS */
-const NEW_PACKS = ['retro','elemental','atlas','boddle','gimkit','blooket','aarav','fun','dad','veggie','fruit'];
+const NEW_PACKS = ['hero','cosmic','ultimate','retro','elemental','atlas','boddle','gimkit','blooket','aarav','fun','dad','veggie','fruit'];
 const PACK_BLURBS = {
   retro:     '80s arcade vibes — pixels, joysticks, neon, and cassette tape glow.',
   elemental: 'Master fire, water, wind, stone, ice, and lightning. Become the Storm Lord.',
@@ -2965,7 +3011,10 @@ const PACK_BLURBS = {
   fun:       'THE BEST PACK! 9 items with THREE legendaries: Pure Joy, Mega Star & Ultimate Fun.',
   dad:       'Coffee, newspapers, BBQ, tools, and the legendary Super Dad aura. Dad joke not included.',
   veggie:    'Carrots, corn, lettuce, cucumber, eggplant & spuds — crowned by the Veggie King.',
-  fruit:     'Apples, bananas, berries, grapes, peaches & melons — ruled by the Pineapple King.'
+  fruit:     'Apples, bananas, berries, grapes, peaches & melons — ruled by the Pineapple King.',
+  hero:      '🔥 PREMIUM 100k 🔥 Transform into a Super Hero. Cape, shield, speed, eagle soar & Mythic Avenger.',
+  cosmic:    '🔥 PREMIUM 100k 🔥 Stars, moons, comets, planets & black holes. Become the Galaxy God.',
+  ultimate:  '🔥 PREMIUM 100k 🔥 The ultimate ultra-pack. Crown, trident, royal sigil & Mythic Ultimate form.'
 };
 function refreshNews() {
   const list = document.getElementById('newsPackList');
