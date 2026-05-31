@@ -44,7 +44,7 @@
   }
   .mode-card:active { transform: scale(0.94); }
   .mode-card.galaxy { background: linear-gradient(135deg, #1a0e3d, #4a148c); }
-  .mode-card.boss { background: linear-gradient(135deg, #7b1f1f, #311b1b); }
+  .mode-card.boss { background: linear-gradient(135deg, #1a0e3d, #311b92, #2575fc); }
   .mode-card.gems { background: linear-gradient(135deg, #006064, #4dd0e1); }
   .mode-card.adv { background: linear-gradient(135deg, #1b5e20, #66bb6a); }
   .mode-card .emoji { font-size: clamp(40px, 7vw, 56px); display: block; }
@@ -471,9 +471,9 @@
         <div class="desc">Blast aliens with right answers!</div>
       </div>
       <div class="mode-card boss" data-mode="boss">
-        <span class="emoji">🐉</span>
-        <div class="name">Don't Look Down</div>
-        <div class="desc">Climb! Triple jump! Slay dragon!</div>
+        <span class="emoji">🟦</span>
+        <div class="name">Geometry Dash</div>
+        <div class="desc">Auto-run, tap to jump, dodge spikes!</div>
       </div>
       <div class="mode-card gems" data-mode="gems">
         <span class="emoji">💎</span>
@@ -608,7 +608,7 @@
     </div>
     <div class="row" id="hostModeRow">
       <button class="btn" data-hmode="galaxy">🚀 Galaxy</button>
-      <button class="btn" data-hmode="boss">🐉 Boss</button>
+      <button class="btn" data-hmode="boss">🟦 Geo Dash</button>
       <button class="btn" data-hmode="gems">💎 Gems</button>
       <button class="btn" data-hmode="adventure">🗺️ Adventure</button>
     </div>
@@ -1208,7 +1208,7 @@ function resize() {
   bgGalaxy = ctx.createLinearGradient(0, 0, 0, H);
   bgGalaxy.addColorStop(0, '#000020'); bgGalaxy.addColorStop(1, '#1a0e3d');
   bgBoss = ctx.createLinearGradient(0, 0, 0, H);
-  bgBoss.addColorStop(0, '#1a0e3d'); bgBoss.addColorStop(0.6, '#7b1f1f'); bgBoss.addColorStop(1, '#000');
+  bgBoss.addColorStop(0, '#1a0e3d'); bgBoss.addColorStop(0.55, '#311b92'); bgBoss.addColorStop(1, '#0d0d2b');
   bgAdv = ctx.createLinearGradient(0, 0, 0, H);
   bgAdv.addColorStop(0, '#4fc3f7'); bgAdv.addColorStop(0.7, '#81d4fa'); bgAdv.addColorStop(1, '#fff59d');
 }
@@ -1547,6 +1547,11 @@ canvas.addEventListener('click', (e) => {
   SFX.shoot();
 });
 
+// Geometry Dash: tap anywhere on screen to jump
+canvas.addEventListener('pointerdown', () => { if (Game.mode === 'boss' && !Game.paused) { ensureAudio(); KEYS.jump = true; } });
+canvas.addEventListener('pointerup',   () => { if (Game.mode === 'boss') KEYS.jump = false; });
+canvas.addEventListener('pointercancel', () => { if (Game.mode === 'boss') KEYS.jump = false; });
+
 function renderGalaxy() {
   ctx.fillStyle = bgGalaxy; ctx.fillRect(0, 0, W, H);
   // stars
@@ -1618,354 +1623,249 @@ function renderGalaxy() {
   setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `Wave ${Galaxy.wave}`);
 }
 
-/* ============================================================ DON'T LOOK DOWN BOSS ============================================================ */
-const Boss = {
-  player: null, platforms: [], dragon: null, lava: 0, lavaSpeed: 0.06,
-  fireballs: [], cam: { y: 0 }, height: 0, dragonHits: 0, level: 1,
-  nextBonusQ: 0, doubleHit: 0
+/* ============================================================ GEOMETRY DASH ============================================================ */
+const Geo = {
+  player: null, obstacles: [], portals: [], coins: [],
+  cam: { x: 0 }, speed: 5, worldEnd: 0, distance: 0, groundY: 0, shake: 0
 };
 
 function startBoss() {
-  Game.mode = 'boss'; Game.lives = 3; Game.score = 0;
+  Game.mode = 'boss'; Game.lives = 5; Game.score = 0; Game.paused = false;
   resetStreak(); Retention.reset();
-  Boss.player = {
-    x: W/2 - 18, y: H - 200, w: 36, h: 44,
-    vx: 0, vy: 0, onGround: false, facing: 1,
-    char: CHARACTERS[chosenChar], invuln: 0, frame: 0, jumps: 0
+  Geo.groundY = H - 90;
+  Geo.player = {
+    x: 140, y: Geo.groundY - 38, w: 38, h: 38,
+    vy: 0, onGround: true, rot: 0, invuln: 0, char: CHARACTERS[chosenChar]
   };
-  Boss.platforms = []; Boss.fireballs = []; Boss.lava = H + 40; Boss.lavaSpeed = 0.06;
-  Boss.height = 0; Boss.dragonHits = 0; Boss.level = 1; Boss.cam.y = 0;
-  Boss.nextBonusQ = performance.now() + 12000; Boss.doubleHit = 0;
+  Geo.obstacles = []; Geo.portals = []; Geo.coins = [];
+  Geo.cam.x = 0; Geo.distance = 0; Geo.speed = 5; Geo.shake = 0;
   particles = [];
-  buildBossArena();
-  spawnDragon();
+  buildGeoLevel();
   startMainLoop();
 }
 
-function buildBossArena() {
-  const groundY = H - 80;
-  Boss.platforms.push({ x: 0, y: groundY, w: W, h: 80, type: 'ground' });
-  // generate climbing platforms going UP
-  let y = groundY - 90;
-  let lastX = W/2 - 50;
-  for (let i = 0; i < 40; i++) {
-    const w = rand(80, 130);
-    const x = Math.max(20, Math.min(W - w - 20, lastX + (Math.random() - 0.5) * 220));
-    let type = 'solid';
+function buildGeoLevel() {
+  const gy = Geo.groundY;
+  Geo.obstacles = []; Geo.coins = []; Geo.portals = [];
+  let x = 760; // generous empty runway to start
+  for (let seg = 0; seg < 28; seg++) {
     const r = Math.random();
-    if (i > 2 && r < 0.18) type = 'crumble';
-    else if (i > 3 && r < 0.30) type = 'moving';
-    Boss.platforms.push({ x, y, w, h: 14, type, originX: x, range: 60, dir: Math.random()<0.5 ? 1 : -1, breakTimer: 0 });
-    y -= rand(75, 105);
-    lastX = x;
+    if (r < 0.46) {
+      // 1 spike (occasionally 2 later on) — an easy hop
+      const n = (seg > 8 && Math.random() < 0.3) ? 2 : 1;
+      for (let i = 0; i < n; i++) Geo.obstacles.push({ x: x + i * 30, y: gy - 30, w: 30, h: 30, type: 'spike' });
+      Geo.coins.push({ x: x + (n * 30) / 2, y: gy - 92, taken: false });
+      x += n * 30 + rand(230, 320);
+    } else if (r < 0.74) {
+      // a short, low block — clears in one jump; coins reward landing on top
+      const bh = rand(34, 56), bw = rand(40, 64);
+      Geo.obstacles.push({ x, y: gy - bh, w: bw, h: bh, type: 'block' });
+      for (let k = 0; k < 2; k++) Geo.coins.push({ x: x + bw/2 - 13 + k * 26, y: gy - bh - 30, taken: false });
+      x += bw + rand(220, 300);
+    } else {
+      // a spike then a low block, spaced so one jump clears both
+      Geo.obstacles.push({ x, y: gy - 30, w: 30, h: 30, type: 'spike' });
+      const bh = rand(34, 52);
+      Geo.obstacles.push({ x: x + 70, y: gy - bh, w: 56, h: bh, type: 'block' });
+      Geo.coins.push({ x: x + 55, y: gy - 96, taken: false });
+      x += rand(280, 360);
+    }
+    // a learning portal every 5 segments (with a big clear landing zone)
+    if (seg > 0 && seg % 5 === 0) {
+      Geo.portals.push({ x, passed: false });
+      x += 340;
+    }
   }
-  // top safe zone
-  Boss.topY = y + 50;
+  Geo.worldEnd = x + 500;
 }
 
-function spawnDragon() {
-  const monsters = [
-    { emoji: '🐉', name: 'Dragon' },
-    { emoji: '👹', name: 'Ogre' },
-    { emoji: '🦖', name: 'T-Rex' }
-  ];
-  const m = monsters[(Boss.level - 1) % monsters.length];
-  Boss.dragon = {
-    x: W/2 - 50, y: H/2 - 60, w: 100, h: 100,
-    vx: 1.5 + Boss.level * 0.3, vy: 0,
-    emoji: m.emoji, name: m.name, hp: 4, maxHP: 4,
-    flash: 0, stunned: 0, fireTimer: 0
-  };
-  Boss.dragonHits = 0;
-  Boss.lavaSpeed = 0.06;
+function geoCrash(p) {
+  Game.lives--; SFX.hurt(); resetStreak(); Geo.shake = 12;
+  for (let i = 0; i < 16; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h/2, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8 - 2, life: 30, text: '💥', color: '#ff1744' });
+  if (Game.lives <= 0) { endGame('dead'); return; }
+  // forgiving respawn: back up onto clear ground with a brief shield
+  p.x = Math.max(140, p.x - 220);
+  for (let tries = 0; tries < 40; tries++) {
+    const clash = Geo.obstacles.some(o => o.x < p.x + p.w + 50 && o.x + o.w > p.x - 50);
+    if (!clash) break;
+    p.x -= 30;
+    if (p.x <= 140) { p.x = 140; break; }
+  }
+  p.y = Geo.groundY - p.h; p.vy = 0; p.onGround = true; p.rot = 0; p.invuln = 95;
 }
 
 function physicsBoss(p, dt, t) {
-  const SPEED = 5, JUMP_V = -14, AIR_JUMP_V = -12.5, GRAV = 0.6, FRICTION = 0.82;
-  const MAX_JUMPS = 3; // triple jump
-  if (KEYS.left) { p.vx = -SPEED; p.facing = -1; }
-  else if (KEYS.right) { p.vx = SPEED; p.facing = 1; }
-  else p.vx *= FRICTION;
-  if (KS.jumpBuffer > 0) KS.jumpBuffer--;
-  if (p.onGround) { KS.coyote = 8; p.jumps = 0; }
-  else if (KS.coyote > 0) KS.coyote--;
-  if (KS.jumpBuffer > 0) {
-    if ((p.onGround || KS.coyote > 0) && p.jumps === 0) {
-      p.vy = JUMP_V; p.onGround = false; KS.coyote = 0; KS.jumpBuffer = 0; p.jumps = 1; SFX.jump();
-    } else if (p.jumps < MAX_JUMPS) {
-      p.vy = AIR_JUMP_V; p.jumps++; KS.jumpBuffer = 0; SFX.jump();
-      for (let i = 0; i < 8; i++) particles.push({ x: p.x + p.w/2 + (Math.random()-0.5)*22, y: p.y + p.h, vx:(Math.random()-0.5)*2, vy: 1+Math.random(), life: 22, text: ['✨','⭐','💫'][p.jumps-1] || '✨', color: '#ffeb3b' });
-    }
+  const GRAV = 0.9, JUMP_V = -15.5;
+  if (Geo.shake > 0) Geo.shake--;
+  if (p.invuln > 0) p.invuln--;
+  // auto-run forward; speed creeps up a little the further you go
+  Geo.speed = 5 + Math.min(2, p.x / 9000);
+  p.x += Geo.speed;
+  // jump (hold or tap) only when on the ground
+  if (KEYS.jump && p.onGround) {
+    p.vy = JUMP_V; p.onGround = false; SFX.jump();
+    for (let i = 0; i < 5; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h, vx: (Math.random()-0.5)*3, vy: 1 + Math.random(), life: 18, text: '✨', color: '#fff' });
   }
-  if (!KS.jumpHeld && p.vy < -6) p.vy = -6;
-  p.vy += GRAV;
-  if (p.vy > 18) p.vy = 18;
-  p.x += p.vx;
-  if (p.x < 0) p.x = 0; if (p.x + p.w > W) p.x = W - p.w;
-  for (const pl of Boss.platforms) {
-    if (rectOverlap(p, pl)) { if (p.vx > 0) p.x = pl.x - p.w; else if (p.vx < 0) p.x = pl.x + pl.w; p.vx = 0; }
-  }
+  // gravity
+  p.vy += GRAV; if (p.vy > 22) p.vy = 22;
   p.y += p.vy;
-  p.onGround = false;
-  for (const pl of Boss.platforms) {
-    if (rectOverlap(p, pl)) {
-      if (p.vy > 0) {
-        p.y = pl.y - p.h; p.vy = 0; p.onGround = true; p.jumps = 0;
-        if (pl.type === 'crumble') {
-          if (pl.breakTimer === 0) pl.breakTimer = 1;
-        }
-      } else if (p.vy < 0) { p.y = pl.y + pl.h; p.vy = 0; }
+  // spin while airborne
+  if (!p.onGround) p.rot += 0.18;
+  // ground collision
+  let landed = false;
+  if (p.y + p.h >= Geo.groundY) { p.y = Geo.groundY - p.h; p.vy = 0; landed = true; }
+  // obstacle collision
+  for (const o of Geo.obstacles) {
+    if (o.x + o.w < p.x - 60 || o.x > p.x + 60) continue;
+    if (!rectOverlap(p, o)) continue;
+    if (o.type === 'spike') { if (p.invuln === 0) { geoCrash(p); return; } continue; }
+    // block: land on top if descending onto it, otherwise crash into the side
+    const prevBottom = p.y + p.h - p.vy;
+    if (p.vy >= 0 && prevBottom <= o.y + 10) { p.y = o.y - p.h; p.vy = 0; landed = true; }
+    else if (p.invuln === 0) { geoCrash(p); return; }
+  }
+  if (landed) {
+    if (!p.onGround) p.rot = Math.round(p.rot / (Math.PI/2)) * (Math.PI/2);
+    p.onGround = true;
+  } else p.onGround = false;
+  // coins
+  for (const c of Geo.coins) {
+    if (c.taken) continue;
+    if (Math.abs(p.x + p.w/2 - c.x) < 24 && Math.abs(p.y + p.h/2 - c.y) < 24) {
+      c.taken = true; Game.score += 5; SFX.coin();
+      particles.push({ x: c.x, y: c.y, vx: 0, vy: -2, life: 30, text: '+5', color: '#ffeb3b' });
     }
   }
-  // crumble platforms
-  for (const pl of Boss.platforms) {
-    if (pl.type === 'crumble' && pl.breakTimer > 0) {
-      pl.breakTimer++;
-      if (pl.breakTimer > 40) { pl.x = -9999; pl.broken = true; }
-    }
-    if (pl.type === 'moving') {
-      pl.x += pl.dir * 1.2;
-      if (pl.x > pl.originX + pl.range) pl.dir = -1;
-      if (pl.x < pl.originX - pl.range) pl.dir = 1;
-    }
-  }
-
-  // dragon collision: from above + falling = drop kick
-  const d = Boss.dragon;
-  if (d && rectOverlap(p, d) && p.invuln === 0) {
-    const fromAbove = p.vy > 4 && p.y + p.h - d.y < 35;
-    if (fromAbove) {
-      const dmg = Boss.doubleHit > 0 ? 2 : 1;
-      d.hp -= dmg;
-      d.flash = 25; d.stunned = 60;
-      p.vy = -14; p.invuln = 30; p.jumps = 0;
-      Game.score += 50;
-      Boss.dragonHits++;
-      if (Boss.doubleHit > 0) Boss.doubleHit--;
-      SFX.correct();
-      for (let i=0;i<10;i++) particles.push({ x: d.x+d.w/2+(Math.random()-0.5)*60, y: d.y, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*3, life:35, text:'💥', color:'#ff5722' });
-      particles.push({ x: d.x+d.w/2, y: d.y-10, vx:0, vy:-2, life:50, text:'-' + dmg + ' HP', color:'#f44336' });
-      if (d.hp <= 0) {
-        Game.score += 200; Boss.level++;
-        particles.push({ x: d.x+d.w/2, y: d.y, vx:0, vy:-2, life:90, text:'DEFEATED!', color:'#ffeb3b' });
-        SFX.win();
-        if (Boss.level > 5) { setTimeout(() => endGame('win'), 800); return; }
-        setTimeout(() => spawnDragon(), 800);
-      }
-    } else {
-      Game.lives--; p.invuln = 80;
-      p.vx = (p.x < d.x ? -10 : 10); p.vy = -10;
-      SFX.hurt();
-      particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:40, text:'JUMP ON HEAD!', color:'#ffeb3b' });
-      if (Game.lives <= 0) { endGame('dead'); return; }
-    }
-  }
-  // fireballs
-  Boss.fireballs = Boss.fireballs.filter(fb => {
-    fb.x += fb.vx; fb.y += fb.vy; fb.vy += 0.18; fb.life--;
-    if (rectOverlap(p, { x: fb.x-12, y: fb.y-12, w:24, h:24 }) && p.invuln === 0) {
-      Game.lives--; p.invuln = 60; p.vy = -8; SFX.hurt();
-      particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:30, text:'🔥-1', color:'#ff5722' });
-      if (Game.lives <= 0) { endGame('dead'); return false; }
-      return false;
-    }
-    return fb.life > 0 && fb.y < H + 50;
-  });
-
-  // lava rising
-  Boss.lava -= Boss.lavaSpeed;
-  if (p.y + p.h >= Boss.lava) {
-    Game.lives--; p.invuln = 80; p.vy = -14; SFX.hurt();
-    particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:40, text:'🌋 LAVA!', color:'#ff5722' });
-    if (Game.lives <= 0) { endGame('dead'); return; }
-    p.y = Boss.lava - p.h - 50;
-  }
-
-  // dragon AI
-  if (d) {
-    if (d.flash > 0) d.flash--;
-    if (d.stunned > 0) d.stunned--;
-    else {
-      // chase player horizontally near their height
-      const targetY = p.y + 20;
-      const dy = targetY - d.y;
-      d.vy += dy * 0.0008;
-      d.vy *= 0.96;
-      d.y += d.vy;
-      const targetX = p.x;
-      d.vx += (Math.sign(targetX - d.x) * (1 + Boss.level * 0.2) - d.vx) * 0.05;
-      d.x += d.vx;
-      if (d.x < 0) d.x = 0; if (d.x + d.w > W) d.x = W - d.w;
-      if (d.y < 50) d.y = 50; if (d.y > H - 200) d.y = H - 200;
-      // fire breath
-      d.fireTimer = (d.fireTimer || 0) + 16;
-      if (d.fireTimer > 2200) {
-        d.fireTimer = 0;
-        const dx = (p.x + p.w/2) - (d.x + d.w/2);
-        const dy2 = (p.y) - (d.y + 30);
-        const dist = Math.hypot(dx, dy2) || 1;
-        Boss.fireballs.push({ x: d.x + d.w/2, y: d.y + 30, vx: (dx/dist)*4, vy: (dy2/dist)*3 - 1, life: 220 });
-      }
-    }
-  }
-
-  // bonus question
-  if (t > Boss.nextBonusQ && !Game.paused) {
-    Boss.nextBonusQ = t + 99999;
-    showQuestion(Game.subject, '⭐ Bonus! Correct = +1 ❤ or 2x next hit', (correct, wasRetention) => {
-      if (correct) {
-        bumpStreak();
-        const bonus = wasRetention ? 3 : 1; // 3x for retention!
-        Game.score += 50 * comboMult() * bonus;
-        if (wasRetention) {
-          // retention reward: extra heart!
-          if (Game.lives < 5) Game.lives++;
-          Boss.doubleHit = 3;
-          particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:60, text:'🧠 RETENTION! +1❤ +3x DMG', color:'#ffd700' });
-        } else if (Math.random() < 0.5 && Game.lives < 5) {
-          Game.lives++;
-          particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'+1 ❤', color:'#f44336' });
+  // learning portals — answer a question to keep your streak and earn a shield
+  for (const portal of Geo.portals) {
+    if (portal.passed) continue;
+    if (p.x + p.w > portal.x - 6 && p.x < portal.x + 12) {
+      portal.passed = true;
+      showQuestion(Game.subject, '🟢 Portal! Answer to power up!', (correct, wasRetention) => {
+        if (correct) {
+          bumpStreak();
+          const bonus = wasRetention ? 3 : 1;
+          const pts = 50 * comboMult() * bonus;
+          Game.score += pts;
+          if (wasRetention && Game.lives < 5) Game.lives++;
+          else if (Math.random() < 0.4 && Game.lives < 5) Game.lives++;
+          p.invuln = Math.max(p.invuln, 90);
+          particles.push({ x: p.x, y: p.y, vx: 0, vy: -2, life: 60, text: (wasRetention ? '🧠 +' : '+') + pts + ' ⭐ shield!', color: '#00e676' });
         } else {
-          Boss.doubleHit = 2;
-          particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'2x DAMAGE!', color:'#ffeb3b' });
+          resetStreak();
+          particles.push({ x: p.x, y: p.y, vx: 0, vy: -2, life: 50, text: '🧠 Try later!', color: '#ffd700' });
         }
-      } else {
-        // wrong: small penalty (lose streak only, no life lost — they got the explanation)
-        resetStreak();
-        particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'🧠 Try later!', color:'#ffd700' });
-      }
-      Boss.nextBonusQ = performance.now() + 12000;
-    });
+      });
+      break;
+    }
   }
-
-  // out of map
-  if (p.y > H + 200) {
-    Game.lives--;
-    if (Game.lives <= 0) { endGame('dead'); return; }
-    p.x = W/2 - 18; p.y = 100; p.vx = 0; p.vy = 0;
-  }
-  // track height
-  Boss.height = Math.max(Boss.height, (H - 80) - p.y);
-  // camera follow vertically (lock x at 0)
-  const targetY = p.y - H * 0.5;
-  Boss.cam.y += (targetY - Boss.cam.y) * 0.1;
-  if (Boss.cam.y > 0) Boss.cam.y = 0;
+  // reached the finish line
+  if (p.x >= Geo.worldEnd) { endGame('win'); return; }
+  Geo.distance = Math.max(Geo.distance, p.x - 140);
+  // camera follows horizontally
+  Geo.cam.x = p.x - W * 0.28;
+  if (Geo.cam.x < 0) Geo.cam.x = 0;
 }
 
 function renderBoss() {
+  // neon background
   ctx.fillStyle = bgBoss; ctx.fillRect(0, 0, W, H);
-  // far stars
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  for (let i = 0; i < 30; i++) {
-    const x = (i * 137 + Boss.cam.y * 0.05) % W;
-    const y = (i * 73) % H;
-    ctx.fillRect(x, y, 2, 2);
-  }
+  // moving grid (Geometry Dash style)
+  ctx.strokeStyle = 'rgba(140,120,255,0.10)'; ctx.lineWidth = 1;
+  const off = Geo.cam.x % 44;
+  for (let gx = -off; gx < W; gx += 44) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke(); }
+  for (let gy2 = (Geo.groundY % 44) - 44; gy2 < H; gy2 += 44) { ctx.beginPath(); ctx.moveTo(0, gy2); ctx.lineTo(W, gy2); ctx.stroke(); }
+
   ctx.save();
-  ctx.translate(0, -Boss.cam.y);
+  const sh = Geo.shake > 0 ? (Math.random()-0.5) * Geo.shake : 0;
+  ctx.translate(-Geo.cam.x + sh, sh);
 
-  // platforms
-  for (const pl of Boss.platforms) {
-    if (pl.broken || pl.x < -100) continue;
-    if (pl.type === 'ground') {
-      ctx.fillStyle = '#4e342e'; ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
-      ctx.fillStyle = '#6d4c41'; ctx.fillRect(pl.x, pl.y, pl.w, 8);
+  // ground slab with glowing edge
+  ctx.fillStyle = '#160a33'; ctx.fillRect(Geo.cam.x, Geo.groundY, W, H - Geo.groundY);
+  ctx.fillStyle = '#00e5ff'; ctx.fillRect(Geo.cam.x, Geo.groundY - 3, W, 5);
+  ctx.fillStyle = 'rgba(0,229,255,0.15)'; ctx.fillRect(Geo.cam.x, Geo.groundY + 2, W, 12);
+
+  // portals
+  for (const portal of Geo.portals) {
+    if (portal.passed) continue;
+    if (portal.x < Geo.cam.x - 40 || portal.x > Geo.cam.x + W + 40) continue;
+    const pulse = 0.4 + Math.abs(Math.sin(performance.now()/300)) * 0.4;
+    ctx.fillStyle = `rgba(0,230,118,${pulse})`;
+    ctx.fillRect(portal.x - 16, 50, 32, Geo.groundY - 50);
+    ctx.strokeStyle = '#00e676'; ctx.lineWidth = 4; ctx.strokeRect(portal.x - 16, 50, 32, Geo.groundY - 50);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 34px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('?', portal.x, Geo.groundY / 2);
+  }
+
+  // obstacles
+  for (const o of Geo.obstacles) {
+    if (o.x + o.w < Geo.cam.x - 40 || o.x > Geo.cam.x + W + 40) continue;
+    if (o.type === 'spike') {
+      ctx.fillStyle = '#ff1744';
+      ctx.beginPath(); ctx.moveTo(o.x, o.y + o.h); ctx.lineTo(o.x + o.w/2, o.y); ctx.lineTo(o.x + o.w, o.y + o.h); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
     } else {
-      let color = '#a1887f', edge = '#6d4c41';
-      if (pl.type === 'crumble') { color = pl.breakTimer > 0 ? (pl.breakTimer % 6 < 3 ? '#fff' : '#bf360c') : '#bf360c'; edge = '#3e2723'; }
-      if (pl.type === 'moving') { color = '#1976d2'; edge = '#0d47a1'; }
-      ctx.fillStyle = color; ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
-      ctx.fillStyle = edge; ctx.fillRect(pl.x, pl.y + pl.h - 3, pl.w, 3);
-      if (pl.type === 'crumble') {
-        ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('💥', pl.x + pl.w/2, pl.y - 2);
-      } else if (pl.type === 'moving') {
-        ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('↔', pl.x + pl.w/2, pl.y - 2);
-      }
+      ctx.fillStyle = '#3949ab'; ctx.fillRect(o.x, o.y, o.w, o.h);
+      ctx.fillStyle = '#7c4dff'; ctx.fillRect(o.x, o.y, o.w, 6);
+      ctx.strokeStyle = '#b388ff'; ctx.lineWidth = 2; ctx.strokeRect(o.x, o.y, o.w, o.h);
     }
   }
 
-  // dragon
-  const d = Boss.dragon;
-  if (d) {
-    if (d.flash > 0) ctx.globalAlpha = d.flash % 6 < 3 ? 0.4 : 1;
-    ctx.font = `${d.h}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(d.emoji, d.x + d.w/2, d.y + d.h/2);
-    ctx.globalAlpha = 1;
-    if (d.stunned > 0) {
-      ctx.font = '20px sans-serif'; ctx.fillText('💫', d.x + d.w/2 - 24 + Math.cos(performance.now()/100)*15, d.y - 5);
-      ctx.fillText('💫', d.x + d.w/2 + 24 + Math.cos(performance.now()/100+2)*15, d.y - 5);
-    }
-    // hp dots
-    for (let i = 0; i < d.maxHP; i++) {
-      ctx.fillStyle = i < d.hp ? '#f44336' : '#444';
-      ctx.beginPath(); ctx.arc(d.x + 14 + i*22, d.y - 16, 8, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
-    }
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(`${d.name} Lv.${Boss.level}`, d.x + d.w/2, d.y - 32);
+  // coins
+  for (const c of Geo.coins) {
+    if (c.taken) continue;
+    if (c.x < Geo.cam.x - 40 || c.x > Geo.cam.x + W + 40) continue;
+    const sq = Math.abs(Math.sin(performance.now()/200 + c.x));
+    ctx.fillStyle = '#ffd54f';
+    ctx.beginPath(); ctx.ellipse(c.x, c.y, 7 * sq + 2, 9, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#f57f17'; ctx.lineWidth = 1.5; ctx.stroke();
   }
-  // fireballs
-  for (const fb of Boss.fireballs) {
-    ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('🔥', fb.x, fb.y);
-  }
-  // player
-  const p = Boss.player;
+
+  // player cube
+  const p = Geo.player;
   if (p) {
-    if (p.vx !== 0 || !p.onGround) emitTrail(p);
+    if (!p.onGround) emitTrail(p);
     renderTrail(0, 0);
     renderAura(p, 0, 0);
-    if (p.invuln > 0 && Math.floor(p.invuln/6)%2 === 0) ctx.globalAlpha = 0.4;
-    if (Boss.doubleHit > 0) {
-      ctx.save();
-      ctx.shadowColor = '#ffeb3b'; ctx.shadowBlur = 14;
-      ctx.fillStyle = 'rgba(255,235,59,0.25)';
-      ctx.beginPath(); ctx.arc(p.x + p.w/2, p.y + p.h/2, 28, 0, Math.PI*2); ctx.fill();
-      ctx.restore();
-    }
-    p.frame++;
-    drawCharacter(ctx, p.char, p.x + p.w/2, p.y + p.h, p.w + 8, p.frame, p.facing);
-    ctx.globalAlpha = 1;
-    // jump indicator
-    const jumpsLeft = 3 - p.jumps;
-    for (let i = 0; i < 3; i++) {
-      ctx.fillStyle = i < jumpsLeft ? '#ffeb3b' : '#444';
-      ctx.beginPath(); ctx.arc(p.x + p.w/2 - 12 + i*12, p.y - 14, 4, 0, Math.PI*2); ctx.fill();
-    }
-  }
-  // particles
-  particles = particles.filter(pt => pt.life > 0);
-  ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-  for (const pt of particles) {
-    pt.life--; pt.y += pt.vy; pt.vy += 0.05;
-    ctx.globalAlpha = Math.max(0, pt.life / 50);
-    ctx.fillStyle = pt.color || '#fff';
-    ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y);
+    ctx.save();
+    ctx.translate(p.x + p.w/2, p.y + p.h/2);
+    ctx.rotate(p.rot);
+    if (p.invuln > 0 && Math.floor(p.invuln/5)%2 === 0) ctx.globalAlpha = 0.45;
+    if (p.invuln > 0) { ctx.shadowColor = '#00e676'; ctx.shadowBlur = 16; }
+    ctx.fillStyle = '#00e5ff'; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    ctx.fillStyle = '#b3f5ff'; ctx.fillRect(-p.w/2, -p.h/2, p.w, 6);
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#01579b'; ctx.lineWidth = 3; ctx.strokeRect(-p.w/2, -p.h/2, p.w, p.h);
+    ctx.fillStyle = '#01579b';
+    ctx.fillRect(-8, -5, 5, 7); ctx.fillRect(4, -5, 5, 7);
+    ctx.fillRect(-6, 7, 12, 3);
+    ctx.restore();
     ctx.globalAlpha = 1;
   }
 
-  // LAVA
-  ctx.fillStyle = '#bf360c';
-  ctx.fillRect(0, Boss.lava, W, H + 200 - Boss.lava);
-  // lava waves
-  ctx.fillStyle = '#ff5722';
-  for (let i = 0; i < W; i += 30) {
-    const wy = Boss.lava + Math.sin((performance.now()/200) + i*0.05)*4;
-    ctx.fillRect(i, wy, 30, 6);
-  }
-  ctx.fillStyle = '#ffeb3b';
-  for (let i = 0; i < W; i += 60) {
-    const wy = Boss.lava + Math.sin((performance.now()/300) + i*0.03)*3 + 8;
-    ctx.fillRect(i, wy, 18, 3);
+  // particles
+  particles = particles.filter(pt => pt.life > 0);
+  ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+  for (const pt of particles) {
+    pt.life--; pt.x += pt.vx || 0; pt.y += pt.vy; pt.vy += 0.12;
+    ctx.globalAlpha = Math.max(0, pt.life / 40);
+    ctx.fillStyle = pt.color || '#fff';
+    if (pt.text) { ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y); }
+    ctx.globalAlpha = 1;
   }
 
   ctx.restore();
 
-  // hud
-  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `🐲 Lv.${Boss.level} · 📏 ${Math.floor(Boss.height)}`);
+  // progress bar to the finish
+  const pct = Math.max(0, Math.min(1, (p ? p.x : 0) / Geo.worldEnd));
+  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(W/2 - 80, 44, 160, 12);
+  ctx.fillStyle = '#00e676'; ctx.fillRect(W/2 - 78, 46, 156 * pct, 8);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.strokeRect(W/2 - 80, 44, 160, 12);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(Math.floor(pct * 100) + '%', W/2, 50);
+
+  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `🏃 ${Math.floor(Geo.distance/30)}m`);
 }
 
 /* ============================================================ ADVENTURE (simple runner with gates) ============================================================ */
@@ -2156,7 +2056,7 @@ function loop(t) {
   const dt = t - lastT; lastT = t;
   if (Game.mode === 'galaxy') { updateGalaxy(t); renderGalaxy(); }
   else if (Game.mode === 'boss') {
-    if (!Game.paused) physicsBoss(Boss.player, dt, t);
+    if (!Game.paused) physicsBoss(Geo.player, dt, t);
     if (Game.mode === 'boss') renderBoss();
   } else if (Game.mode === 'adventure') {
     if (!Game.paused) physicsAdv(Adv.player, dt);
