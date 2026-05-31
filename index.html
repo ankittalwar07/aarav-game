@@ -335,6 +335,19 @@
   }
   .levelup-card .big { font-size: 70px; }
 
+  /* GEOMETRY DASH SPEED PICKER */
+  #geoSpeed {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.85); z-index: 36; flex-direction: column; padding: 14px;
+  }
+  #geoSpeed.active { display: flex; }
+  .geo-speed-card {
+    background: linear-gradient(180deg, #fff, #b3f5ff);
+    color: #222; border-radius: 22px; padding: 24px;
+    border: 5px solid #00e5ff; text-align: center; max-width: 340px; width: 100%;
+    box-shadow: 0 0 60px #00e5ff; animation: revealIn 0.4s;
+  }
+
   /* INVENTORY ITEM */
   .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
   .inv-item {
@@ -587,6 +600,18 @@
       <div style="font-size:22px; margin:10px 0;">You are now Level <b id="newLevel">2</b></div>
       <div style="font-size:26px; margin: 14px 0; color: #b71c1c;">+ 🪙 1,000,000,000,000,000<br>(One QUADRILLION coins!) 🤯</div>
       <button class="btn green" id="levelUpClose">Awesome!</button>
+    </div>
+  </div>
+
+  <!-- GEOMETRY DASH SPEED PICKER -->
+  <div id="geoSpeed">
+    <div class="geo-speed-card">
+      <div style="font-size:56px;">🟦</div>
+      <h1 style="color:#222; font-size:26px;">Geometry Dash</h1>
+      <div style="font-size:15px; margin:8px 0 14px; color:#333;">Choose your speed!</div>
+      <button class="btn green" id="geoMediumBtn" style="display:block; width:100%; margin:8px 0; color:#fff;">🐢 Medium Speed</button>
+      <button class="btn red" id="geoFastBtn" style="display:block; width:100%; margin:8px 0; color:#fff;">🚀 Fast Speed</button>
+      <button class="btn small" id="geoSpeedCancel" style="margin-top:8px;">Back</button>
     </div>
   </div>
 
@@ -1628,6 +1653,7 @@ const Geo = {
   player: null, obstacles: [], portals: [], coins: [],
   cam: { x: 0 }, speed: 5, worldEnd: 0, distance: 0, groundY: 0, shake: 0
 };
+let geoSpeedMode = 'medium'; // 'medium' (gentler) or 'fast'
 
 function startBoss() {
   Game.mode = 'boss'; Game.lives = 5; Game.score = 0; Game.paused = false;
@@ -1647,23 +1673,26 @@ function startBoss() {
 function buildGeoLevel() {
   const gy = Geo.groundY;
   Geo.obstacles = []; Geo.coins = []; Geo.portals = [];
+  const easy = (geoSpeedMode !== 'fast'); // medium = gentler patterns + more room
+  const pad = easy ? 70 : 0;               // slower speed = shorter jump, so spread out
   let x = 760; // generous empty runway to start
   for (let seg = 0; seg < 28; seg++) {
     const r = Math.random();
-    if (r < 0.46) {
-      // 1 spike (occasionally 2 later on) — an easy hop
-      const n = (seg > 8 && Math.random() < 0.3) ? 2 : 1;
+    if (r < (easy ? 0.55 : 0.46)) {
+      // spikes — always single on medium; occasionally double (later) on fast
+      const n = (!easy && seg > 8 && Math.random() < 0.3) ? 2 : 1;
       for (let i = 0; i < n; i++) Geo.obstacles.push({ x: x + i * 30, y: gy - 30, w: 30, h: 30, type: 'spike' });
       Geo.coins.push({ x: x + (n * 30) / 2, y: gy - 92, taken: false });
-      x += n * 30 + rand(230, 320);
-    } else if (r < 0.74) {
-      // a short, low block — clears in one jump; coins reward landing on top
-      const bh = rand(34, 56), bw = rand(40, 64);
+      x += n * 30 + rand(230, 320) + pad;
+    } else if (easy || r < 0.74) {
+      // a low block — lower & narrower on medium so a short jump clears it easily
+      const bh = easy ? rand(30, 44) : rand(34, 56);
+      const bw = easy ? rand(36, 52) : rand(40, 64);
       Geo.obstacles.push({ x, y: gy - bh, w: bw, h: bh, type: 'block' });
       for (let k = 0; k < 2; k++) Geo.coins.push({ x: x + bw/2 - 13 + k * 26, y: gy - bh - 30, taken: false });
-      x += bw + rand(220, 300);
+      x += bw + rand(220, 300) + pad;
     } else {
-      // a spike then a low block, spaced so one jump clears both
+      // fast only: a spike then a low block, spaced so one jump clears both
       Geo.obstacles.push({ x, y: gy - 30, w: 30, h: 30, type: 'spike' });
       const bh = rand(34, 52);
       Geo.obstacles.push({ x: x + 70, y: gy - bh, w: 56, h: bh, type: 'block' });
@@ -1698,8 +1727,9 @@ function physicsBoss(p, dt, t) {
   const GRAV = 0.9, JUMP_V = -15.5;
   if (Geo.shake > 0) Geo.shake--;
   if (p.invuln > 0) p.invuln--;
-  // auto-run forward; speed creeps up a little the further you go
-  Geo.speed = 5 + Math.min(2, p.x / 9000);
+  // auto-run forward; two selectable speeds (medium is gentler)
+  if (geoSpeedMode === 'fast') Geo.speed = 5.5 + Math.min(2, p.x / 9000);
+  else Geo.speed = 4 + Math.min(1.5, p.x / 11000);
   p.x += Geo.speed;
   // jump (hold or tap) only when on the ground
   if (KEYS.jump && p.onGround) {
@@ -1865,7 +1895,7 @@ function renderBoss() {
   ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(Math.floor(pct * 100) + '%', W/2, 50);
 
-  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `🏃 ${Math.floor(Geo.distance/30)}m`);
+  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `${geoSpeedMode === 'fast' ? '🚀' : '🐢'} ${Math.floor(Geo.distance/30)}m`);
 }
 
 /* ============================================================ ADVENTURE (simple runner with gates) ============================================================ */
@@ -2368,7 +2398,7 @@ document.querySelectorAll('[data-mode]').forEach(c => {
     currentLesson = null; // home modes are mixed lessons
     const m = c.dataset.mode;
     if (m === 'galaxy') startGalaxy();
-    else if (m === 'boss') startBoss();
+    else if (m === 'boss') showGeoSpeedPicker();
     else if (m === 'gems') startGems();
     else if (m === 'adventure') startAdventure();
   });
@@ -2969,6 +2999,19 @@ function checkLevelUp() {
 document.getElementById('levelUpClose').addEventListener('click', () => {
   document.getElementById('levelUp').classList.remove('active');
 });
+
+/* GEOMETRY DASH SPEED PICKER */
+function showGeoSpeedPicker() {
+  document.getElementById('geoSpeed').classList.add('active');
+}
+function launchGeo(mode) {
+  geoSpeedMode = mode;
+  document.getElementById('geoSpeed').classList.remove('active');
+  startBoss();
+}
+document.getElementById('geoMediumBtn').addEventListener('click', () => { SFX.click(); launchGeo('medium'); });
+document.getElementById('geoFastBtn').addEventListener('click', () => { SFX.click(); launchGeo('fast'); });
+document.getElementById('geoSpeedCancel').addEventListener('click', () => { SFX.click(); document.getElementById('geoSpeed').classList.remove('active'); });
 
 function refreshHomeStats() {
   document.getElementById('coinsTop').textContent = coins.toLocaleString();
