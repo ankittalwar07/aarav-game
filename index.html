@@ -1678,16 +1678,16 @@ function buildGeoLevel() {
   let x = 760; // generous empty runway to start
   for (let seg = 0; seg < 28; seg++) {
     const r = Math.random();
-    if (r < (easy ? 0.55 : 0.46)) {
+    if (r < (easy ? 0.62 : 0.46)) {
       // spikes — always single on medium; occasionally double (later) on fast
       const n = (!easy && seg > 8 && Math.random() < 0.3) ? 2 : 1;
       for (let i = 0; i < n; i++) Geo.obstacles.push({ x: x + i * 30, y: gy - 30, w: 30, h: 30, type: 'spike' });
       Geo.coins.push({ x: x + (n * 30) / 2, y: gy - 92, taken: false });
       x += n * 30 + rand(230, 320) + pad;
     } else if (easy || r < 0.74) {
-      // a low block — lower & narrower on medium so a short jump clears it easily
-      const bh = easy ? rand(30, 44) : rand(34, 56);
-      const bw = easy ? rand(36, 52) : rand(40, 64);
+      // a low block — very short/narrow on medium so a short jump flies clean over it
+      const bh = easy ? rand(22, 34) : rand(34, 56);
+      const bw = easy ? rand(34, 46) : rand(40, 64);
       Geo.obstacles.push({ x, y: gy - bh, w: bw, h: bh, type: 'block' });
       for (let k = 0; k < 2; k++) Geo.coins.push({ x: x + bw/2 - 13 + k * 26, y: gy - bh - 30, taken: false });
       x += bw + rand(220, 300) + pad;
