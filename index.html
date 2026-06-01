@@ -47,6 +47,7 @@
   .mode-card.boss { background: linear-gradient(135deg, #1a0e3d, #311b92, #2575fc); }
   .mode-card.gems { background: linear-gradient(135deg, #006064, #4dd0e1); }
   .mode-card.adv { background: linear-gradient(135deg, #1b5e20, #66bb6a); }
+  .mode-card.moto { background: linear-gradient(135deg, #1a237e, #d84315, #ffb300); }
   .mode-card .emoji { font-size: clamp(40px, 7vw, 56px); display: block; }
   .mode-card .name { font-size: clamp(15px, 3vw, 19px); font-weight: bold; margin-top: 4px; text-shadow: 2px 2px 0 #000; }
   .mode-card .desc { font-size: 11px; opacity: 0.9; margin-top: 3px; }
@@ -498,6 +499,11 @@
         <div class="name">Adventure</div>
         <div class="desc">Run, jump, answer to pass gates</div>
       </div>
+      <div class="mode-card moto" data-mode="moto">
+        <span class="emoji">🏍️</span>
+        <div class="name">Moto Madness</div>
+        <div class="desc">Ride, jump cars, grab boost arrows!</div>
+      </div>
     </div>
 
     <h2>Play with Friends</h2>
@@ -636,6 +642,7 @@
       <button class="btn" data-hmode="boss">🟦 Geo Dash</button>
       <button class="btn" data-hmode="gems">💎 Gems</button>
       <button class="btn" data-hmode="adventure">🗺️ Adventure</button>
+      <button class="btn" data-hmode="moto">🏍️ Moto</button>
     </div>
     <div class="footer-row">
       <button class="btn red" id="hostBack">Back</button>
@@ -1573,9 +1580,9 @@ canvas.addEventListener('click', (e) => {
 });
 
 // Geometry Dash: tap anywhere on screen to jump
-canvas.addEventListener('pointerdown', () => { if (Game.mode === 'boss' && !Game.paused) { ensureAudio(); KEYS.jump = true; } });
-canvas.addEventListener('pointerup',   () => { if (Game.mode === 'boss') KEYS.jump = false; });
-canvas.addEventListener('pointercancel', () => { if (Game.mode === 'boss') KEYS.jump = false; });
+canvas.addEventListener('pointerdown', () => { if ((Game.mode === 'boss' || Game.mode === 'moto') && !Game.paused) { ensureAudio(); KEYS.jump = true; } });
+canvas.addEventListener('pointerup',   () => { if (Game.mode === 'boss' || Game.mode === 'moto') KEYS.jump = false; });
+canvas.addEventListener('pointercancel', () => { if (Game.mode === 'boss' || Game.mode === 'moto') KEYS.jump = false; });
 
 function renderGalaxy() {
   ctx.fillStyle = bgGalaxy; ctx.fillRect(0, 0, W, H);
@@ -1898,6 +1905,343 @@ function renderBoss() {
   setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `${geoSpeedMode === 'fast' ? '🚀' : '🐢'} ${Math.floor(Geo.distance/30)}m`);
 }
 
+/* ============================================================ MOTO MADNESS ============================================================ */
+const Moto = {
+  player: null, obstacles: [], coins: [], portals: [], boosts: [],
+  cam: { x: 0 }, speed: 6, baseSpeed: 6, worldEnd: 0, distance: 0, groundY: 0,
+  shake: 0, boostUntil: 0
+};
+
+function startMoto() {
+  Game.mode = 'moto'; Game.lives = 5; Game.score = 0; Game.paused = false;
+  resetStreak(); Retention.reset();
+  Moto.groundY = H - 80;
+  Moto.player = {
+    x: 150, y: Moto.groundY - 38, w: 54, h: 38,
+    vy: 0, onGround: true, wheelRot: 0, tilt: 0, invuln: 0
+  };
+  Moto.obstacles = []; Moto.coins = []; Moto.portals = []; Moto.boosts = [];
+  Moto.cam.x = 0; Moto.distance = 0; Moto.baseSpeed = 6; Moto.speed = 6;
+  Moto.shake = 0; Moto.boostUntil = 0;
+  particles = [];
+  buildMotoLevel();
+  startMainLoop();
+}
+
+function buildMotoLevel() {
+  const gy = Moto.groundY;
+  Moto.obstacles = []; Moto.coins = []; Moto.portals = []; Moto.boosts = [];
+  let x = 820; // big runway at the start
+  for (let seg = 0; seg < 30; seg++) {
+    const r = Math.random();
+    if (r < 0.40) {
+      // traffic cones — small, easy hop; sometimes 2 in a row later
+      const n = (seg > 5 && Math.random() < 0.3) ? 2 : 1;
+      for (let i = 0; i < n; i++) Moto.obstacles.push({ x: x + i * 36, y: gy - 28, w: 28, h: 28, type: 'cone' });
+      Moto.coins.push({ x: x + (n * 36) / 2, y: gy - 100, taken: false });
+      x += n * 36 + rand(280, 360);
+    } else if (r < 0.65) {
+      // rock — chunky, land on top or jump over
+      const rsz = rand(34, 50);
+      Moto.obstacles.push({ x, y: gy - rsz, w: rsz + 8, h: rsz, type: 'rock' });
+      for (let k = 0; k < 2; k++) Moto.coins.push({ x: x + 13 + k * 26, y: gy - rsz - 36, taken: false });
+      x += rsz + rand(300, 380);
+    } else if (r < 0.85) {
+      // car — bigger jump needed
+      Moto.obstacles.push({ x, y: gy - 56, w: 88, h: 56, type: 'car', color: ['#e91e63','#1976d2','#43a047','#fb8c00'][rand(0,3)] });
+      Moto.coins.push({ x: x + 44, y: gy - 116, taken: false });
+      x += rand(360, 460);
+    } else {
+      // boost zone — run through for a brief speedup
+      Moto.boosts.push({ x, w: 80, used: false });
+      for (let k = 0; k < 3; k++) Moto.coins.push({ x: x + 16 + k * 24, y: gy - 30, taken: false });
+      x += rand(300, 380);
+    }
+    if (seg > 0 && seg % 5 === 0) {
+      Moto.portals.push({ x, passed: false });
+      x += 360; // big clearance after a portal so you land safe
+    }
+  }
+  Moto.worldEnd = x + 500;
+}
+
+function motoCrash(p) {
+  Game.lives--; SFX.hurt(); resetStreak(); Moto.shake = 14;
+  for (let i = 0; i < 18; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h/2, vx: (Math.random()-0.5)*9, vy: (Math.random()-0.5)*9 - 2, life: 32, text: '💥', color: '#ff5722' });
+  if (Game.lives <= 0) { endGame('dead'); return; }
+  // forgiving respawn: back up to clear ground with a long shield
+  p.x = Math.max(150, p.x - 240);
+  for (let tries = 0; tries < 40; tries++) {
+    const clash = Moto.obstacles.some(o => o.x < p.x + p.w + 60 && o.x + o.w > p.x - 60);
+    if (!clash) break;
+    p.x -= 30;
+    if (p.x <= 150) { p.x = 150; break; }
+  }
+  p.y = Moto.groundY - p.h; p.vy = 0; p.onGround = true; p.tilt = 0; p.invuln = 100;
+  Moto.boostUntil = 0; Moto.baseSpeed = 6;
+}
+
+function physicsMoto(p, dt, t) {
+  const GRAV = 0.85, JUMP_V = -15.5;
+  if (Moto.shake > 0) Moto.shake--;
+  if (p.invuln > 0) p.invuln--;
+  // gentle speed ramp + temporary boost
+  Moto.baseSpeed = 6 + Math.min(2, p.x / 10000);
+  Moto.speed = Moto.boostUntil > t ? Moto.baseSpeed + 4 : Moto.baseSpeed;
+  p.x += Moto.speed;
+  if (KEYS.jump && p.onGround) {
+    p.vy = JUMP_V; p.onGround = false; SFX.jump();
+    for (let i = 0; i < 6; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h, vx: (Math.random()-0.5)*4, vy: 1 + Math.random()*2, life: 20, text: '·', color: '#bbb' });
+  }
+  p.vy += GRAV; if (p.vy > 22) p.vy = 22;
+  p.y += p.vy;
+  // wheelie tilt while airborne (front wheel lifts)
+  if (!p.onGround) {
+    if (p.vy < 0) p.tilt = Math.max(-0.45, p.tilt - 0.05);
+    else p.tilt = Math.min(0.25, p.tilt + 0.04);
+  }
+  // wheel spin scales with speed
+  p.wheelRot += Moto.speed * 0.05;
+  // ground collision
+  let landed = false;
+  if (p.y + p.h >= Moto.groundY) { p.y = Moto.groundY - p.h; p.vy = 0; landed = true; }
+  // obstacle collision
+  for (const o of Moto.obstacles) {
+    if (o.x + o.w < p.x - 80 || o.x > p.x + 80) continue;
+    if (!rectOverlap(p, o)) continue;
+    const prevBottom = p.y + p.h - p.vy;
+    if ((o.type === 'rock' || o.type === 'car') && p.vy >= 0 && prevBottom <= o.y + 12) {
+      p.y = o.y - p.h; p.vy = 0; landed = true;
+    } else if (p.invuln === 0) {
+      motoCrash(p); return;
+    }
+  }
+  if (landed) {
+    if (!p.onGround) {
+      for (let i = 0; i < 5; i++) particles.push({ x: p.x + p.w/2 + (Math.random()-0.5)*30, y: p.y + p.h, vx: (Math.random()-0.5)*3, vy: -Math.random()*1.5, life: 16, text: '·', color: '#bbb' });
+      p.tilt = 0;
+    }
+    p.onGround = true;
+  } else p.onGround = false;
+  // tire dust trail
+  if (p.onGround && Math.random() < 0.4) particles.push({ x: p.x + 4, y: p.y + p.h - 2, vx: -1 - Math.random(), vy: -Math.random()*0.5, life: 12, text: '·', color: 'rgba(160,160,160,0.7)' });
+  // coins
+  for (const c of Moto.coins) {
+    if (c.taken) continue;
+    if (Math.abs(p.x + p.w/2 - c.x) < 26 && Math.abs(p.y + p.h/2 - c.y) < 26) {
+      c.taken = true; Game.score += 5; SFX.coin();
+      particles.push({ x: c.x, y: c.y, vx: 0, vy: -2, life: 30, text: '+5', color: '#ffeb3b' });
+    }
+  }
+  // boost pads
+  for (const b of Moto.boosts) {
+    if (b.used) continue;
+    if (p.x + p.w/2 > b.x && p.x + p.w/2 < b.x + b.w) {
+      b.used = true; Moto.boostUntil = t + 1500; SFX.coin();
+      for (let i = 0; i < 14; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h/2, vx: 2 + Math.random()*4, vy: (Math.random()-0.5)*3, life: 22, text: '⚡', color: '#ffeb3b' });
+    }
+  }
+  // learning portals
+  for (const portal of Moto.portals) {
+    if (portal.passed) continue;
+    if (p.x + p.w > portal.x - 6 && p.x < portal.x + 12) {
+      portal.passed = true;
+      showQuestion(Game.subject, '📚 Checkpoint! Answer for a boost!', (correct, wasRetention) => {
+        if (correct) {
+          bumpStreak();
+          const bonus = wasRetention ? 3 : 1;
+          const pts = 50 * comboMult() * bonus;
+          Game.score += pts;
+          if (wasRetention && Game.lives < 5) Game.lives++;
+          else if (Math.random() < 0.4 && Game.lives < 5) Game.lives++;
+          p.invuln = Math.max(p.invuln, 100);
+          Moto.boostUntil = performance.now() + 1800;
+          particles.push({ x: p.x, y: p.y, vx: 0, vy: -2, life: 60, text: (wasRetention ? '🧠 +' : '+') + pts + ' ⭐ BOOST!', color: '#ff9800' });
+        } else {
+          resetStreak();
+          particles.push({ x: p.x, y: p.y, vx: 0, vy: -2, life: 50, text: '🧠 Try later!', color: '#ffd700' });
+        }
+      });
+      break;
+    }
+  }
+  if (p.x >= Moto.worldEnd) { endGame('win'); return; }
+  Moto.distance = Math.max(Moto.distance, p.x - 150);
+  Moto.cam.x = p.x - W * 0.28;
+  if (Moto.cam.x < 0) Moto.cam.x = 0;
+}
+
+function renderMoto() {
+  // sunset sky
+  const sky = ctx.createLinearGradient(0, 0, 0, Moto.groundY);
+  sky.addColorStop(0, '#1a237e'); sky.addColorStop(0.55, '#d84315'); sky.addColorStop(1, '#ffb300');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, Moto.groundY);
+  // sun
+  ctx.fillStyle = 'rgba(255,235,59,0.85)';
+  ctx.beginPath(); ctx.arc(W * 0.7, Moto.groundY - 50, 36, 0, Math.PI*2); ctx.fill();
+  // distant mountains (parallax)
+  ctx.fillStyle = 'rgba(48,30,90,0.7)';
+  for (let i = 0; i < 7; i++) {
+    const mx = ((i * 250 - Moto.cam.x * 0.2) % (W + 300)) - 150;
+    ctx.beginPath(); ctx.moveTo(mx, Moto.groundY); ctx.lineTo(mx + 120, Moto.groundY - 80); ctx.lineTo(mx + 240, Moto.groundY); ctx.closePath(); ctx.fill();
+  }
+  // road
+  ctx.fillStyle = '#1c1c1c'; ctx.fillRect(0, Moto.groundY, W, H - Moto.groundY);
+  ctx.fillStyle = '#ffeb3b'; ctx.fillRect(0, Moto.groundY - 2, W, 3);
+  // lane dashes (scrolling)
+  ctx.fillStyle = '#fff';
+  const dashOff = Moto.cam.x % 80;
+  for (let dx = -dashOff; dx < W; dx += 80) ctx.fillRect(dx, Moto.groundY + 26, 40, 5);
+
+  ctx.save();
+  const sh = Moto.shake > 0 ? (Math.random()-0.5) * Moto.shake : 0;
+  ctx.translate(-Moto.cam.x + sh, sh);
+
+  // boost arrows on the road
+  for (const b of Moto.boosts) {
+    if (b.x + b.w < Moto.cam.x - 40 || b.x > Moto.cam.x + W + 40) continue;
+    ctx.fillStyle = b.used ? 'rgba(255,235,59,0.25)' : '#ffeb3b';
+    for (let i = 0; i < 3; i++) {
+      const ax = b.x + 6 + i * 24;
+      ctx.beginPath();
+      ctx.moveTo(ax, Moto.groundY + 14);
+      ctx.lineTo(ax + 14, Moto.groundY + 6);
+      ctx.lineTo(ax + 14, Moto.groundY + 12);
+      ctx.lineTo(ax + 26, Moto.groundY + 4);
+      ctx.lineTo(ax + 14, Moto.groundY + 24);
+      ctx.lineTo(ax + 14, Moto.groundY + 18);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // portals (highway-sign style)
+  for (const portal of Moto.portals) {
+    if (portal.passed) continue;
+    if (portal.x < Moto.cam.x - 40 || portal.x > Moto.cam.x + W + 40) continue;
+    ctx.fillStyle = '#5d4037'; ctx.fillRect(portal.x - 3, Moto.groundY - 80, 6, 80);
+    const pulse = 0.7 + Math.abs(Math.sin(performance.now()/300)) * 0.3;
+    ctx.fillStyle = `rgba(0,230,118,${pulse})`;
+    ctx.fillRect(portal.x - 26, Moto.groundY - 116, 52, 40);
+    ctx.strokeStyle = '#00e676'; ctx.lineWidth = 3; ctx.strokeRect(portal.x - 26, Moto.groundY - 116, 52, 40);
+    ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('📚', portal.x, Moto.groundY - 96);
+  }
+
+  // obstacles
+  for (const o of Moto.obstacles) {
+    if (o.x + o.w < Moto.cam.x - 40 || o.x > Moto.cam.x + W + 40) continue;
+    if (o.type === 'cone') {
+      ctx.fillStyle = '#ff6f00';
+      ctx.beginPath(); ctx.moveTo(o.x + o.w/2, o.y); ctx.lineTo(o.x, o.y + o.h); ctx.lineTo(o.x + o.w, o.y + o.h); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillRect(o.x + 4, o.y + o.h * 0.45, o.w - 8, 4);
+      ctx.fillStyle = '#3e2723'; ctx.fillRect(o.x - 2, o.y + o.h - 4, o.w + 4, 4);
+    } else if (o.type === 'rock') {
+      ctx.fillStyle = '#616161';
+      ctx.beginPath(); ctx.ellipse(o.x + o.w/2, o.y + o.h/2, o.w/2, o.h/2, 0, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#37474f'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#9e9e9e';
+      ctx.beginPath(); ctx.ellipse(o.x + o.w/2 - 6, o.y + 6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
+    } else if (o.type === 'car') {
+      ctx.fillStyle = o.color || '#e91e63';
+      ctx.fillRect(o.x, o.y + 14, o.w, o.h - 14);
+      ctx.beginPath();
+      ctx.moveTo(o.x + 14, o.y + 14); ctx.lineTo(o.x + 24, o.y); ctx.lineTo(o.x + o.w - 24, o.y); ctx.lineTo(o.x + o.w - 14, o.y + 14);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#b3e5fc'; ctx.fillRect(o.x + 24, o.y + 4, o.w - 48, 10);
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(o.x + 16, o.y + o.h, 8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(o.x + o.w - 16, o.y + o.h, 8, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillRect(o.x + o.w - 5, o.y + 18, 5, 8);
+    }
+  }
+
+  // coins
+  for (const c of Moto.coins) {
+    if (c.taken) continue;
+    if (c.x < Moto.cam.x - 40 || c.x > Moto.cam.x + W + 40) continue;
+    const sq = Math.abs(Math.sin(performance.now()/200 + c.x));
+    ctx.fillStyle = '#ffd54f';
+    ctx.beginPath(); ctx.ellipse(c.x, c.y, 7 * sq + 2, 9, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#f57f17'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+
+  // motorcycle
+  const p = Moto.player;
+  if (p) {
+    renderTrail(0, 0);
+    renderAura(p, 0, 0);
+    // boost flame behind the bike (drawn first so the bike covers its base)
+    if (Moto.boostUntil > performance.now()) {
+      ctx.fillStyle = '#ffeb3b';
+      ctx.beginPath(); ctx.moveTo(p.x - 2, p.y + 14); ctx.lineTo(p.x - 22 - Math.random()*8, p.y + 20); ctx.lineTo(p.x - 2, p.y + 26); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#ff5722';
+      ctx.beginPath(); ctx.moveTo(p.x - 2, p.y + 16); ctx.lineTo(p.x - 14 - Math.random()*4, p.y + 20); ctx.lineTo(p.x - 2, p.y + 24); ctx.closePath(); ctx.fill();
+    }
+    if (p.invuln > 0 && Math.floor(p.invuln/5)%2 === 0) ctx.globalAlpha = 0.5;
+    ctx.save();
+    ctx.translate(p.x + p.w/2, p.y + p.h/2);
+    ctx.rotate(p.tilt);
+    if (p.invuln > 0) { ctx.shadowColor = '#00e676'; ctx.shadowBlur = 12; }
+    // bike body
+    ctx.fillStyle = '#e53935';
+    ctx.beginPath();
+    ctx.moveTo(-22, 6); ctx.lineTo(-14, -8); ctx.lineTo(14, -8); ctx.lineTo(22, 6); ctx.lineTo(18, 10); ctx.lineTo(-18, 10); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#212121'; ctx.fillRect(-10, -10, 18, 4);
+    // handlebar
+    ctx.strokeStyle = '#212121'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(14, -8); ctx.lineTo(20, -16); ctx.stroke();
+    // rider
+    ctx.fillStyle = '#1976d2';
+    ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(8, -10); ctx.lineTo(6, -2); ctx.lineTo(-4, -2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#5d4037';
+    ctx.beginPath(); ctx.arc(2, -16, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#90caf9'; ctx.fillRect(2, -18, 6, 2);
+    ctx.shadowBlur = 0;
+    // wheels with spinning spokes
+    for (const wx of [-18, 18]) {
+      ctx.save();
+      ctx.translate(wx, 14);
+      ctx.fillStyle = '#212121';
+      ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#616161';
+      ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+      for (let k = 0; k < 4; k++) {
+        const a = p.wheelRot + k * Math.PI/2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a)*8, Math.sin(a)*8); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  }
+
+  // particles
+  particles = particles.filter(pt => pt.life > 0);
+  ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+  for (const pt of particles) {
+    pt.life--; pt.x += pt.vx || 0; pt.y += pt.vy; pt.vy += 0.12;
+    ctx.globalAlpha = Math.max(0, pt.life / 40);
+    ctx.fillStyle = pt.color || '#fff';
+    if (pt.text) { ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y); }
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+
+  // progress bar
+  const pct = Math.max(0, Math.min(1, (p ? p.x : 0) / Moto.worldEnd));
+  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(W/2 - 80, 44, 160, 12);
+  ctx.fillStyle = '#ff9800'; ctx.fillRect(W/2 - 78, 46, 156 * pct, 8);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.strokeRect(W/2 - 80, 44, 160, 12);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(Math.floor(pct * 100) + '%', W/2, 50);
+
+  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `🏍️ ${Math.floor(Moto.distance/30)}m${Moto.boostUntil > performance.now() ? ' · ⚡BOOST' : ''}`);
+}
+
 /* ============================================================ ADVENTURE (simple runner with gates) ============================================================ */
 const Adv = {
   player: null, platforms: [], obstacles: [], coins: [], gates: [], cam: { x:0 },
@@ -2096,6 +2440,9 @@ function loop(t) {
       if (Adv.cam.x < 0) Adv.cam.x = 0;
     }
     renderAdv();
+  } else if (Game.mode === 'moto') {
+    if (!Game.paused) physicsMoto(Moto.player, dt, t);
+    if (Game.mode === 'moto') renderMoto();
   }
   // multiplayer broadcast
   if (Net.active && t - (Net.lastSend || 0) > 200) {
@@ -2401,6 +2748,7 @@ document.querySelectorAll('[data-mode]').forEach(c => {
     else if (m === 'boss') showGeoSpeedPicker();
     else if (m === 'gems') startGems();
     else if (m === 'adventure') startAdventure();
+    else if (m === 'moto') startMoto();
   });
 });
 
@@ -2418,6 +2766,7 @@ document.getElementById('resAgain').addEventListener('click', () => {
   else if (Game.mode === 'boss') startBoss();
   else if (Game.mode === 'gems') startGems();
   else if (Game.mode === 'adventure') startAdventure();
+  else if (Game.mode === 'moto') startMoto();
 });
 document.getElementById('resHome').addEventListener('click', () => {
   document.getElementById('result').classList.remove('active');
@@ -3163,6 +3512,7 @@ const Net = {
       else if (msg.mode === 'boss') startBoss();
       else if (msg.mode === 'gems') startGems();
       else if (msg.mode === 'adventure') startAdventure();
+      else if (msg.mode === 'moto') startMoto();
     } else if (msg.type === 'lobby') {
       const el = document.getElementById('hostPlayers');
       el && (el.innerHTML = msg.players.map(n => `<div>👤 ${n}</div>`).join(''));
@@ -3227,6 +3577,7 @@ document.getElementById('hostStart').addEventListener('click', () => {
   if (hostMode === 'galaxy') startGalaxy();
   else if (hostMode === 'boss') startBoss();
   else if (hostMode === 'gems') startGems();
+  else if (hostMode === 'moto') startMoto();
   else startAdventure();
 });
 document.getElementById('joinBtn').addEventListener('click', () => { document.getElementById('home').classList.remove('active'); document.getElementById('joinScreen').classList.add('active'); });
