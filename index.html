@@ -514,10 +514,28 @@
       <button class="btn small red hud-btn" id="moneyQuit">✖</button>
     </div>
 
-    <div style="background:rgba(0,0,0,0.4); border-radius:12px; padding:10px; border:2px solid gold; text-align:center;">
-      <div style="font-size:12px; opacity:0.85;">💎 Net Worth</div>
+    <div style="background:rgba(0,0,0,0.4); border-radius:12px; padding:10px; border:2px solid gold; text-align:center; cursor:pointer;" onclick="showInfo('net_worth')" title="Tap to learn about Net Worth">
+      <div style="font-size:12px; opacity:0.85;">💎 Net Worth <span style="background:rgba(255,255,255,0.2); padding:1px 6px; border-radius:8px; font-size:10px;">ℹ️ tap</span></div>
       <div style="font-size:26px; font-weight:bold; color:gold;" id="netWorth">$0</div>
-      <div style="font-size:11px; margin-top:4px;">🚫 Wasted: <b id="wastedTotal">$0</b> · 📈 Earned: <b id="earnedTotal">$0</b></div>
+      <div style="font-size:11px; margin-top:4px;">🚫 Wasted: <b id="wastedTotal">$0</b> · 📈 Earned: <b id="earnedTotal">$0</b> · 🏬 Passive: <b id="passiveTotal">$0/wk</b></div>
+    </div>
+
+    <!-- NEWS TICKER -->
+    <div id="newsTicker" style="background:linear-gradient(90deg,#1976d2,#42a5f5); border-radius:12px; padding:8px 14px; border:2px solid #fff; font-size:13px; font-weight:bold; display:flex; align-items:center; gap:8px;">
+      <span style="background:#fff; color:#1565c0; padding:2px 8px; border-radius:6px; font-size:11px;">📰 NEWS</span>
+      <span id="newsText" style="flex:1;">Loading market news...</span>
+    </div>
+
+    <!-- MAIN ACTION BUTTONS (row 1) -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px;">
+      <button class="btn" id="bizShopBtn" style="background:linear-gradient(180deg,#ff9800,#e65100); color:#fff; font-size:12px;">🏬 Businesses</button>
+      <button class="btn" id="realEstateBtn" style="background:linear-gradient(180deg,#8e24aa,#4a148c); color:#fff; font-size:12px;">🏠 Real Estate</button>
+      <button class="btn" id="portfolioBtn" style="background:linear-gradient(180deg,#00838f,#004d40); color:#fff; font-size:12px;">📊 Portfolio</button>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px;">
+      <button class="btn" id="pnlBtn" style="background:linear-gradient(180deg,#546e7a,#263238); color:#fff; font-size:12px;">📈 P&L Report</button>
+      <button class="btn" id="charityBtn" style="background:linear-gradient(180deg,#e91e63,#880e4f); color:#fff; font-size:12px;">❤️ Charity</button>
+      <button class="btn" id="achieveBtn" style="background:linear-gradient(180deg,#ffb300,#e65100); color:#fff; font-size:12px;">🏆 Trophies <span id="achieveCount" style="font-size:10px;">0/0</span></button>
     </div>
 
     <!-- JOB -->
@@ -527,8 +545,9 @@
         <div style="font-size:12px; background:rgba(255,215,0,0.2); padding:3px 8px; border-radius:8px; border:1px solid gold;">Jobs: <b id="jobsThisWeekTxt">0</b>/3</div>
       </div>
       <div id="jobDisplay" style="font-size:18px; font-weight:bold; margin-top:3px;">Pick a Job!</div>
-      <div style="display:flex; gap:6px; margin-top:6px;">
+      <div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">
         <button class="btn small blue" id="changeJobBtn">Change</button>
+        <button class="btn small" id="compareBtn" style="background:linear-gradient(180deg,#ffd54f,#ff6f00); color:#222;">⚖️ Work vs Own?</button>
         <button class="btn green" id="workBtn" style="flex:1; font-size:15px;">💼 START JOB!</button>
         <button class="btn" id="endWeekBtn" style="background:linear-gradient(180deg,#7e57c2,#4527a0); color:#fff; font-size:14px;">😴 End Week</button>
       </div>
@@ -3224,6 +3243,93 @@ const JOBS = [
 ];
 const JOBS_PER_WEEK = 3;
 
+/* PASSIVE INCOME BUSINESSES — buy once, earn every week automatically! */
+const BUSINESSES = [
+  { id:'b_vm',      emoji:'🥤', name:'Vending Machine',   cost:500,       income:15 },
+  { id:'b_ice',     emoji:'🍦', name:'Ice Cream Stand',   cost:1500,      income:60 },
+  { id:'b_arcade',  emoji:'🕹️', name:'Mini Arcade',       cost:4000,      income:180 },
+  { id:'b_truck',   emoji:'🚚', name:'Food Truck',        cost:8000,      income:400 },
+  { id:'b_shop',    emoji:'🏪', name:'Corner Store',      cost:20000,     income:1100 },
+  { id:'b_rest',    emoji:'🍕', name:'Pizza Restaurant',  cost:60000,     income:3500 },
+  { id:'b_chain',   emoji:'🏬', name:'Store Chain',       cost:250000,    income:16000 },
+  { id:'b_factory', emoji:'🏭', name:'Factory',           cost:1000000,   income:75000 },
+  { id:'b_tech',    emoji:'💻', name:'Tech Startup',      cost:5000000,   income:400000 },
+  { id:'b_corp',    emoji:'🏢', name:'Mega Corporation',  cost:50000000,  income:5000000 }
+];
+
+/* CRYPTOCURRENCY — very volatile 4th investment! */
+const CRYPTO_RATES = [-0.4, -0.25, -0.15, -0.05, 0.05, 0.15, 0.25, 0.5, 0.8, -0.5, 1.0]; // very volatile
+
+/* ACHIEVEMENTS — unlock badges */
+const ACHIEVEMENTS = [
+  { id:'a_firstjob',  emoji:'💼', name:'First Job!',        check: () => Money.earned > 0 },
+  { id:'a_1k',        emoji:'💰', name:'Rich Kid ($1K)',    check: () => netWorth() >= 1000 },
+  { id:'a_10k',       emoji:'💵', name:'Big Money ($10K)',  check: () => netWorth() >= 10000 },
+  { id:'a_100k',      emoji:'💸', name:'Six Figures!',      check: () => netWorth() >= 100000 },
+  { id:'a_1m',        emoji:'🎩', name:'Millionaire!',      check: () => netWorth() >= 1000000 },
+  { id:'a_10m',       emoji:'👑', name:'Multi-Millionaire', check: () => netWorth() >= 10000000 },
+  { id:'a_100m',      emoji:'💎', name:'Filthy Rich',       check: () => netWorth() >= 100000000 },
+  { id:'a_billionaire', emoji:'🦄', name:'BILLIONAIRE!',    check: () => netWorth() >= 1000000000 },
+  { id:'a_diversify', emoji:'⚖️', name:'Diversified',       check: () => Money.savings > 0 && Money.stocks > 0 && Money.bonds > 0 },
+  { id:'a_business',  emoji:'🏪', name:'Business Owner',    check: () => (Money.businesses||[]).length > 0 },
+  { id:'a_empire',    emoji:'🏭', name:'Business Empire',   check: () => (Money.businesses||[]).length >= 5 },
+  { id:'a_lambo',     emoji:'🏎️', name:'Lambo Life',        check: () => Money.wants.includes('w_lambo') },
+  { id:'a_house',     emoji:'🏠', name:'Homeowner',         check: () => Money.wants.includes('w_house') },
+  { id:'a_yacht',     emoji:'⛵', name:'Yacht Club',        check: () => Money.wants.includes('w_yacht') },
+  { id:'a_island',    emoji:'🏝️', name:'Island Owner',      check: () => Money.wants.includes('w_island') },
+  { id:'a_space',     emoji:'🚀', name:'Astronaut',         check: () => Money.wants.includes('w_space') },
+  { id:'a_generous',  emoji:'❤️', name:'Generous Heart',    check: () => (Money.donated||0) >= 1000 },
+  { id:'a_hero',      emoji:'😇', name:'Charity Hero',      check: () => (Money.donated||0) >= 100000 },
+  { id:'a_crypto',    emoji:'🪙', name:'Crypto Curious',    check: () => (Money.crypto||0) > 0 },
+  { id:'a_noloans',   emoji:'🛡️', name:'Debt Free',         check: () => Money.week >= 20 && !Money.loanBalance },
+  { id:'a_workaholic',emoji:'😅', name:'Workaholic',        check: () => Money.week >= 50 },
+  { id:'a_retired',   emoji:'🏖️', name:'Early Retirement',  check: () => netWorth() >= 5000000 }
+];
+
+/* REAL ESTATE PORTFOLIO — buy properties, construction time, then rent forever */
+const REAL_ESTATE = [
+  { id:'r_studio',    emoji:'🏠', name:'Small Studio',       cost:5000,      rent:120,     buildWeeks:1, appreciation:0.01 },
+  { id:'r_house',     emoji:'🏡', name:'Family Home',        cost:20000,     rent:600,     buildWeeks:2, appreciation:0.012 },
+  { id:'r_duplex',    emoji:'🏘️', name:'Duplex (2 units)',   cost:55000,     rent:1800,    buildWeeks:3, appreciation:0.015 },
+  { id:'r_condo',     emoji:'🏢', name:'Condo Building',     cost:180000,    rent:6500,    buildWeeks:4, appreciation:0.018 },
+  { id:'r_apt',       emoji:'🏘️', name:'Apartment Complex',  cost:600000,    rent:23000,   buildWeeks:6, appreciation:0.02 },
+  { id:'r_hotel',     emoji:'🏨', name:'Boutique Hotel',     cost:2500000,   rent:110000,  buildWeeks:8, appreciation:0.025 },
+  { id:'r_resort',    emoji:'🏝️', name:'Beach Resort',       cost:15000000,  rent:750000,  buildWeeks:12, appreciation:0.03 },
+  { id:'r_skyscraper',emoji:'🏙️', name:'Skyscraper',         cost:80000000,  rent:5000000, buildWeeks:16, appreciation:0.035 }
+];
+
+/* INFO TOOLTIPS — kid-friendly explanations for every concept */
+const INFO = {
+  net_worth: { title:'What is Net Worth?', body:'<b>Net Worth</b> = ALL your money combined!<br><br>💵 Cash (checking)<br>+ 🏦 Savings + 📊 Bonds + 📈 Stocks + 🪙 Crypto<br>+ 🏬 Businesses value<br>+ 🏠 Real Estate value<br>− 💳 Loans you owe<br><br>= <b>Your total wealth!</b> 💎<br><br>Rich people build net worth over TIME by owning things that grow, not just working!' },
+  checking: { title:'What is a Checking Account?', body:'<b>💵 Checking</b> is your everyday spending money.<br><br>✅ Use it to pay for things<br>✅ Move money into investments<br>❌ It does NOT grow<br><br>Keep enough for daily needs, but INVEST the rest so your money can grow! 🌱' },
+  savings: { title:'What is a Savings Account?', body:'<b>🏦 Savings</b> is your SAFEST place to grow money.<br><br>✅ Grows 0.5% every week<br>✅ Never loses money<br>❌ Grows slowly<br><br>Best for money you need soon — like a rainy day! 🌧️' },
+  bonds: { title:'What are Bonds?', body:'<b>📊 Bonds</b> are like SAFE loans to companies.<br><br>✅ Grows 2% every week<br>✅ Very steady<br>❌ Slower than stocks<br><br>Good middle ground between safety and growth! ⚖️' },
+  stocks: { title:'What are Stocks?', body:'<b>📈 Stocks</b> = tiny pieces of companies!<br><br>✅ Can grow 3-7% per week<br>✅ Big rewards over time<br>❌ Can go DOWN some weeks 📉<br><br>Watch the news for hints about what will boom! 📰' },
+  crypto: { title:'What is Cryptocurrency?', body:'<b>🪙 Crypto</b> is digital money that moves CRAZY fast!<br><br>✅ Can DOUBLE in a week! 🚀<br>❌ Can also CRASH 50%! 💥<br><br>Only invest what you can lose. Not for beginners!' },
+  business: { title:'What is a Business?', body:'<b>🏬 Businesses</b> earn money automatically — PASSIVE INCOME!<br><br>✅ Pays you every week — no work needed!<br>✅ You own it forever<br>❌ Big money upfront<br><br>💡 <b>KEY LESSON:</b> Rich people BUY businesses, not just WORK in them! When you own it, YOU keep all the profit!' },
+  realestate: { title:'What is Real Estate?', body:'<b>🏠 Real Estate</b> = buildings & land you own!<br><br>✅ Rent = income every week!<br>✅ Property value GROWS over time<br>❌ Costs a lot upfront<br>❌ Takes TIME to build (construction!) 🏗️<br><br>Real estate + businesses = the SECRET to serious wealth! 💰' },
+  passive: { title:'What is Passive Income?', body:'<b>💰 Passive Income</b> = money that comes to you WITHOUT working!<br><br>Comes from:<br>🏬 Businesses you own<br>🏠 Rental properties<br>📈 Investment growth<br><br>💡 <b>GOAL OF LIFE:</b> Build enough passive income so you don\'t HAVE to work! Then you have FREEDOM! 🕊️' },
+  profit_loss: { title:'What is Profit & Loss?', body:'<b>📊 Profit & Loss (P&L)</b> tracks money in vs money out.<br><br>💚 <b>Income</b>: Jobs, Business, Rent, Growth<br>💔 <b>Expenses</b>: Living, Loans, Waste<br>= <b>Profit (or Loss)</b><br><br>If profit > expenses → 💰 GROW WEALTH<br>If expenses > income → 💸 LOSE MONEY<br>Track this every week!' },
+  compound: { title:'What is Compound Interest?', body:'<b>🚀 Compound Interest</b> = money making MORE money!<br><br>Week 1: $100 → grows to $102<br>Week 2: $102 → grows to $104.04<br>Week 3: $104.04 → grows to $106.12<br>... and on and on!<br><br>The MORE time, the FASTER it grows! Einstein called it the 8th wonder of the world! 🌟' },
+  money_multiplier: { title:'The MONEY MULTIPLIER!', body:'<b>💡 Big Kid Lesson!</b><br><br>Working at a pizza shop = <b>$60/week</b><br>Owning a pizza shop = <b>$3,500/week</b>! (60x more!)<br><br>Working at a hotel = a normal job<br>OWNING a hotel = <b>$110,000/week</b>!<br><br>Same time, but OWNING gives you MULTIPLICATION! ✖️<br>That\'s the money multiplier!' }
+};
+
+/* NEWS HEADLINES — hint at stock movements */
+const STOCK_NEWS = [
+  { text:'🎮 Gaming companies booming this quarter!', bias: 0.15 },
+  { text:'📱 Tech industry hits record highs!',       bias: 0.15 },
+  { text:'🌩️ Storm damages retail sales',              bias: -0.15 },
+  { text:'☀️ Sunny days boost ice cream stocks',       bias: 0.10 },
+  { text:'📰 Big scandal shakes market!',              bias: -0.20 },
+  { text:'🌎 New products excite everyone',            bias: 0.10 },
+  { text:'💥 Market crash predicted by experts',       bias: -0.25 },
+  { text:'🎉 New year, new record highs!',             bias: 0.20 },
+  { text:'📉 Investors nervous about the future',       bias: -0.10 },
+  { text:'🚀 SpaceX launches new rocket!',             bias: 0.15 },
+  { text:'🏦 Banks announce lower rates',              bias: 0.08 },
+  { text:'⚠️ Recession fears growing...',              bias: -0.15 }
+];
+
 const WANTS = [
   { id: 'w_book',    emoji: '📚', name: 'Cool Book',       cost: 100 },
   { id: 'w_lego',    emoji: '🧱', name: 'Lego Set',         cost: 300 },
@@ -3270,11 +3376,19 @@ const EVENTS = [
 ];
 
 const Money = {
-  cash: 100, savings: 0, stocks: 0, bonds: 0,
+  cash: 100, savings: 0, stocks: 0, bonds: 0, crypto: 0,
   week: 1, jobId: 'j_pizza', wants: [], wasted: 0, earned: 0,
   log: [],
   jobsThisWeek: 0,
-  lessonsShown: []  // track which financial lessons already shown
+  lessonsShown: [],
+  businesses: [],
+  realEstate: [],   // [{id, boughtWeek, currentValue}]
+  achievements: [],
+  donated: 0,
+  currentNews: null,
+  loanBalance: 0,
+  lastCryptoChange: 0,
+  lastWeekPnL: null  // { income, expenses, profit }
 };
 
 /* Financial Literacy Micro-Lessons — teach at the right moment */
@@ -3316,7 +3430,391 @@ function fmt(n) {
   if (n >= 10000) return '$' + (n/1000).toFixed(1) + 'K';
   return '$' + Math.floor(n).toLocaleString();
 }
-function netWorth() { return Math.floor(Money.cash + Money.savings + Money.stocks + Money.bonds); }
+function netWorth() {
+  const bizValue = (Money.businesses || []).reduce((sum, id) => {
+    const b = BUSINESSES.find(x => x.id === id); return sum + (b ? b.cost : 0);
+  }, 0);
+  const reValue = (Money.realEstate || []).reduce((sum, p) => sum + (p.currentValue || 0), 0);
+  return Math.floor(Money.cash + Money.savings + Money.stocks + Money.bonds + (Money.crypto||0) + bizValue + reValue - (Money.loanBalance||0));
+}
+function passiveIncome() {
+  const biz = (Money.businesses || []).reduce((sum, id) => {
+    const b = BUSINESSES.find(x => x.id === id); return sum + (b ? b.income : 0);
+  }, 0);
+  const rent = (Money.realEstate || []).reduce((sum, p) => {
+    const re = REAL_ESTATE.find(x => x.id === p.id);
+    if (!re) return sum;
+    const isReady = (Money.week - p.boughtWeek) >= re.buildWeeks;
+    return sum + (isReady ? re.rent : 0);
+  }, 0);
+  return biz + rent;
+}
+function totalRentIncome() {
+  return (Money.realEstate || []).reduce((sum, p) => {
+    const re = REAL_ESTATE.find(x => x.id === p.id);
+    if (!re) return sum;
+    const isReady = (Money.week - p.boughtWeek) >= re.buildWeeks;
+    return sum + (isReady ? re.rent : 0);
+  }, 0);
+}
+function buyRealEstate(id) {
+  const re = REAL_ESTATE.find(x => x.id === id);
+  if (!re) return;
+  if (Money.cash < re.cost) { showToast('Not enough cash!'); return; }
+  Money.cash -= re.cost;
+  Money.realEstate.push({ id: re.id, boughtWeek: Money.week, currentValue: re.cost });
+  addLog(`🏠 Bought ${re.name}! Will earn ${fmt(re.rent)}/wk after ${re.buildWeeks} weeks of construction`);
+  SFX.win();
+  saveMoneyState();
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:80px;">${re.emoji}</div>
+      <h1 style="color:#2e7d32;">🏗️ Under Construction!</h1>
+      <h2>${re.name}</h2>
+      <div style="font-size:14px; margin:14px 0; padding:12px; background:#e3f2fd; border-radius:12px; text-align:left;">
+        💡 <b>REAL ESTATE LESSON!</b><br><br>
+        Real estate needs <b>TIME</b> to build! 🏗️<br>
+        Construction: <b>${re.buildWeeks} weeks</b><br>
+        After that: Earns <b>${fmt(re.rent)}/week</b> forever!<br>
+        And the value <b>GROWS</b> over time too! 📈<br><br>
+        Big rewards require patience! ⏰
+      </div>
+      <button class="btn green" onclick="closeMoneyModal()">Cool!</button>
+    </div>
+  `);
+  renderMoney();
+  checkAchievements();
+}
+window.buyRealEstate = buyRealEstate;
+
+function showRealEstateShop() {
+  const rows = REAL_ESTATE.map(re => {
+    const canBuy = Money.cash >= re.cost;
+    const ownedCount = (Money.realEstate || []).filter(p => p.id === re.id).length;
+    return `<div style="display:flex; align-items:center; gap:8px; padding:8px; background:#f5f5f5; border-radius:10px; margin:4px 0;">
+      <div style="font-size:32px;">${re.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-weight:bold; font-size:14px;">${re.name} ${ownedCount > 0 ? `<span style="background:gold; color:#222; padding:2px 6px; border-radius:6px; font-size:11px;">x${ownedCount}</span>` : ''}</div>
+        <div style="font-size:11px; opacity:0.7;">${fmt(re.cost)} → ${fmt(re.rent)}/wk after ${re.buildWeeks}wk build</div>
+      </div>
+      <button class="btn small ${canBuy?'green':'red'}" data-rid="${re.id}" ${canBuy?'':'disabled style="opacity:0.5;"'}>${canBuy?'BUY':'🔒'}</button>
+    </div>`;
+  }).join('');
+  showMoneyModal(`
+    <div>
+      <h2 style="text-align:center;">🏠 Real Estate Market</h2>
+      <div style="font-size:12px; text-align:center; margin-bottom:8px; background:#fff3e0; padding:8px; border-radius:8px;">💡 Buildings take TIME to build 🏗️ but pay rent FOREVER!<br>Property value also GROWS over time! 📈</div>
+      <div style="max-height:60vh; overflow-y:auto;">${rows}</div>
+      <button class="btn red" style="width:100%; margin-top:8px;" onclick="closeMoneyModal()">Close</button>
+    </div>
+  `);
+  document.querySelectorAll('#moneyModalBody [data-rid]').forEach(b => {
+    b.addEventListener('click', () => { closeMoneyModal(); buyRealEstate(b.dataset.rid); });
+  });
+}
+window.showRealEstateShop = showRealEstateShop;
+
+function showInfo(key) {
+  const info = INFO[key];
+  if (!info) return;
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:60px;">ℹ️</div>
+      <h2 style="color:#1565c0;">${info.title}</h2>
+      <div style="font-size:14px; margin:14px 0; padding:14px; background:#e3f2fd; border-radius:12px; text-align:left; line-height:1.7;">${info.body}</div>
+      <button class="btn green" onclick="closeMoneyModal()">Got it! 👍</button>
+    </div>
+  `);
+}
+window.showInfo = showInfo;
+
+function showJobCompare() {
+  const job = JOBS.find(j => j.id === Money.jobId) || JOBS[0];
+  // find matching business if any
+  const matchMap = { j_pizza:'b_rest', j_lemon:'b_ice', j_youtube:'b_arcade', j_tutor:'b_shop', j_coder:'b_tech', j_ceo:'b_corp', j_art:'b_arcade', j_lawn:'b_vm', j_petsit:'b_vm', j_doctor:'b_shop' };
+  const bizId = matchMap[job.id];
+  const biz = BUSINESSES.find(b => b.id === bizId) || BUSINESSES[0];
+  // 52 weeks comparison
+  let workTotal = 0, ownTotal = -biz.cost;
+  const workData = [], ownData = [];
+  for (let w = 0; w <= 52; w++) {
+    workTotal = job.pay * w * JOBS_PER_WEEK;
+    ownTotal = -biz.cost + biz.income * w;
+    workData.push(workTotal); ownData.push(ownTotal);
+  }
+  // Break-even week
+  let breakEven = -1;
+  for (let w = 1; w <= 200; w++) {
+    if (biz.income * w > biz.cost) { breakEven = w; break; }
+  }
+  const workAt52 = job.pay * 52 * JOBS_PER_WEEK;
+  const ownAt52 = -biz.cost + biz.income * 52;
+  // Simple SVG chart
+  const chartW = 300, chartH = 140, padding = 30;
+  const maxVal = Math.max(workData[52], ownData[52], biz.cost * 1.2);
+  const minVal = Math.min(0, ownData[0]);
+  const range = maxVal - minVal || 1;
+  const scaleY = (v) => chartH - padding - ((v - minVal) / range) * (chartH - padding * 2);
+  const scaleX = (w) => padding + (w / 52) * (chartW - padding * 2);
+  const workPath = workData.map((v,w) => `${w===0?'M':'L'}${scaleX(w).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
+  const ownPath = ownData.map((v,w) => `${w===0?'M':'L'}${scaleX(w).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
+  const zeroY = scaleY(0);
+  showMoneyModal(`
+    <div>
+      <h2 style="text-align:center;">⚖️ WORK vs OWN — 1 Year</h2>
+      <div style="font-size:13px; text-align:center; margin:6px 0;">Compare: Working at ${job.name} vs Owning ${biz.name}</div>
+      <div style="background:#fafafa; border-radius:10px; padding:10px; margin:8px 0;">
+        <svg viewBox="0 0 ${chartW} ${chartH}" style="width:100%; height:auto;">
+          <line x1="${padding}" y1="${zeroY}" x2="${chartW-padding}" y2="${zeroY}" stroke="#ccc" stroke-dasharray="3,3"/>
+          <text x="${padding-5}" y="${zeroY+3}" font-size="10" text-anchor="end" fill="#666">$0</text>
+          <path d="${workPath}" fill="none" stroke="#42a5f5" stroke-width="2.5"/>
+          <path d="${ownPath}" fill="none" stroke="#f44336" stroke-width="2.5"/>
+          <text x="${chartW-padding}" y="${scaleY(workData[52])-4}" font-size="10" text-anchor="end" fill="#1565c0">Work</text>
+          <text x="${chartW-padding}" y="${scaleY(ownData[52])-4}" font-size="10" text-anchor="end" fill="#b71c1c">Own</text>
+          <text x="${chartW/2}" y="${chartH-4}" font-size="10" text-anchor="middle" fill="#666">Weeks →</text>
+        </svg>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px;">
+        <div style="background:#e3f2fd; padding:10px; border-radius:10px; text-align:center;">
+          <div style="font-weight:bold; color:#1565c0;">💼 WORK</div>
+          <div>at ${job.name}</div>
+          <div style="margin-top:6px; font-size:11px;">Pay: ${fmt(job.pay)}/job</div>
+          <div style="margin-top:6px; font-weight:bold; color:#2e7d32;">1 Year: ${fmt(workAt52)}</div>
+          <div style="font-size:10px; opacity:0.7;">(you must work every week!)</div>
+        </div>
+        <div style="background:#ffebee; padding:10px; border-radius:10px; text-align:center;">
+          <div style="font-weight:bold; color:#b71c1c;">🏬 OWN</div>
+          <div>${biz.name}</div>
+          <div style="margin-top:6px; font-size:11px;">Cost: ${fmt(biz.cost)}<br>Earns: ${fmt(biz.income)}/wk</div>
+          <div style="margin-top:6px; font-weight:bold; color:${ownAt52>=0?'#2e7d32':'#b71c1c'};">1 Year: ${fmt(ownAt52)}</div>
+          <div style="font-size:10px; opacity:0.7;">${breakEven>0?`(pays for itself in ${breakEven} weeks!)`:''}</div>
+        </div>
+      </div>
+      <div style="font-size:13px; padding:12px; background:linear-gradient(135deg,#fff3e0,#ffe0b2); border-radius:12px; margin:10px 0; text-align:center;">
+        💡 <b>LESSON:</b> Working pays right away.<br>Owning costs money first, but pays FOREVER — even while you sleep! 💤<br><b>${ownAt52 > workAt52 ? '👑 Owning WINS in the long run!' : '⏰ Owning wins after enough time passes!'}</b>
+      </div>
+      <button class="btn green" style="width:100%;" onclick="closeMoneyModal()">Got it! 💪</button>
+    </div>
+  `);
+}
+window.showJobCompare = showJobCompare;
+
+function showPortfolio() {
+  const bizRows = (Money.businesses || []).map(id => {
+    const b = BUSINESSES.find(x => x.id === id); if (!b) return '';
+    return `<tr><td>${b.emoji} ${b.name}</td><td style="text-align:right;">${fmt(b.cost)}</td><td style="text-align:right; color:#2e7d32;">+${fmt(b.income)}/wk</td></tr>`;
+  }).join('');
+  const reRows = (Money.realEstate || []).map(p => {
+    const re = REAL_ESTATE.find(x => x.id === p.id); if (!re) return '';
+    const weeksBuilt = Money.week - p.boughtWeek;
+    const isReady = weeksBuilt >= re.buildWeeks;
+    return `<tr><td>${re.emoji} ${re.name} ${isReady ? '✅' : `🏗️ ${re.buildWeeks - weeksBuilt}wk left`}</td><td style="text-align:right;">${fmt(p.currentValue)}</td><td style="text-align:right; color:${isReady?'#2e7d32':'#999'};">${isReady?'+'+fmt(re.rent)+'/wk':'Building...'}</td></tr>`;
+  }).join('');
+  const totalPassive = passiveIncome();
+  showMoneyModal(`
+    <div>
+      <h2 style="text-align:center;">📊 My Portfolio</h2>
+      <div style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9); padding:12px; border-radius:12px; margin:8px 0; text-align:center;">
+        <div style="font-size:12px; opacity:0.8;">💰 TOTAL PASSIVE INCOME</div>
+        <div style="font-size:24px; font-weight:bold; color:#2e7d32;">${fmt(totalPassive)}/week</div>
+        <div style="font-size:11px; opacity:0.7;">Money earned WITHOUT working! 🎉</div>
+      </div>
+      <div style="max-height:50vh; overflow-y:auto;">
+        <div style="font-size:13px; font-weight:bold; margin-top:8px;">💵 Cash & Investments</div>
+        <table style="width:100%; font-size:12px; margin:6px 0;">
+          <tr><td>💵 Checking</td><td style="text-align:right;">${fmt(Money.cash)}</td><td></td></tr>
+          <tr><td>🏦 Savings</td><td style="text-align:right;">${fmt(Money.savings)}</td><td style="text-align:right; color:#2e7d32;">+0.5%/wk</td></tr>
+          <tr><td>📊 Bonds</td><td style="text-align:right;">${fmt(Money.bonds)}</td><td style="text-align:right; color:#2e7d32;">+2%/wk</td></tr>
+          <tr><td>📈 Stocks</td><td style="text-align:right;">${fmt(Money.stocks)}</td><td style="text-align:right; color:#2e7d32;">~+5%/wk</td></tr>
+          <tr><td>🪙 Crypto</td><td style="text-align:right;">${fmt(Money.crypto||0)}</td><td style="text-align:right; color:#e91e63;">CRAZY!</td></tr>
+        </table>
+        ${bizRows ? `<div style="font-size:13px; font-weight:bold; margin-top:8px;">🏬 Businesses</div><table style="width:100%; font-size:12px;">${bizRows}</table>` : ''}
+        ${reRows ? `<div style="font-size:13px; font-weight:bold; margin-top:8px;">🏠 Real Estate</div><table style="width:100%; font-size:12px;">${reRows}</table>` : ''}
+        ${Money.loanBalance > 0 ? `<div style="font-size:13px; font-weight:bold; margin-top:8px; color:#b71c1c;">💳 Debts</div><table style="width:100%; font-size:12px;"><tr><td>Loan (10%/wk!)</td><td style="text-align:right; color:#b71c1c;">-${fmt(Money.loanBalance)}</td></tr></table>` : ''}
+      </div>
+      <div style="background:#fff3e0; padding:10px; border-radius:10px; margin:10px 0; font-size:12px; text-align:center;">
+        💎 Net Worth: <b style="color:gold;">${fmt(netWorth())}</b>
+      </div>
+      <button class="btn red" style="width:100%;" onclick="closeMoneyModal()">Close</button>
+    </div>
+  `);
+}
+window.showPortfolio = showPortfolio;
+
+function showPnL() {
+  const pnl = Money.lastWeekPnL;
+  if (!pnl) {
+    showMoneyModal(`<div style="text-align:center;"><div style="font-size:60px;">📊</div><h2>No P&L Yet</h2><div style="margin:14px 0;">End a week first to see your Profit & Loss report!</div><button class="btn green" onclick="closeMoneyModal()">OK</button></div>`);
+    return;
+  }
+  const rows = (label, items, color) => {
+    const filtered = items.filter(([n,v]) => v > 0);
+    if (!filtered.length) return `<div style="color:#666; font-style:italic;">No ${label.toLowerCase()}</div>`;
+    return filtered.map(([n,v]) => `<div style="display:flex; justify-content:space-between;"><span>${n}</span><span style="color:${color};">${color==='#b71c1c'?'-':'+'}${fmt(v)}</span></div>`).join('');
+  };
+  showMoneyModal(`
+    <div>
+      <h2 style="text-align:center;">📊 Week ${Money.week - 1} P&L</h2>
+      <div style="font-size:11px; text-align:center; opacity:0.7;">Profit & Loss = Income minus Expenses</div>
+      <div style="background:#e8f5e9; padding:10px; border-radius:10px; margin:8px 0;">
+        <div style="font-weight:bold; color:#2e7d32;">💚 INCOME</div>
+        ${rows('income', pnl.income, '#2e7d32')}
+        <div style="border-top:1px solid #a5d6a7; margin-top:6px; padding-top:6px; display:flex; justify-content:space-between; font-weight:bold;"><span>Total In</span><span style="color:#2e7d32;">+${fmt(pnl.income.reduce((s,[n,v])=>s+v,0))}</span></div>
+      </div>
+      <div style="background:#ffebee; padding:10px; border-radius:10px; margin:8px 0;">
+        <div style="font-weight:bold; color:#b71c1c;">💔 EXPENSES</div>
+        ${rows('expenses', pnl.expenses, '#b71c1c')}
+        <div style="border-top:1px solid #ffab91; margin-top:6px; padding-top:6px; display:flex; justify-content:space-between; font-weight:bold;"><span>Total Out</span><span style="color:#b71c1c;">-${fmt(pnl.expenses.reduce((s,[n,v])=>s+v,0))}</span></div>
+      </div>
+      <div style="background:${pnl.profit>=0?'#c8e6c9':'#ffcdd2'}; padding:12px; border-radius:10px; margin:8px 0; text-align:center;">
+        <div style="font-size:11px; opacity:0.7;">${pnl.profit>=0?'💰 PROFIT':'📉 LOSS'}</div>
+        <div style="font-size:22px; font-weight:bold; color:${pnl.profit>=0?'#2e7d32':'#b71c1c'};">${pnl.profit>=0?'+':''}${fmt(pnl.profit)}</div>
+      </div>
+      <button class="btn green" style="width:100%;" onclick="closeMoneyModal()">OK</button>
+    </div>
+  `);
+}
+window.showPnL = showPnL;
+function refreshNews() {
+  Money.currentNews = pick(STOCK_NEWS);
+}
+function checkAchievements() {
+  const newOnes = [];
+  for (const a of ACHIEVEMENTS) {
+    if (!Money.achievements.includes(a.id) && a.check()) {
+      Money.achievements.push(a.id);
+      newOnes.push(a);
+    }
+  }
+  if (newOnes.length) {
+    Save.set('money', Money);
+    // celebrate first new one
+    const a = newOnes[0];
+    setTimeout(() => {
+      showMoneyModal(`
+        <div style="text-align:center;">
+          <div style="font-size:80px; animation: shake 0.4s infinite alternate;">${a.emoji}</div>
+          <h1 style="color:#ff6f00;">🏆 ACHIEVEMENT!</h1>
+          <h2>${a.name}</h2>
+          <div style="font-size:14px; margin:14px 0;">You unlocked a new badge!</div>
+          <button class="btn green" onclick="closeMoneyModal()">Cool!</button>
+        </div>
+      `);
+      SFX.win();
+      setTimeout(() => SFX.win(), 300);
+    }, 500);
+  }
+}
+function buyBusiness(id) {
+  const b = BUSINESSES.find(x => x.id === id);
+  if (!b) return;
+  if (Money.businesses.includes(id)) { showToast('You already own this!'); return; }
+  if (Money.cash < b.cost) { showToast('Not enough cash!'); return; }
+  Money.cash -= b.cost;
+  Money.businesses.push(id);
+  addLog(`🏬 Bought ${b.name}! Now earns ${fmt(b.income)}/wk automatically`);
+  SFX.win();
+  saveMoneyState();
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:80px;">${b.emoji}</div>
+      <h1 style="color:#2e7d32;">🎉 New Business!</h1>
+      <h2>${b.name}</h2>
+      <div style="font-size:14px; margin:14px 0; padding:12px; background:#e8f5e9; border-radius:12px;">
+        💡 <b>PASSIVE INCOME!</b> This business earns <b>${fmt(b.income)}/week</b> — you don't have to work for it! 🎉<br><br>
+        The more businesses you own, the more money flows in every week automatically. That's how the RICH stay rich!
+      </div>
+      <button class="btn green" onclick="closeMoneyModal()">Awesome!</button>
+    </div>
+  `);
+  renderMoney();
+  checkAchievements();
+}
+function showBusinessShop() {
+  const rows = BUSINESSES.map(b => {
+    const owned = Money.businesses.includes(b.id);
+    const canBuy = Money.cash >= b.cost;
+    return `<div style="display:flex; align-items:center; gap:8px; padding:8px; background:${owned ? '#e8f5e9' : '#f5f5f5'}; border-radius:10px; margin:4px 0; ${owned ? 'border:2px solid gold;' : ''}">
+      <div style="font-size:32px;">${b.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-weight:bold; font-size:14px;">${b.name}</div>
+        <div style="font-size:11px; opacity:0.7;">${fmt(b.cost)} → earns ${fmt(b.income)}/wk</div>
+      </div>
+      ${owned ? '<div style="color:gold; font-weight:bold;">✓ OWNED</div>' : `<button class="btn small ${canBuy?'green':'red'}" data-bid="${b.id}" ${canBuy?'':'disabled style="opacity:0.5;"'}>${canBuy?'BUY':'🔒'}</button>`}
+    </div>`;
+  }).join('');
+  showMoneyModal(`
+    <div>
+      <h2 style="text-align:center;">🏬 Business Shop</h2>
+      <div style="font-size:12px; text-align:center; margin-bottom:8px;">Buy businesses that earn money EVERY WEEK — passive income! 💰</div>
+      <div style="max-height:60vh; overflow-y:auto;">${rows}</div>
+      <button class="btn red" style="width:100%; margin-top:8px;" onclick="closeMoneyModal()">Close</button>
+    </div>
+  `);
+  document.querySelectorAll('#moneyModalBody [data-bid]').forEach(b => {
+    b.addEventListener('click', () => { closeMoneyModal(); buyBusiness(b.dataset.bid); });
+  });
+}
+function donate(amount) {
+  if (Money.cash < amount) { showToast('Not enough cash!'); return; }
+  Money.cash -= amount;
+  Money.donated = (Money.donated||0) + amount;
+  addLog(`❤️ Donated ${fmt(amount)} to charity!`);
+  SFX.correct();
+  saveMoneyState();
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:80px;">😇</div>
+      <h1 style="color:#e91e63;">You're a Hero!</h1>
+      <div style="font-size:14px; margin:14px 0; padding:12px; background:#fce4ec; border-radius:12px;">
+        💖 You donated <b>${fmt(amount)}</b> to help others.<br><br>
+        Giving makes you FEEL amazing, and it teaches you that money isn't everything!<br><br>
+        <b>Total donated:</b> ${fmt(Money.donated)}
+      </div>
+      <button class="btn green" onclick="closeMoneyModal()">Feels Good!</button>
+    </div>
+  `);
+  renderMoney();
+  checkAchievements();
+}
+function showCharityModal() {
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:70px;">❤️</div>
+      <h2>Give to Charity</h2>
+      <div style="font-size:13px; margin:10px 0;">Help kids in need! Donating money is a great habit.</div>
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin:10px 0;">
+        <button class="btn green" onclick="closeMoneyModal();donate(10);">💝 $10</button>
+        <button class="btn green" onclick="closeMoneyModal();donate(100);">💝 $100</button>
+        <button class="btn green" onclick="closeMoneyModal();donate(1000);">💝 $1,000</button>
+        <button class="btn green" onclick="closeMoneyModal();donate(10000);">💝 $10,000</button>
+      </div>
+      <button class="btn red" onclick="closeMoneyModal()">Not now</button>
+    </div>
+  `);
+}
+function showAchievements() {
+  const rows = ACHIEVEMENTS.map(a => {
+    const has = Money.achievements.includes(a.id);
+    return `<div style="text-align:center; padding:8px; background:${has ? 'linear-gradient(135deg,#ffeb3b,#ff9800)' : '#eeeeee'}; border-radius:12px; border:${has ? '3px solid gold' : '2px solid #ccc'}; opacity:${has ? '1' : '0.5'};">
+      <div style="font-size:32px;">${has ? a.emoji : '🔒'}</div>
+      <div style="font-size:11px; font-weight:bold; color:#222;">${has ? a.name : '???'}</div>
+    </div>`;
+  }).join('');
+  const owned = Money.achievements.length;
+  showMoneyModal(`
+    <div>
+      <h2 style="text-align:center;">🏆 Achievements</h2>
+      <div style="text-align:center; font-size:13px; margin:6px 0;">${owned}/${ACHIEVEMENTS.length} unlocked</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(90px, 1fr)); gap:6px; max-height:60vh; overflow-y:auto;">
+        ${rows}
+      </div>
+      <button class="btn red" style="width:100%; margin-top:8px;" onclick="closeMoneyModal()">Close</button>
+    </div>
+  `);
+}
+window.donate = donate;
+window.buyBusiness = buyBusiness;
 function addLog(text) {
   Money.log.unshift(`Wk${Money.week}: ${text}`);
   if (Money.log.length > 20) Money.log.length = 20;
@@ -3325,6 +3823,12 @@ function addLog(text) {
 function startMoneyGame() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   loadMoneyState();
+  // ensure new fields exist for old saves
+  if (Money.businesses === undefined) Money.businesses = [];
+  if (Money.achievements === undefined) Money.achievements = [];
+  if (Money.crypto === undefined) Money.crypto = 0;
+  if (Money.donated === undefined) Money.donated = 0;
+  if (!Money.currentNews) refreshNews();
   document.getElementById('moneyScreen').classList.add('active');
   renderMoney();
   // welcome modal if brand new
@@ -3332,25 +3836,35 @@ function startMoneyGame() {
     showMoneyModal(`
       <div style="text-align:center;">
         <div style="font-size:70px;">💰</div>
-        <h2>Welcome to Money Master!</h2>
-        <div style="text-align:left; font-size:14px; margin:14px 0; line-height:1.6;">
-          <b>🎯 Your goal:</b> Save & invest to buy BIG dreams like a Lamborghini!<br><br>
-          <b>💼 How to play:</b><br>
-          1. Pick a job<br>
-          2. Click <b>WORK</b> to earn money each week<br>
-          3. Put money in <b>Savings</b> (safe), <b>Bonds</b> (steady), or <b>Stocks</b> (risky but grows fast)<br>
-          4. Watch out for money-wasters! 🍭<br>
-          5. Buy BIG goals when you have enough!<br><br>
-          <b>💡 Secret:</b> Money you INVEST grows every week — that's called <b>compound interest!</b> 📈
+        <h1 style="color:#2e7d32;">Money Master!</h1>
+        <div style="text-align:left; font-size:14px; margin:14px 0; line-height:1.7; padding:12px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); border-radius:12px; color:#1b5e20;">
+          <b>🎯 Your MISSION:</b> Become RICH by learning how money works!<br><br>
+          <b>💡 BIG SECRET (adults don't tell kids!):</b><br>
+          The rich don't get rich by WORKING harder.<br>
+          They get rich by <b>OWNING things</b> that make money for them! 🏬🏠<br><br>
+          <b>You'll learn to:</b><br>
+          💼 Work jobs (starter money)<br>
+          🏬 Buy businesses (passive income!)<br>
+          🏠 Own real estate (rent forever!)<br>
+          📈 Invest smart (compound growth!)<br>
+          📊 Read Profit & Loss (like a CEO!)<br><br>
+          <b>Tap any</b> <span style="background:rgba(255,255,255,0.5); padding:1px 6px; border-radius:6px;">ℹ️</span> <b>to learn any concept!</b>
         </div>
-        <button class="btn green" onclick="closeMoneyModal()">Let's Go! 🚀</button>
+        <div style="display:flex; gap:6px;">
+          <button class="btn blue" style="flex:1;" onclick="closeMoneyModal();showInfo('money_multiplier');">💡 Learn First!</button>
+          <button class="btn green" style="flex:1;" onclick="closeMoneyModal()">Let's Go! 🚀</button>
+        </div>
       </div>
     `);
   }
 }
 
 function renderMoney() {
-  document.getElementById('moneyHudLeft').textContent = `💰${fmt(Money.cash)} · 🏦${fmt(Money.savings)} · 📈${fmt(Money.stocks)}`;
+  const hudEl = document.getElementById('moneyHudLeft');
+  hudEl.innerHTML = `💵 <b>${fmt(Money.cash)}</b> · 🏦${fmt(Money.savings)} · 📈${fmt(Money.stocks)}`;
+  hudEl.style.cursor = 'pointer';
+  hudEl.title = 'Tap to learn what these mean';
+  hudEl.onclick = () => showInfo('checking');
   document.getElementById('moneyHudCenter').textContent = `Week ${Money.week}`;
   document.getElementById('netWorth').textContent = fmt(netWorth());
   document.getElementById('wastedTotal').textContent = fmt(Money.wasted);
@@ -3359,13 +3873,21 @@ function renderMoney() {
   const job = JOBS.find(j => j.id === Money.jobId) || JOBS[0];
   document.getElementById('jobDisplay').innerHTML = `${job.emoji} ${job.name} — <b>${fmt(job.pay)}/week</b>`;
   document.getElementById('jobsThisWeekTxt').textContent = Money.jobsThisWeek;
-  // Investments — with EXACT next-week preview (no percentages, kid-friendly)
+  document.getElementById('passiveTotal').textContent = fmt(passiveIncome()) + '/wk';
+  // Update news ticker
+  const nt = document.getElementById('newsText');
+  if (nt) nt.textContent = Money.currentNews ? Money.currentNews.text + ' ' + (Money.currentNews.bias > 0 ? '📈 (Stocks may go UP!)' : Money.currentNews.bias < 0 ? '📉 (Stocks may go DOWN!)' : '') : 'All quiet on the market...';
+  // Update achievement count
+  const ac = document.getElementById('achieveCount');
+  if (ac) ac.textContent = (Money.achievements||[]).length + '/' + ACHIEVEMENTS.length;
+  // Investments — with EXACT next-week preview + CRYPTO
   const inv = document.getElementById('investPanel');
   inv.innerHTML = '';
   const types = [
     { key: 'savings', emoji: '🏦', name: 'Savings',  growth: 0.005, color: '#42a5f5', desc: 'Safe — always grows' },
     { key: 'bonds',   emoji: '📊', name: 'Bonds',    growth: 0.02,  color: '#66bb6a', desc: 'Steady — grows more' },
-    { key: 'stocks',  emoji: '📈', name: 'Stocks',   growth: 0.05,  color: '#ef5350', desc: 'Risky — grows FASTEST' }
+    { key: 'stocks',  emoji: '📈', name: 'Stocks',   growth: 0.05,  color: '#ef5350', desc: 'Risky — grows FASTEST' },
+    { key: 'crypto',  emoji: '🪙', name: 'Crypto',   growth: 0.20,  color: '#9c27b0', desc: 'CRAZY — can 2x or CRASH!' }
   ];
   types.forEach(t => {
     const nextWeek = Math.floor(Money[t.key] * (1 + t.growth));
@@ -3375,7 +3897,7 @@ function renderMoney() {
     row.style.cssText = 'display:flex; flex-direction:column; gap:4px; background:rgba(0,0,0,0.35); padding:8px; border-radius:10px; border-left:4px solid ' + t.color;
     row.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-size:14px; font-weight:bold;">${t.emoji} ${t.name}</div>
+        <div style="font-size:14px; font-weight:bold;">${t.emoji} ${t.name} <span style="background:rgba(255,255,255,0.2); padding:1px 6px; border-radius:6px; font-size:10px; cursor:pointer;" onclick="showInfo('${t.key}')">ℹ️</span></div>
         <div style="font-size:11px; opacity:0.85;">${t.desc}</div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -3431,7 +3953,7 @@ function closeMoneyModal() {
 window.closeMoneyModal = closeMoneyModal;
 
 function invest(type, amount) {
-  const firstEverInvest = !Money.lessonsShown.includes('first_invest') && Money.savings === 0 && Money.stocks === 0 && Money.bonds === 0;
+  const firstEverInvest = !Money.lessonsShown.includes('first_invest') && Money.savings === 0 && Money.stocks === 0 && Money.bonds === 0 && (Money.crypto||0) === 0;
   if (amount > 0) {
     if (Money.cash < amount) { showToast('Not enough cash!'); return; }
     Money.cash -= amount; Money[type] += amount;
@@ -3598,45 +4120,116 @@ function doInteractiveJob(job) {
 
 function endWeek() {
   if (Money.jobsThisWeek === 0 && !confirm('You haven\'t worked yet this week! Skip anyway?')) return;
-  // Investments grow
+  // Investments grow — with NEWS BIAS on stocks
   const savingsGrowth = Math.floor(Money.savings * 0.005);
   const bondsGrowth   = Math.floor(Money.bonds * 0.02);
-  const stocksGrowth  = Math.floor(Money.stocks * (0.03 + Math.random() * 0.04));
+  const newsBias = (Money.currentNews?.bias || 0);
+  const stockRate = 0.03 + Math.random() * 0.04 + newsBias;
+  const stocksGrowth  = Math.floor(Money.stocks * stockRate);
   Money.savings += savingsGrowth;
   Money.bonds   += bondsGrowth;
-  Money.stocks  += stocksGrowth;
+  Money.stocks  = Math.max(0, Money.stocks + stocksGrowth);
+  // CRYPTO — wild swings!
+  const cryptoRate = pick(CRYPTO_RATES);
+  const cryptoGrowth = Math.floor((Money.crypto || 0) * cryptoRate);
+  Money.crypto = Math.max(0, (Money.crypto || 0) + cryptoGrowth);
+  Money.lastCryptoChange = cryptoRate;
+  // BUSINESS INCOME
+  const bizIncome = (Money.businesses || []).reduce((sum, id) => {
+    const b = BUSINESSES.find(x => x.id === id); return sum + (b ? b.income : 0);
+  }, 0);
+  // RENT INCOME + PROPERTY APPRECIATION
+  let rentIncome = 0, appreciation = 0;
+  const readyThisWeek = [];
+  (Money.realEstate || []).forEach(p => {
+    const re = REAL_ESTATE.find(x => x.id === p.id);
+    if (!re) return;
+    const weeksBuilt = Money.week - p.boughtWeek;
+    const isReady = weeksBuilt >= re.buildWeeks;
+    if (isReady) {
+      rentIncome += re.rent;
+      const grow = Math.floor(p.currentValue * re.appreciation);
+      appreciation += grow;
+      p.currentValue += grow;
+      // Check if this is the first ready week
+      if (weeksBuilt === re.buildWeeks) readyThisWeek.push(re);
+    }
+  });
+  Money.cash += bizIncome + rentIncome;
+  Money.earned += bizIncome + rentIncome;
+  // LOAN INTEREST — 10% per week if unpaid
+  const loanInterest = Math.floor((Money.loanBalance || 0) * 0.10);
+  Money.loanBalance = (Money.loanBalance || 0) + loanInterest;
+
+  // Build P&L statement
+  const jobIncome = Money.jobsThisWeek * (JOBS.find(j => j.id === Money.jobId)?.pay || 0);
+  Money.lastWeekPnL = {
+    income: [
+      ['💼 Job income (this week)', jobIncome],
+      ['🏬 Business income', bizIncome],
+      ['🏠 Rental income', rentIncome],
+      ['🏦 Savings growth', savingsGrowth],
+      ['📊 Bonds growth', bondsGrowth],
+      ['📈 Stocks growth', Math.max(0, stocksGrowth)],
+      ['🪙 Crypto growth', Math.max(0, cryptoGrowth)],
+      ['🏠 Property appreciation', appreciation]
+    ],
+    expenses: [
+      ['📉 Stock loss', Math.max(0, -stocksGrowth)],
+      ['📉 Crypto loss', Math.max(0, -cryptoGrowth)],
+      ['💳 Loan interest', loanInterest]
+    ]
+  };
+  const totalIn = Money.lastWeekPnL.income.reduce((s, [,v]) => s + v, 0);
+  const totalOut = Money.lastWeekPnL.expenses.reduce((s, [,v]) => s + v, 0);
+  Money.lastWeekPnL.profit = totalIn - totalOut;
+
   Money.week++;
   Money.jobsThisWeek = 0;
-  if (savingsGrowth + bondsGrowth + stocksGrowth > 0) {
-    addLog(`📊 Investments grew: 🏦+${fmt(savingsGrowth)} 📊+${fmt(bondsGrowth)} 📈+${fmt(stocksGrowth)}`);
-  }
+  refreshNews();
+
+  if (savingsGrowth + bondsGrowth + stocksGrowth > 0) addLog(`📊 Investments: 🏦+${fmt(savingsGrowth)} 📊+${fmt(bondsGrowth)} 📈${stocksGrowth>=0?'+':''}${fmt(stocksGrowth)}`);
+  if (cryptoGrowth !== 0) addLog(`🪙 Crypto: ${cryptoGrowth>=0?'+':''}${fmt(cryptoGrowth)}`);
+  if (bizIncome > 0) addLog(`🏬 Businesses earned +${fmt(bizIncome)}`);
+  if (rentIncome > 0) addLog(`🏠 Rent collected +${fmt(rentIncome)}`);
+  if (appreciation > 0) addLog(`📈 Property values grew +${fmt(appreciation)}`);
+  if (loanInterest > 0) addLog(`💳 Loan interest: -${fmt(loanInterest)} owed`);
+  readyThisWeek.forEach(re => addLog(`✅ ${re.name} is READY! Earning ${fmt(re.rent)}/wk`));
+
   SFX.coin();
   saveMoneyState();
   renderMoney();
 
-  const total = savingsGrowth + bondsGrowth + stocksGrowth;
-  if (total > 0) {
-    showMoneyModal(`
-      <div style="text-align:center;">
-        <div style="font-size:70px;">📈</div>
-        <h2 style="color:#2e7d32;">Week ${Money.week - 1} Ended!</h2>
-        <div style="font-size:14px; margin:10px 0;">Your investments grew while you rested! 💰</div>
-        <div style="background:#e8f5e9; padding:14px; border-radius:12px; margin:14px 0; font-size:14px; text-align:left;">
-          🏦 Savings: <b>+${fmt(savingsGrowth)}</b><br>
-          📊 Bonds: <b>+${fmt(bondsGrowth)}</b><br>
-          📈 Stocks: <b>+${fmt(stocksGrowth)}</b><br>
-          <hr style="margin:6px 0; border:0; border-top:1px solid #ccc;">
-          <b style="color:#2e7d32;">Total Growth: +${fmt(total)}</b>
-        </div>
-        ${!Money.lessonsShown.includes('compound') && total > 5 ? '<div style="font-size:13px; padding:10px; background:#fff3e0; border-radius:10px; margin:10px 0;">💡 <b>Amazing!</b> Your money is making more money — that\'s COMPOUND INTEREST! Keep investing! 🚀</div>' : ''}
-        <button class="btn green" onclick="closeMoneyModal();${!Money.lessonsShown.includes('compound') && total > 5 ? 'showFinLesson(\'compound\');' : ''}">Great!</button>
+  const totalPassive = bizIncome + rentIncome;
+  const totalGrowth = savingsGrowth + bondsGrowth + stocksGrowth + cryptoGrowth + appreciation;
+  const total = totalPassive + totalGrowth;
+  const readyMsg = readyThisWeek.length ? `<div style="background:linear-gradient(135deg,#c8e6c9,#a5d6a7); padding:10px; border-radius:10px; margin:8px 0; font-size:13px;">🎉 <b>Construction complete!</b><br>${readyThisWeek.map(re => `${re.emoji} ${re.name} is now earning rent!`).join('<br>')}</div>` : '';
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:60px;">📈</div>
+      <h2 style="color:#2e7d32;">Week ${Money.week - 1} Ended!</h2>
+      ${readyMsg}
+      <div style="background:#e8f5e9; padding:12px; border-radius:12px; margin:10px 0; font-size:12px; text-align:left;">
+        <div style="font-weight:bold; color:#1565c0;">💰 PASSIVE INCOME</div>
+        🏬 Businesses: <b>+${fmt(bizIncome)}</b><br>
+        🏠 Rent: <b>+${fmt(rentIncome)}</b><br>
+        <div style="font-weight:bold; margin-top:4px; color:#2e7d32;">📊 INVESTMENT GROWTH</div>
+        🏦+${fmt(savingsGrowth)} · 📊+${fmt(bondsGrowth)} · 📈<span style="color:${stocksGrowth>=0?'#2e7d32':'#b71c1c'};">${stocksGrowth>=0?'+':''}${fmt(stocksGrowth)}</span> · 🪙<span style="color:${cryptoGrowth>=0?'#2e7d32':'#b71c1c'};">${cryptoGrowth>=0?'+':''}${fmt(cryptoGrowth)}</span> (${cryptoRate>0?'+':''}${Math.round(cryptoRate*100)}%)<br>
+        🏠 Appreciation: <b>+${fmt(appreciation)}</b>
+        ${loanInterest>0?`<br><span style="color:#b71c1c;">💳 Loan interest: -${fmt(loanInterest)}</span>`:''}
+        <hr style="margin:6px 0; border:0; border-top:1px solid #ccc;">
+        <b style="color:#2e7d32;">Total: ${total>=0?'+':''}${fmt(total)}</b>
       </div>
-    `);
-  }
-  // random event chance
+      <div style="display:flex; gap:6px;">
+        <button class="btn small blue" style="flex:1;" onclick="closeMoneyModal();showPnL();">📊 See P&L</button>
+        <button class="btn green" style="flex:1;" onclick="closeMoneyModal();${!Money.lessonsShown.includes('compound') && total > 5 ? 'showFinLesson(\'compound\');' : ''}">Next Week!</button>
+      </div>
+    </div>
+  `);
+  checkAchievements();
   const r = Math.random();
-  if (r < 0.35) setTimeout(triggerDistraction, 1000);
-  else if (r < 0.65) setTimeout(triggerEvent, 1000);
+  if (r < 0.3) setTimeout(triggerDistraction, 1200);
+  else if (r < 0.55) setTimeout(triggerEvent, 1200);
 }
 
 function triggerDistraction() {
@@ -3734,6 +4327,13 @@ function showJobPicker() {
 }
 
 document.getElementById('moneyBtn').addEventListener('click', () => { SFX.click(); startMoneyGame(); });
+document.getElementById('bizShopBtn').addEventListener('click', () => { SFX.click(); showBusinessShop(); });
+document.getElementById('charityBtn').addEventListener('click', () => { SFX.click(); showCharityModal(); });
+document.getElementById('achieveBtn').addEventListener('click', () => { SFX.click(); showAchievements(); });
+document.getElementById('realEstateBtn').addEventListener('click', () => { SFX.click(); showRealEstateShop(); });
+document.getElementById('portfolioBtn').addEventListener('click', () => { SFX.click(); showPortfolio(); });
+document.getElementById('pnlBtn').addEventListener('click', () => { SFX.click(); showPnL(); });
+document.getElementById('compareBtn').addEventListener('click', () => { SFX.click(); showJobCompare(); });
 document.getElementById('moneyQuit').addEventListener('click', () => {
   saveMoneyState();
   document.getElementById('moneyScreen').classList.remove('active');
