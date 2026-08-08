@@ -522,11 +522,15 @@
 
     <!-- JOB -->
     <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:10px; border:2px solid rgba(255,255,255,0.3);">
-      <div style="font-size:11px; opacity:0.8;">CURRENT JOB</div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:11px; opacity:0.8;">CURRENT JOB</div>
+        <div style="font-size:12px; background:rgba(255,215,0,0.2); padding:3px 8px; border-radius:8px; border:1px solid gold;">Jobs: <b id="jobsThisWeekTxt">0</b>/3</div>
+      </div>
       <div id="jobDisplay" style="font-size:18px; font-weight:bold; margin-top:3px;">Pick a Job!</div>
-      <div style="display:flex; gap:8px; margin-top:6px;">
-        <button class="btn small blue" id="changeJobBtn">Change Job</button>
-        <button class="btn green" id="workBtn" style="flex:1; font-size:16px;">💼 WORK → Next Week</button>
+      <div style="display:flex; gap:6px; margin-top:6px;">
+        <button class="btn small blue" id="changeJobBtn">Change</button>
+        <button class="btn green" id="workBtn" style="flex:1; font-size:15px;">💼 START JOB!</button>
+        <button class="btn" id="endWeekBtn" style="background:linear-gradient(180deg,#7e57c2,#4527a0); color:#fff; font-size:14px;">😴 End Week</button>
       </div>
     </div>
 
@@ -3197,17 +3201,28 @@ document.getElementById('resetLessonsBtn').addEventListener('click', () => {
 
 /* ============================================================ MONEY MASTER — Financial Literacy Game ============================================================ */
 const JOBS = [
-  { id: 'j_lemon',  emoji: '🍋', name: 'Lemonade Stand', pay: 40,   unlockWeek: 1 },
-  { id: 'j_pizza',  emoji: '🍕', name: 'Pizza Maker',    pay: 60,   unlockWeek: 1 },
-  { id: 'j_petsit', emoji: '🐕', name: 'Pet Sitter',     pay: 90,   unlockWeek: 1 },
-  { id: 'j_lawn',   emoji: '🌱', name: 'Lawn Mowing',    pay: 120,  unlockWeek: 2 },
-  { id: 'j_art',    emoji: '🎨', name: 'Selling Art',    pay: 180,  unlockWeek: 5 },
-  { id: 'j_tutor',  emoji: '📚', name: 'Tutor',          pay: 250,  unlockWeek: 10 },
-  { id: 'j_youtube',emoji: '📹', name: 'YouTuber',       pay: 400,  unlockWeek: 15 },
-  { id: 'j_coder',  emoji: '💻', name: 'Coder',          pay: 700,  unlockWeek: 20 },
-  { id: 'j_doctor', emoji: '🩺', name: 'Doctor',         pay: 1500, unlockWeek: 30 },
-  { id: 'j_ceo',    emoji: '👔', name: 'CEO',            pay: 5000, unlockWeek: 50 }
+  { id: 'j_lemon',  emoji: '🍋', name: 'Lemonade Stand', pay: 40,   unlockWeek: 1,
+    steps: [{e:'🍋',n:'Squeeze Lemons'},{e:'💧',n:'Add Water'},{e:'🍯',n:'Add Sugar'},{e:'🧊',n:'Add Ice'},{e:'🥤',n:'Pour & Serve'}] },
+  { id: 'j_pizza',  emoji: '🍕', name: 'Pizza Maker',    pay: 60,   unlockWeek: 1,
+    steps: [{e:'🫓',n:'Roll Dough'},{e:'🍅',n:'Spread Sauce'},{e:'🧀',n:'Add Cheese'},{e:'🌶️',n:'Toppings'},{e:'🔥',n:'Bake in Oven'}] },
+  { id: 'j_petsit', emoji: '🐕', name: 'Pet Sitter',     pay: 90,   unlockWeek: 1,
+    steps: [{e:'🍖',n:'Feed Pet'},{e:'💧',n:'Give Water'},{e:'🚶',n:'Walk Pet'},{e:'🎾',n:'Play'},{e:'❤️',n:'Cuddle'}] },
+  { id: 'j_lawn',   emoji: '🌱', name: 'Lawn Mowing',    pay: 120,  unlockWeek: 2,
+    steps: [{e:'👷',n:'Get Gear'},{e:'⛽',n:'Fuel Mower'},{e:'🌾',n:'Cut Grass'},{e:'🍂',n:'Rake Leaves'},{e:'🗑️',n:'Bag Trash'}] },
+  { id: 'j_art',    emoji: '🎨', name: 'Selling Art',    pay: 180,  unlockWeek: 5,
+    steps: [{e:'💡',n:'Get Idea'},{e:'✏️',n:'Sketch'},{e:'🖌️',n:'Paint'},{e:'🖼️',n:'Frame Art'},{e:'💰',n:'Sell to Customer'}] },
+  { id: 'j_tutor',  emoji: '📚', name: 'Tutor',          pay: 250,  unlockWeek: 10,
+    steps: [{e:'📖',n:'Prep Lesson'},{e:'👋',n:'Greet Student'},{e:'✏️',n:'Give Practice'},{e:'✅',n:'Grade Work'},{e:'⭐',n:'Encourage'}] },
+  { id: 'j_youtube',emoji: '📹', name: 'YouTuber',       pay: 400,  unlockWeek: 15,
+    steps: [{e:'💡',n:'Plan Video'},{e:'🎬',n:'Film'},{e:'✂️',n:'Edit'},{e:'⬆️',n:'Upload'},{e:'👍',n:'Get Likes'}] },
+  { id: 'j_coder',  emoji: '💻', name: 'Coder',          pay: 700,  unlockWeek: 20,
+    steps: [{e:'📝',n:'Read Ticket'},{e:'⌨️',n:'Write Code'},{e:'🐛',n:'Fix Bugs'},{e:'✅',n:'Test'},{e:'🚀',n:'Deploy'}] },
+  { id: 'j_doctor', emoji: '🩺', name: 'Doctor',         pay: 1500, unlockWeek: 30,
+    steps: [{e:'👋',n:'Greet Patient'},{e:'🩺',n:'Check Vitals'},{e:'🔬',n:'Diagnose'},{e:'💊',n:'Prescribe'},{e:'❤️',n:'Care'}] },
+  { id: 'j_ceo',    emoji: '👔', name: 'CEO',            pay: 5000, unlockWeek: 50,
+    steps: [{e:'📊',n:'Review Reports'},{e:'💡',n:'Big Idea'},{e:'📞',n:'Call Team'},{e:'🤝',n:'Make Deal'},{e:'💰',n:'Grow Company'}] }
 ];
+const JOBS_PER_WEEK = 3;
 
 const WANTS = [
   { id: 'w_book',    emoji: '📚', name: 'Cool Book',       cost: 100 },
@@ -3257,8 +3272,38 @@ const EVENTS = [
 const Money = {
   cash: 100, savings: 0, stocks: 0, bonds: 0,
   week: 1, jobId: 'j_pizza', wants: [], wasted: 0, earned: 0,
-  log: []
+  log: [],
+  jobsThisWeek: 0,
+  lessonsShown: []  // track which financial lessons already shown
 };
+
+/* Financial Literacy Micro-Lessons — teach at the right moment */
+const FIN_LESSONS = {
+  first_invest: { emoji:'📈', title:'What is INVESTING?', body:'When you INVEST money, it works for YOU! 💪<br>Your money makes MORE money automatically.<br>The more you invest, the more it grows! 🌱' },
+  first_stocks: { emoji:'📊', title:'What are STOCKS?', body:'Stocks let you own a tiny piece of a company! 🏢<br>If the company does well, your money GROWS.<br>But be careful — stocks can also go DOWN! 📉' },
+  first_bonds:  { emoji:'📊', title:'What are BONDS?', body:'Bonds are like SAFE loans to a company.<br>They pay you a small amount every week — steady! 💰<br>Less risky than stocks, but slower growth.' },
+  first_savings:{ emoji:'🏦', title:'SAVINGS Account!', body:'A savings account is SUPER SAFE! 🛡️<br>Your money grows a tiny bit each week — no risk.<br>Best for money you need soon!' },
+  first_distraction: { emoji:'💡', title:'Opportunity Cost!', body:'Every dollar you spend on TOYS 🧸 is a dollar<br>that could grow to MANY dollars in investments!<br>Think before you buy! 💭' },
+  first_want:   { emoji:'🎯', title:'Saving for Goals!', body:'BIG dreams need BIG savings! 💪<br>Save a little every week for what you REALLY want.<br>Patience makes DREAMS come true! ⭐' },
+  compound: { emoji:'📈', title:'Compound Interest!', body:'Your investments GROW every week!<br>Next week those growths grow TOO! 🚀<br>That\'s how tiny amounts become HUGE over time!' },
+  diversify:{ emoji:'⚖️', title:'Don\'t Put All Eggs in One Basket!', body:'Smart investors split money across:<br>🏦 Savings (safe) + 📊 Bonds (steady) + 📈 Stocks (grow)<br>If one goes down, others help! 🛡️' }
+};
+
+function showFinLesson(key) {
+  if (Money.lessonsShown.includes(key)) return;
+  const L = FIN_LESSONS[key]; if (!L) return;
+  Money.lessonsShown.push(key);
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:70px;">${L.emoji}</div>
+      <h2 style="color:#1565c0;">💡 Money Lesson!</h2>
+      <h3 style="margin:10px 0;">${L.title}</h3>
+      <div style="font-size:14px; line-height:1.6; margin:14px 0; padding:12px; background:#e3f2fd; border-radius:12px;">${L.body}</div>
+      <button class="btn green" onclick="closeMoneyModal()">Got it! 💪</button>
+    </div>
+  `);
+  saveMoneyState();
+}
 
 function loadMoneyState() {
   const saved = Save.get('money', null);
@@ -3313,25 +3358,38 @@ function renderMoney() {
   // Job
   const job = JOBS.find(j => j.id === Money.jobId) || JOBS[0];
   document.getElementById('jobDisplay').innerHTML = `${job.emoji} ${job.name} — <b>${fmt(job.pay)}/week</b>`;
-  // Investments
+  document.getElementById('jobsThisWeekTxt').textContent = Money.jobsThisWeek;
+  // Investments — with EXACT next-week preview (no percentages, kid-friendly)
   const inv = document.getElementById('investPanel');
   inv.innerHTML = '';
   const types = [
-    { key: 'savings', emoji: '🏦', name: 'Savings',  rate: '0.5%',   color: '#42a5f5', desc: 'Safe!' },
-    { key: 'bonds',   emoji: '📊', name: 'Bonds',    rate: '2%',     color: '#66bb6a', desc: 'Steady' },
-    { key: 'stocks',  emoji: '📈', name: 'Stocks',   rate: '~5%',    color: '#ef5350', desc: 'Risky, grows fast!' }
+    { key: 'savings', emoji: '🏦', name: 'Savings',  growth: 0.005, color: '#42a5f5', desc: 'Safe — always grows' },
+    { key: 'bonds',   emoji: '📊', name: 'Bonds',    growth: 0.02,  color: '#66bb6a', desc: 'Steady — grows more' },
+    { key: 'stocks',  emoji: '📈', name: 'Stocks',   growth: 0.05,  color: '#ef5350', desc: 'Risky — grows FASTEST' }
   ];
   types.forEach(t => {
+    const nextWeek = Math.floor(Money[t.key] * (1 + t.growth));
+    const growAmount = nextWeek - Money[t.key];
+    const in10weeks = Math.floor(Money[t.key] * Math.pow(1 + t.growth, 10));
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); padding:6px 8px; border-radius:8px; border-left:4px solid ' + t.color;
+    row.style.cssText = 'display:flex; flex-direction:column; gap:4px; background:rgba(0,0,0,0.35); padding:8px; border-radius:10px; border-left:4px solid ' + t.color;
     row.innerHTML = `
-      <div style="flex:1;">
-        <div style="font-size:13px; font-weight:bold;">${t.emoji} ${t.name} <span style="font-size:10px; opacity:0.8;">(${t.rate}/wk ${t.desc})</span></div>
-        <div style="font-size:16px; color:gold; font-weight:bold;">${fmt(Money[t.key])}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:14px; font-weight:bold;">${t.emoji} ${t.name}</div>
+        <div style="font-size:11px; opacity:0.85;">${t.desc}</div>
       </div>
-      <button class="btn small green" data-inv="${t.key}" data-amt="10">+$10</button>
-      <button class="btn small green" data-inv="${t.key}" data-amt="100">+$100</button>
-      <button class="btn small red"   data-inv="${t.key}" data-amt="-100">−</button>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:18px; color:gold; font-weight:bold;">${fmt(Money[t.key])}</div>
+        <div style="font-size:11px; text-align:right;">
+          ${Money[t.key] > 0 ? `📅 Next week: <b style="color:#a5d6a7;">${fmt(nextWeek)}</b> (+${fmt(growAmount)})<br>🚀 In 10 weeks: <b style="color:gold;">${fmt(in10weeks)}</b>` : `<i style="opacity:0.6;">Invest to see growth!</i>`}
+        </div>
+      </div>
+      <div style="display:flex; gap:4px; flex-wrap:wrap;">
+        <button class="btn small green" data-inv="${t.key}" data-amt="10">+$10</button>
+        <button class="btn small green" data-inv="${t.key}" data-amt="100">+$100</button>
+        <button class="btn small green" data-inv="${t.key}" data-amt="500">+$500</button>
+        <button class="btn small red"   data-inv="${t.key}" data-amt="-9999999">Take Out</button>
+      </div>
     `;
     inv.appendChild(row);
   });
@@ -3373,10 +3431,20 @@ function closeMoneyModal() {
 window.closeMoneyModal = closeMoneyModal;
 
 function invest(type, amount) {
+  const firstEverInvest = !Money.lessonsShown.includes('first_invest') && Money.savings === 0 && Money.stocks === 0 && Money.bonds === 0;
   if (amount > 0) {
     if (Money.cash < amount) { showToast('Not enough cash!'); return; }
     Money.cash -= amount; Money[type] += amount;
     addLog(`Invested ${fmt(amount)} in ${type}`);
+    // trigger appropriate lessons
+    if (firstEverInvest) { setTimeout(() => showFinLesson('first_invest'), 300); }
+    else if (type === 'stocks' && !Money.lessonsShown.includes('first_stocks')) setTimeout(() => showFinLesson('first_stocks'), 300);
+    else if (type === 'bonds' && !Money.lessonsShown.includes('first_bonds')) setTimeout(() => showFinLesson('first_bonds'), 300);
+    else if (type === 'savings' && !Money.lessonsShown.includes('first_savings')) setTimeout(() => showFinLesson('first_savings'), 300);
+    // diversify lesson: has all 3 types
+    else if (Money.savings > 0 && Money.stocks > 0 && Money.bonds > 0 && !Money.lessonsShown.includes('diversify')) {
+      setTimeout(() => showFinLesson('diversify'), 300);
+    }
   } else {
     const take = Math.min(Money[type], -amount);
     if (take <= 0) return;
@@ -3395,6 +3463,8 @@ function buyWant(id) {
   addLog(`🎉 Bought ${w.name} for ${fmt(w.cost)}!`);
   SFX.win();
   saveMoneyState();
+  const isFirst = !Money.lessonsShown.includes('first_want');
+  if (isFirst) Money.lessonsShown.push('first_want');
   showMoneyModal(`
     <div style="text-align:center;">
       <div style="font-size:100px;">${w.emoji}</div>
@@ -3411,36 +3481,169 @@ function buyWant(id) {
   renderMoney();
 }
 
-function workWeek() {
+function startJob() {
   const job = JOBS.find(j => j.id === Money.jobId) || JOBS[0];
-  Money.cash += job.pay;
-  Money.earned += job.pay;
-  Money.week++;
-  addLog(`💼 Worked as ${job.name}, earned ${fmt(job.pay)}`);
+  if (Money.jobsThisWeek >= JOBS_PER_WEEK) {
+    showMoneyModal(`
+      <div style="text-align:center;">
+        <div style="font-size:70px;">😴</div>
+        <h2>You worked ${JOBS_PER_WEEK} jobs this week!</h2>
+        <div style="font-size:14px; margin:14px 0;">Time to rest and let your investments grow!<br>Click <b>End Week</b> to see your investment returns.</div>
+        <button class="btn green" onclick="closeMoneyModal()">OK!</button>
+      </div>
+    `);
+    return;
+  }
+  doInteractiveJob(job);
+}
 
-  // Investments grow!
+/* Interactive mini-game: tap recipe steps in order */
+function doInteractiveJob(job) {
+  let currentStep = 0;
+  let mistakes = 0;
+  const startedAt = Date.now();
+  const timeLimit = 20000; // 20 seconds for full bonus
+  const buttonOrder = shuffle(job.steps.slice());
+  let timerId = null;
+
+  function render() {
+    const next = job.steps[currentStep];
+    const stepDots = job.steps.map((s,i) => `<div style="font-size:20px; opacity:${i < currentStep ? '1' : '0.35'}; ${i === currentStep ? 'transform: scale(1.4); animation: comboPulse 0.6s infinite alternate;' : ''}">${s.e}</div>`).join('');
+    const btns = buttonOrder.map(s => `<button class="btn" data-e="${s.e}" style="font-size:36px; padding:12px; background:linear-gradient(180deg,#ffca28,#f57c00); color:#222; border:3px solid #fff; border-radius:14px;">${s.e}</button>`).join('');
+    const elapsed = (Date.now() - startedAt) / 1000;
+    const timeLeft = Math.max(0, 20 - elapsed);
+    const timePct = (timeLeft / 20) * 100;
+    showMoneyModal(`
+      <div style="text-align:center;">
+        <div style="font-size:60px;">${job.emoji}</div>
+        <h2>${job.name}</h2>
+        <div style="height:8px; background:#eee; border-radius:4px; margin:8px 0; overflow:hidden;">
+          <div id="jobTimer" style="height:100%; width:${timePct}%; background:linear-gradient(90deg,#4caf50,#ff9800,#f44336); transition:width 0.2s;"></div>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:center; margin:14px 0;">${stepDots}</div>
+        <div style="background:linear-gradient(180deg,#fff8e1,#ffca28); padding:12px; border-radius:14px; margin:10px 0;">
+          <div style="font-size:12px; opacity:0.8;">STEP ${currentStep+1} / ${job.steps.length} — Tap:</div>
+          <div style="font-size:22px; font-weight:bold; color:#3e2723; margin-top:4px;">${next.e} ${next.n}</div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(64px,1fr)); gap:8px;">
+          ${btns}
+        </div>
+        <div style="margin-top:10px; font-size:12px; opacity:0.7;">Mistakes: ${mistakes} · Speed = TIP! ⏱️</div>
+      </div>
+    `);
+    document.querySelectorAll('#moneyModalBody [data-e]').forEach(b => {
+      b.addEventListener('click', () => handleTap(b.dataset.e));
+    });
+  }
+
+  function handleTap(emoji) {
+    const need = job.steps[currentStep];
+    if (emoji === need.e) {
+      SFX.coin();
+      currentStep++;
+      if (currentStep >= job.steps.length) finish();
+      else render();
+    } else {
+      SFX.wrong();
+      mistakes++;
+      // shake feedback
+      const body = document.getElementById('moneyModalBody');
+      if (body) { body.style.animation = 'none'; setTimeout(() => body.style.animation = 'shake 0.3s', 10); }
+      render();
+    }
+  }
+
+  function finish() {
+    clearInterval(timerId);
+    const elapsed = (Date.now() - startedAt) / 1000;
+    const base = job.pay;
+    const speedBonus = Math.max(0, Math.floor(base * (1 - elapsed / 20) * 0.5));
+    const mistakePenalty = Math.min(base * 0.6, mistakes * Math.floor(base * 0.1));
+    const total = Math.max(Math.floor(base * 0.4), base + speedBonus - mistakePenalty);
+    Money.cash += total;
+    Money.earned += total;
+    Money.jobsThisWeek++;
+    addLog(`💼 ${job.name}: earned ${fmt(total)}${speedBonus > 0 ? ' (⚡+' + fmt(speedBonus) + ' tip!)' : ''}${mistakes > 0 ? ' (-' + fmt(mistakePenalty) + ' mistakes)' : ''}`);
+    SFX.win();
+    saveMoneyState();
+    showMoneyModal(`
+      <div style="text-align:center;">
+        <div style="font-size:80px;">${job.emoji}</div>
+        <h2 style="color:#2e7d32;">🎉 Job Done!</h2>
+        <div style="font-size:14px; margin:6px 0;">You worked as a ${job.name}</div>
+        <div style="background:#e8f5e9; padding:14px; border-radius:12px; margin:14px 0;">
+          <div style="font-size:24px; font-weight:bold; color:#2e7d32;">+${fmt(total)}</div>
+          <div style="font-size:12px; margin-top:6px;">Base: ${fmt(base)}${speedBonus > 0 ? ' + Speed tip: ' + fmt(speedBonus) : ''}${mistakes > 0 ? ' - Mistakes: ' + fmt(mistakePenalty) : ''}</div>
+        </div>
+        <div style="font-size:13px; margin:10px 0;">Jobs this week: <b>${Money.jobsThisWeek}/${JOBS_PER_WEEK}</b></div>
+        <div style="display:flex; gap:8px;">
+          ${Money.jobsThisWeek < JOBS_PER_WEEK ? '<button class="btn green" style="flex:1;" onclick="closeMoneyModal(); startJob();">💼 Work Another!</button>' : ''}
+          <button class="btn blue" style="flex:1;" onclick="closeMoneyModal()">💰 Manage Money</button>
+        </div>
+      </div>
+    `);
+    renderMoney();
+  }
+
+  render();
+  timerId = setInterval(() => {
+    const bar = document.getElementById('jobTimer');
+    if (!bar) { clearInterval(timerId); return; }
+    const elapsed = (Date.now() - startedAt) / 1000;
+    const pct = Math.max(0, (20 - elapsed) / 20) * 100;
+    bar.style.width = pct + '%';
+    if (elapsed > 30) { clearInterval(timerId); finish(); }
+  }, 200);
+}
+
+function endWeek() {
+  if (Money.jobsThisWeek === 0 && !confirm('You haven\'t worked yet this week! Skip anyway?')) return;
+  // Investments grow
   const savingsGrowth = Math.floor(Money.savings * 0.005);
   const bondsGrowth   = Math.floor(Money.bonds * 0.02);
   const stocksGrowth  = Math.floor(Money.stocks * (0.03 + Math.random() * 0.04));
   Money.savings += savingsGrowth;
   Money.bonds   += bondsGrowth;
   Money.stocks  += stocksGrowth;
-  if (savingsGrowth || bondsGrowth || stocksGrowth) {
+  Money.week++;
+  Money.jobsThisWeek = 0;
+  if (savingsGrowth + bondsGrowth + stocksGrowth > 0) {
     addLog(`📊 Investments grew: 🏦+${fmt(savingsGrowth)} 📊+${fmt(bondsGrowth)} 📈+${fmt(stocksGrowth)}`);
   }
-
   SFX.coin();
   saveMoneyState();
   renderMoney();
 
-  // 40% chance of a distraction, 30% chance of random event (but not both)
+  const total = savingsGrowth + bondsGrowth + stocksGrowth;
+  if (total > 0) {
+    showMoneyModal(`
+      <div style="text-align:center;">
+        <div style="font-size:70px;">📈</div>
+        <h2 style="color:#2e7d32;">Week ${Money.week - 1} Ended!</h2>
+        <div style="font-size:14px; margin:10px 0;">Your investments grew while you rested! 💰</div>
+        <div style="background:#e8f5e9; padding:14px; border-radius:12px; margin:14px 0; font-size:14px; text-align:left;">
+          🏦 Savings: <b>+${fmt(savingsGrowth)}</b><br>
+          📊 Bonds: <b>+${fmt(bondsGrowth)}</b><br>
+          📈 Stocks: <b>+${fmt(stocksGrowth)}</b><br>
+          <hr style="margin:6px 0; border:0; border-top:1px solid #ccc;">
+          <b style="color:#2e7d32;">Total Growth: +${fmt(total)}</b>
+        </div>
+        ${!Money.lessonsShown.includes('compound') && total > 5 ? '<div style="font-size:13px; padding:10px; background:#fff3e0; border-radius:10px; margin:10px 0;">💡 <b>Amazing!</b> Your money is making more money — that\'s COMPOUND INTEREST! Keep investing! 🚀</div>' : ''}
+        <button class="btn green" onclick="closeMoneyModal();${!Money.lessonsShown.includes('compound') && total > 5 ? 'showFinLesson(\'compound\');' : ''}">Great!</button>
+      </div>
+    `);
+  }
+  // random event chance
   const r = Math.random();
-  if (r < 0.4) triggerDistraction();
-  else if (r < 0.7) triggerEvent();
+  if (r < 0.35) setTimeout(triggerDistraction, 1000);
+  else if (r < 0.65) setTimeout(triggerEvent, 1000);
 }
 
 function triggerDistraction() {
   const d = pick(DISTRACTIONS);
+  if (!Money.lessonsShown.includes('first_distraction')) {
+    setTimeout(() => showFinLesson('first_distraction'), 2000);
+  }
   showMoneyModal(`
     <div style="text-align:center;">
       <div style="font-size:80px;">${d.emoji}</div>
@@ -3536,8 +3739,10 @@ document.getElementById('moneyQuit').addEventListener('click', () => {
   document.getElementById('moneyScreen').classList.remove('active');
   document.getElementById('home').classList.add('active');
 });
-document.getElementById('workBtn').addEventListener('click', workWeek);
+document.getElementById('workBtn').addEventListener('click', startJob);
+document.getElementById('endWeekBtn').addEventListener('click', endWeek);
 document.getElementById('changeJobBtn').addEventListener('click', showJobPicker);
+window.startJob = startJob;
 
 /* ============================================================ MULTIPLAYER ============================================================ */
 const Net = {
