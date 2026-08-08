@@ -44,10 +44,9 @@
   }
   .mode-card:active { transform: scale(0.94); }
   .mode-card.galaxy { background: linear-gradient(135deg, #1a0e3d, #4a148c); }
-  .mode-card.boss { background: linear-gradient(135deg, #1a0e3d, #311b92, #2575fc); }
+  .mode-card.boss { background: linear-gradient(135deg, #7b1f1f, #311b1b); }
   .mode-card.gems { background: linear-gradient(135deg, #006064, #4dd0e1); }
   .mode-card.adv { background: linear-gradient(135deg, #1b5e20, #66bb6a); }
-  .mode-card.moto { background: linear-gradient(135deg, #1a237e, #d84315, #ffb300); }
   .mode-card .emoji { font-size: clamp(40px, 7vw, 56px); display: block; }
   .mode-card .name { font-size: clamp(15px, 3vw, 19px); font-weight: bold; margin-top: 4px; text-shadow: 2px 2px 0 #000; }
   .mode-card .desc { font-size: 11px; opacity: 0.9; margin-top: 3px; }
@@ -209,78 +208,26 @@
   .pack-card.magic_school { background: linear-gradient(135deg, #1a237e, #6a1b9a, #ad1457); }
   .pack-card.dog { background: linear-gradient(135deg, #8d6e63, #d7ccc8, #ffab91); }
   .pack-card.ai  { background: linear-gradient(135deg, #00695c, #00bcd4, #b388ff); }
-  .pack-card.retro { background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff); }
-  .pack-card.elemental { background: linear-gradient(135deg, #ff4500, #00bfff, #228b22, #ffd700); }
-  .pack-card.atlas { background: linear-gradient(135deg, #6d4c1c, #d2b48c, #2e8b57); }
-  .pack-card.boddle { background: linear-gradient(135deg, #ff1744, #00e676, #ffea00); }
-  .pack-card.gimkit { background: linear-gradient(135deg, #1b5e20, #ffc107, #1976d2); }
-  .pack-card.blooket { background: linear-gradient(135deg, #03a9f4, #e91e63, #ffeb3b); }
-  .pack-card.aarav { background: linear-gradient(135deg, #ffd700, #ff6347, #9370db, #ff1493); }
-  .pack-card.fun { background: linear-gradient(135deg, #ff0080, #ff8c00, #ffd700, #00e676, #00bfff, #8a2be2); }
-  .pack-card.dad { background: linear-gradient(135deg, #3e2723, #795548, #a1887f); }
-  .pack-card.veggie { background: linear-gradient(135deg, #1b5e20, #66bb6a, #cddc39); }
-  .pack-card.fruit { background: linear-gradient(135deg, #e91e63, #ff9800, #ffeb3b); }
-  .pack-card.hero { background: linear-gradient(135deg, #d50000, #0091ea, #ffd600); }
-  .pack-card.cosmic { background: linear-gradient(135deg, #000000, #4a148c, #0091ea, #ffd600); }
-  .pack-card.ultimate { background: linear-gradient(135deg, #ffd600, #ff6f00, #d50000, #aa00ff, #0091ea, #ffd600); }
-
-  /* NEWS */
-  .news-btn {
-    position: relative;
-    background: linear-gradient(135deg, #ff8c00, #ff006e, #8338ec);
-    color: #fff;
+  .pack-card.secret {
+    background: linear-gradient(135deg, #e91e63, #ff9800, #ffeb3b, #4caf50, #2196f3, #9c27b0);
+    background-size: 300% 300%;
+    animation: secretShift 4s ease infinite, secretGlow 1.2s ease-in-out infinite alternate;
+    border-color: gold;
   }
-  .news-badge {
-    position: absolute;
-    top: -8px; right: -6px;
-    background: #ffd600;
-    color: #b71c1c;
-    font-size: 10px;
-    font-weight: 900;
-    padding: 2px 6px;
-    border-radius: 8px;
-    border: 2px solid #fff;
-    transform: rotate(8deg);
-    text-shadow: none;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    animation: news-pulse 1.2s ease-in-out infinite;
+  @keyframes secretShift {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
-  @keyframes news-pulse {
-    0%, 100% { transform: rotate(8deg) scale(1); }
-    50% { transform: rotate(8deg) scale(1.15); }
+  @keyframes secretGlow {
+    from { box-shadow: 0 0 12px rgba(255,215,0,0.6); }
+    to { box-shadow: 0 0 30px gold, 0 0 60px rgba(255,215,0,0.5); }
   }
-  .news-card {
-    background: rgba(0,0,0,0.4);
-    border: 2px solid #ffd600;
-    border-radius: 12px;
-    padding: 12px;
-    margin: 8px 0;
-    font-size: 14px;
-  }
-  .news-pack-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  .news-pack-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 12px;
-    border: 2px solid rgba(255,255,255,0.3);
-    color: #fff;
-    text-shadow: 1px 1px 0 #000;
-  }
-  .news-pack-item .np-emoji { font-size: 38px; flex-shrink: 0; }
-  .news-pack-item .np-info { flex: 1; min-width: 0; }
-  .news-pack-item .np-name { font-size: 16px; font-weight: bold; }
-  .news-pack-item .np-desc { font-size: 12px; opacity: 0.95; margin-top: 2px; line-height: 1.4; }
-  .news-pack-item .np-cost { font-size: 12px; margin-top: 4px; background: rgba(0,0,0,0.5); display: inline-block; padding: 2px 8px; border-radius: 10px; }
-  .news-pack-item.best {
-    border: 3px solid #ffd600;
-    box-shadow: 0 0 14px rgba(255, 214, 0, 0.8);
-    animation: best-glow 1.8s ease-in-out infinite;
-  }
-  @keyframes best-glow {
-    0%, 100% { box-shadow: 0 0 14px rgba(255, 214, 0, 0.8); }
-    50% { box-shadow: 0 0 24px rgba(255, 214, 0, 1); }
+  .secret-badge {
+    position: absolute; top: 4px; right: 4px;
+    background: gold; color: #b71c1c;
+    font-size: 10px; font-weight: bold;
+    padding: 3px 8px; border-radius: 10px;
+    border: 2px solid #fff; animation: secretGlow 1s alternate infinite;
   }
 
   /* PACK OPENING */
@@ -316,9 +263,6 @@
   .rarity.rare { background: #1976d2; }
   .rarity.epic { background: #8e24aa; }
   .rarity.legendary { background: linear-gradient(90deg, #ff6f00, #ffeb3b, #ff6f00); color: #222; animation: rainbowText 2s linear infinite; }
-  .rarity.kio { background: linear-gradient(90deg, #00e5ff, #ffea00, #00e5ff); color: #222; animation: rainbowText 2.5s linear infinite; }
-  .rarity.chroma { background: linear-gradient(90deg, #ff00ff, #00ffff, #ffff00, #ff00ff); color: #fff; text-shadow: 1px 1px 0 #000; animation: rainbowText 1.5s linear infinite; }
-  .rarity.mythical { background: linear-gradient(90deg, #6a1b9a, #e91e63, #ff6f00, #ffd600, #e91e63, #6a1b9a); color: #fff; text-shadow: 1px 1px 0 #000; animation: rainbowText 1s linear infinite; box-shadow: 0 0 14px rgba(255,215,0,0.9); }
   @keyframes rainbowText { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
 
   /* LEVEL UP */
@@ -335,19 +279,6 @@
     animation: revealIn 0.6s;
   }
   .levelup-card .big { font-size: 70px; }
-
-  /* GEOMETRY DASH SPEED PICKER */
-  #geoSpeed {
-    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.85); z-index: 36; flex-direction: column; padding: 14px;
-  }
-  #geoSpeed.active { display: flex; }
-  .geo-speed-card {
-    background: linear-gradient(180deg, #fff, #b3f5ff);
-    color: #222; border-radius: 22px; padding: 24px;
-    border: 5px solid #00e5ff; text-align: center; max-width: 340px; width: 100%;
-    box-shadow: 0 0 60px #00e5ff; animation: revealIn 0.4s;
-  }
 
   /* INVENTORY ITEM */
   .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
@@ -445,7 +376,7 @@
   <!-- HOME -->
   <div id="home" class="screen">
     <div class="hero-banner">
-      <h1>⚡ AARAV'S QUEST ARENA ⚡</h1>
+      <h1><span id="secretBolt" style="cursor:pointer; display:inline-block;">⚡</span> AARAV'S QUEST ARENA <span id="secretBolt2" style="cursor:pointer; display:inline-block;">⚡</span></h1>
       <div style="font-size:14px; margin-top:4px;">Welcome, <b id="profileNameTop">Player</b>!  <button class="btn small" id="switchProfileBtn">Switch</button></div>
       <div style="display:flex; justify-content:space-around; margin-top:8px; font-size:14px;">
         <div>🪙 <b id="coinsTop">0</b></div>
@@ -460,11 +391,45 @@
       <button class="btn purple" id="shopBtn">🎁 Pack Shop</button>
       <button class="btn blue" id="inventoryBtn">🎒 My Items</button>
       <button class="btn green" id="lessonsBtn">📚 Lessons</button>
-      <button class="btn news-btn" id="newsBtn">📰 News <span class="news-badge">NEW!</span></button>
+      <button class="btn" id="moneyBtn" style="background:linear-gradient(180deg,#4caf50,#1b5e20); color:#fff;">💰 Money Master</button>
     </div>
     <div style="text-align:center; background:rgba(0,0,0,0.4); border-radius:14px; padding:8px; border:2px solid #ff9800; font-size:13px;">
       🔥 <b>COMBO MODE:</b> Answer 5 in a row = 2x · 10 = 3x · 15 = 4x · 20 = 5x · 25 = 6x!<br>
       <span style="opacity:0.85">Best streak: <b id="bestComboTop">0</b> · One wrong answer resets the chain</span>
+    </div>
+
+    <!-- PROGRESS PANEL -->
+    <div style="background:linear-gradient(135deg,rgba(76,175,80,0.25),rgba(21,101,192,0.25)); border-radius:14px; padding:12px; border:3px solid rgba(255,255,255,0.4);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <b style="font-size:15px;">📊 Your Progress</b>
+        <span style="font-size:11px; opacity:0.85;" id="progLifetime">0 correct all-time</span>
+      </div>
+      <!-- Daily goal -->
+      <div style="margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:3px;">
+          <span>🎯 Daily Goal</span>
+          <b id="progGoalText">0/10</b>
+        </div>
+        <div style="height:12px; background:rgba(0,0,0,0.4); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.3);">
+          <div id="progGoalBar" style="height:100%; width:0%; background:linear-gradient(90deg,#66bb6a,#2e7d32); transition:width 0.4s;"></div>
+        </div>
+      </div>
+      <!-- Time windows -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; font-size:11px; text-align:center;">
+        <div style="background:rgba(0,0,0,0.35); padding:6px 4px; border-radius:8px;">
+          <div style="opacity:0.75;">This Session</div>
+          <div style="font-size:18px; font-weight:bold; color:#66bb6a;" id="progSession">0</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.35); padding:6px 4px; border-radius:8px;">
+          <div style="opacity:0.75;">Last 7 days</div>
+          <div style="font-size:18px; font-weight:bold; color:#42a5f5;" id="progWeek">0</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.35); padding:6px 4px; border-radius:8px;">
+          <div style="opacity:0.75;">Last Year</div>
+          <div style="font-size:18px; font-weight:bold; color:gold;" id="progYear">0</div>
+        </div>
+      </div>
+      <div style="font-size:10px; text-align:center; opacity:0.7; margin-top:6px;">Every correct answer counts across all games! 🌟</div>
     </div>
 
     <h2>Pick Your Hero</h2>
@@ -485,9 +450,9 @@
         <div class="desc">Blast aliens with right answers!</div>
       </div>
       <div class="mode-card boss" data-mode="boss">
-        <span class="emoji">🟦</span>
-        <div class="name">Geometry Dash</div>
-        <div class="desc">Auto-run, tap to jump, dodge spikes!</div>
+        <span class="emoji">🐉</span>
+        <div class="name">Don't Look Down</div>
+        <div class="desc">Climb! Triple jump! Slay dragon!</div>
       </div>
       <div class="mode-card gems" data-mode="gems">
         <span class="emoji">💎</span>
@@ -498,11 +463,6 @@
         <span class="emoji">🗺️</span>
         <div class="name">Adventure</div>
         <div class="desc">Run, jump, answer to pass gates</div>
-      </div>
-      <div class="mode-card moto" data-mode="moto">
-        <span class="emoji">🏍️</span>
-        <div class="name">Moto Madness</div>
-        <div class="desc">Ride, jump cars, grab boost arrows!</div>
       </div>
     </div>
 
@@ -546,6 +506,54 @@
     </div>
   </div>
 
+  <!-- MONEY MASTER -->
+  <div id="moneyScreen" class="screen" style="background: linear-gradient(180deg,#1b5e20,#2e7d32);">
+    <div class="hud-top" style="position:relative; top:0; padding:0;">
+      <div class="hud-pill" id="moneyHudLeft">💰$0 · 🏦$0 · 📈$0</div>
+      <div class="hud-pill" id="moneyHudCenter">Week 1</div>
+      <button class="btn small red hud-btn" id="moneyQuit">✖</button>
+    </div>
+
+    <div style="background:rgba(0,0,0,0.4); border-radius:12px; padding:10px; border:2px solid gold; text-align:center;">
+      <div style="font-size:12px; opacity:0.85;">💎 Net Worth</div>
+      <div style="font-size:26px; font-weight:bold; color:gold;" id="netWorth">$0</div>
+      <div style="font-size:11px; margin-top:4px;">🚫 Wasted: <b id="wastedTotal">$0</b> · 📈 Earned: <b id="earnedTotal">$0</b></div>
+    </div>
+
+    <!-- JOB -->
+    <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:10px; border:2px solid rgba(255,255,255,0.3);">
+      <div style="font-size:11px; opacity:0.8;">CURRENT JOB</div>
+      <div id="jobDisplay" style="font-size:18px; font-weight:bold; margin-top:3px;">Pick a Job!</div>
+      <div style="display:flex; gap:8px; margin-top:6px;">
+        <button class="btn small blue" id="changeJobBtn">Change Job</button>
+        <button class="btn green" id="workBtn" style="flex:1; font-size:16px;">💼 WORK → Next Week</button>
+      </div>
+    </div>
+
+    <!-- INVESTMENTS -->
+    <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:10px; border:2px solid rgba(255,255,255,0.3);">
+      <div style="font-size:12px; font-weight:bold; opacity:0.9;">📊 INVESTMENTS (grow each week!)</div>
+      <div id="investPanel" style="display:flex; flex-direction:column; gap:6px; margin-top:6px;"></div>
+    </div>
+
+    <!-- WANTS -->
+    <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:10px; border:2px solid rgba(255,255,255,0.3);">
+      <div style="font-size:12px; font-weight:bold; opacity:0.9;">🎯 BIG GOALS (Save & Invest to Buy!)</div>
+      <div id="wantsPanel" style="display:flex; flex-direction:column; gap:5px; margin-top:6px;"></div>
+    </div>
+
+    <!-- LOG -->
+    <div style="background:rgba(0,0,0,0.5); border-radius:10px; padding:8px; font-size:12px; max-height:80px; overflow-y:auto;">
+      <div style="opacity:0.7; font-size:10px;">📜 Recent Activity:</div>
+      <div id="moneyLog"></div>
+    </div>
+  </div>
+
+  <!-- MONEY MODAL (jobs, distractions, events) -->
+  <div id="moneyModal" style="position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); z-index:25; padding:14px;">
+    <div style="background:linear-gradient(180deg,#fff,#e3f2fd); color:#222; border-radius:22px; padding:18px; border:5px solid gold; max-width:420px; width:100%; box-shadow:0 0 30px gold; max-height:85vh; overflow-y:auto;" id="moneyModalBody"></div>
+  </div>
+
   <!-- LESSONS -->
   <div id="lessonsScreen" class="screen">
     <h1>📚 3rd Grade Lessons</h1>
@@ -560,34 +568,6 @@
     <div class="footer-row">
       <button class="btn red" id="lessonsBack">Back</button>
       <button class="btn green" id="resetLessonsBtn">Reset Progress</button>
-    </div>
-  </div>
-
-  <!-- NEWS -->
-  <div id="newsScreen" class="screen">
-    <h1>📰 News & What's New</h1>
-    <div class="hero-banner" style="background:linear-gradient(135deg,#ff0080,#ff8c00,#ffd700,#00bfff,#8a2be2);">
-      <div style="font-size:16px; font-weight:bold;">🎉 9 BRAND NEW PACKS JUST DROPPED! 🎉</div>
-      <div style="font-size:13px; margin-top:6px;">Tap any pack to learn more, then head to the Pack Shop to open them!</div>
-    </div>
-
-    <h2>🎁 How Packs Work</h2>
-    <div class="news-card">
-      <div><b>Spend coins → open packs → get items!</b></div>
-      <ul style="margin:8px 0 0 18px; padding:0; font-size:13px; line-height:1.6;">
-        <li>Each pack has <b>trails ✨</b> and <b>auras 🌟</b> you can equip on your hero.</li>
-        <li>Items come in <b>7 rarities</b>: Common · Rare · Epic · Legendary · <span style="color:#00e5ff;">Kio</span> · <span style="color:#ff00ff;">Chroma</span> · <span style="color:#ffd600;">Mythical</span> (rarest!).</li>
-        <li>The rarer an item, the harder it is to get — but more powerful looking!</li>
-        <li>Got a duplicate? You get coins back: Common 300 · Rare 800 · Epic 2,000 · Legendary 5,000 · <b>Kio 10,000</b> · <b>Chroma 25,000</b> · <b>Mythical 75,000</b>.</li>
-        <li>Earn coins by playing modes, answering questions correctly, and chaining combos!</li>
-      </ul>
-    </div>
-
-    <h2>✨ The New Packs</h2>
-    <div class="news-pack-list" id="newsPackList"></div>
-
-    <div class="footer-row">
-      <button class="btn red" id="newsBack">Back</button>
     </div>
   </div>
 
@@ -609,18 +589,6 @@
     </div>
   </div>
 
-  <!-- GEOMETRY DASH SPEED PICKER -->
-  <div id="geoSpeed">
-    <div class="geo-speed-card">
-      <div style="font-size:56px;">🟦</div>
-      <h1 style="color:#222; font-size:26px;">Geometry Dash</h1>
-      <div style="font-size:15px; margin:8px 0 14px; color:#333;">Choose your speed!</div>
-      <button class="btn green" id="geoMediumBtn" style="display:block; width:100%; margin:8px 0; color:#fff;">🐢 Medium Speed</button>
-      <button class="btn red" id="geoFastBtn" style="display:block; width:100%; margin:8px 0; color:#fff;">🚀 Fast Speed</button>
-      <button class="btn small" id="geoSpeedCancel" style="margin-top:8px;">Back</button>
-    </div>
-  </div>
-
   <!-- HOST -->
   <div id="hostScreen" class="screen">
     <h1>🎮 Host Game</h1>
@@ -639,10 +607,9 @@
     </div>
     <div class="row" id="hostModeRow">
       <button class="btn" data-hmode="galaxy">🚀 Galaxy</button>
-      <button class="btn" data-hmode="boss">🟦 Geo Dash</button>
+      <button class="btn" data-hmode="boss">🐉 Boss</button>
       <button class="btn" data-hmode="gems">💎 Gems</button>
       <button class="btn" data-hmode="adventure">🗺️ Adventure</button>
-      <button class="btn" data-hmode="moto">🏍️ Moto</button>
     </div>
     <div class="footer-row">
       <button class="btn red" id="hostBack">Back</button>
@@ -674,6 +641,7 @@
     </div>
     <div class="player-list" id="playerList" style="display:none;"></div>
     <div id="comboHUD"></div>
+    <div id="sessionHUD" style="position:absolute; top:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); padding:6px 12px; border-radius:14px; border:2px solid rgba(255,255,255,0.3); display:none; flex-direction:column; align-items:center; gap:2px; z-index:6;"></div>
     <div class="controls" id="controls">
       <div class="ctrl-side">
         <div class="ctrl" data-key="left">◀</div>
@@ -701,6 +669,7 @@
       <button class="btn small red hud-btn" id="gemQuit">✖</button>
     </div>
     <div id="comboHUDGem" style="position:absolute; top:50px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); padding:8px 16px; border-radius:20px; border:3px solid #ff9800; z-index:6; font-weight:bold; font-size:16px; display:none;"></div>
+    <div id="sessionHUDGem" style="position:absolute; top:90px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); padding:6px 12px; border-radius:14px; border:2px solid rgba(255,255,255,0.3); display:none; flex-direction:column; align-items:center; gap:2px; z-index:6;"></div>
     <div id="gemBoard"></div>
     <div style="text-align:center; font-size:13px; opacity:0.9;">Tap two next to each other to swap. Match 3+ same color to clear!</div>
     <div id="gemQOverlay" style="position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.75); z-index:20; padding:14px;">
@@ -747,6 +716,13 @@ const Save = {
 let totalStars = 0, bestScore = 0, chosenChar = 0, playerName = 'Player';
 let coins = 50000, level = 1, inventory = [], equippedTrail = null, equippedAura = null, bestCombo = 0;
 let lessonStats = {}; // { skillId: { correct, attempts } }
+let secretUnlocked = false;
+let secretClickCount = 0;
+let answerLog = []; // [{ t: timestamp, correct: bool, lessonId }]
+let sessionCorrect = 0;
+let sessionAttempts = 0;
+let sessionGoalHit = false;
+const SESSION_GOAL = 10;
 function loadProfileData() {
   totalStars = Save.get('stars', 0);
   bestScore = Save.get('best', 0);
@@ -760,6 +736,68 @@ function loadProfileData() {
   equippedAura = Save.get('aura', null);
   bestCombo = Save.get('bestCombo', 0);
   lessonStats = Save.get('lessonStats', {});
+  secretUnlocked = Save.get('secretUnlocked', false);
+  answerLog = Save.get('answerLog', []);
+  // trim to last 400 days to prevent bloat
+  const cutoff = Date.now() - 400*24*60*60*1000;
+  answerLog = answerLog.filter(e => e.t >= cutoff);
+}
+function correctInLast(ms) {
+  const cutoff = Date.now() - ms;
+  return answerLog.filter(e => e.t >= cutoff && e.correct).length;
+}
+function attemptsInLast(ms) {
+  const cutoff = Date.now() - ms;
+  return answerLog.filter(e => e.t >= cutoff).length;
+}
+function resetSession() {
+  sessionCorrect = 0; sessionAttempts = 0; sessionGoalHit = false;
+  updateSessionHUD();
+}
+
+function totalCorrectAnswers() {
+  let n = 0;
+  for (const k in lessonStats) n += (lessonStats[k]?.correct || 0);
+  return n;
+}
+function checkSecretUnlock(source) {
+  if (secretUnlocked) return;
+  // 3 ways to unlock:
+  // 1) Reach level 3
+  // 2) Answer 100+ correct total
+  // 3) Click the ⚡ in title 7 times
+  const byLevel = level >= 3;
+  const byAnswers = totalCorrectAnswers() >= 100;
+  const byClicks = source === 'clicks';
+  if (byLevel || byAnswers || byClicks) {
+    secretUnlocked = true;
+    Save.set('secretUnlocked', true);
+    showSecretUnlockCelebration(source);
+  }
+}
+function showSecretUnlockCelebration(source) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.9), rgba(0,0,0,0.95));
+    z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    animation: revealIn 0.5s;
+  `;
+  overlay.innerHTML = `
+    <div style="font-size: 80px; animation: shake 0.4s infinite alternate;">🎁</div>
+    <h1 style="background: linear-gradient(90deg,#e91e63,#ff9800,#ffeb3b,#4caf50,#2196f3,#9c27b0); -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; font-size: clamp(28px,6vw,44px);">🌈 SECRET PACK UNLOCKED! 🌈</h1>
+    <div style="text-align: center; font-size: 16px; opacity: 0.9;">You found the hidden pack!<br>Contains rare rainbow items 🌟</div>
+    <button class="btn green" id="secretUnlockClose" style="font-size: 20px; padding: 14px 30px;">See the Pack! 🎁</button>
+  `;
+  document.body.appendChild(overlay);
+  SFX.win();
+  setTimeout(() => SFX.correct(), 400);
+  setTimeout(() => SFX.win(), 800);
+  document.getElementById('secretUnlockClose').addEventListener('click', () => {
+    overlay.remove();
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('shopScreen').classList.add('active');
+    refreshShop();
+  });
 }
 function createProfile(name) {
   name = (name||'').trim().slice(0, 16);
@@ -773,6 +811,7 @@ function createProfile(name) {
 function switchProfile(name) {
   currentProfile = name; G.set('currentProfile', name);
   loadProfileData();
+  sessionCorrect = 0; sessionAttempts = 0; sessionGoalHit = false;
 }
 function deleteProfile(name) {
   if (!confirm(`Delete profile "${name}" and all its progress?`)) return;
@@ -1098,6 +1137,59 @@ function recordAnswer(lessonId, correct) {
   lessonStats[lessonId].attempts++;
   if (correct) lessonStats[lessonId].correct++;
   Save.set('lessonStats', lessonStats);
+  // long-term log
+  answerLog.push({ t: Date.now(), correct: !!correct, lessonId });
+  if (answerLog.length > 5000) answerLog = answerLog.slice(-3000);
+  Save.set('answerLog', answerLog);
+  // session
+  sessionAttempts++;
+  if (correct) {
+    sessionCorrect++;
+    if (sessionCorrect === SESSION_GOAL && !sessionGoalHit) {
+      sessionGoalHit = true;
+      celebrateSessionGoal();
+    }
+  }
+  updateSessionHUD();
+  if (correct && !secretUnlocked) checkSecretUnlock('answers');
+}
+
+function updateSessionHUD() {
+  const els = [document.getElementById('sessionHUD'), document.getElementById('sessionHUDGem')].filter(Boolean);
+  const pct = Math.min(100, (sessionCorrect / SESSION_GOAL) * 100);
+  const done = sessionCorrect >= SESSION_GOAL;
+  const html = `
+    <div style="font-size:11px; opacity:0.85;">🎯 Daily Goal</div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <div style="width:80px; height:10px; background:rgba(0,0,0,0.5); border-radius:5px; overflow:hidden; border:1px solid rgba(255,255,255,0.4);">
+        <div style="height:100%; width:${pct}%; background:${done ? 'linear-gradient(90deg,#ffeb3b,#ff9800)' : 'linear-gradient(90deg,#66bb6a,#2e7d32)'}; transition:width 0.3s;"></div>
+      </div>
+      <div style="font-size:12px; font-weight:bold; color:${done ? 'gold' : '#fff'};">${sessionCorrect}/${SESSION_GOAL}${done ? ' 🏆' : ''}</div>
+    </div>
+  `;
+  els.forEach(el => {
+    if (!Game.active && Game.mode !== 'gems') { el.style.display = 'none'; return; }
+    el.style.display = 'flex';
+    el.innerHTML = html;
+  });
+}
+
+function celebrateSessionGoal() {
+  // reward: bonus coins + stars
+  coins += 5000; Save.set('coins', coins);
+  totalStars += 5; Save.set('stars', totalStars);
+  SFX.win();
+  setTimeout(() => SFX.win(), 300);
+  const b = document.createElement('div');
+  b.style.cssText = `
+    position: fixed; top: 30%; left: 50%; transform: translate(-50%,-50%) scale(0);
+    background: linear-gradient(180deg,#ffeb3b,#ff9800); color: #222;
+    padding: 26px 40px; border-radius: 26px; font-weight: bold;
+    border: 6px solid #fff; box-shadow: 0 0 80px gold;
+    z-index: 400; text-align: center; animation: comboBanner 2s ease-out forwards;`;
+  b.innerHTML = `<div style="font-size:60px;">🏆</div><div style="font-size:clamp(22px,5vw,32px);">DAILY GOAL SMASHED!</div><div style="font-size:18px; margin-top:6px;">10 correct answers!</div><div style="font-size:16px; margin-top:8px; color:#b71c1c;">🎁 +5,000 🪙 & +5 ⭐</div>`;
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 2200);
 }
 
 /* ==== EXPLANATIONS for wrong answers (2nd-grade friendly) ==== */
@@ -1150,6 +1242,71 @@ function explainQ(q, lessonId) {
     case 'e_read': return `📖 <b>Answer: "${ans}"!</b><br>👉 The answer is HIDING in the story! 🔍<br>Read it again slowly. Underline numbers and key words.<br>Then match them to the question!`;
   }
   return `✨ The answer is <b>"${ans}"</b>. Read it carefully — you'll get it next time! 💪`;
+}
+
+/* ==== MASTERY GATE — must correctly answer a NEW question on the same skill to progress ==== */
+function showMasteryGate(lessonId, onComplete) {
+  const lesson = LESSON_BY_ID[lessonId];
+  if (!lesson) { onComplete && onComplete(); return; }
+  const q = lesson.gen();
+  q.lessonId = lessonId;
+  q._mastery = true;
+  Game.paused = true;
+
+  const overlay = document.getElementById('qOverlay');
+  document.getElementById('qPrompt').innerHTML = q.prompt.replace(/\n/g, '<br>');
+  const sub = document.getElementById('qSub');
+  sub.innerHTML = '🎯 <b>PROVE YOU LEARNED IT!</b><br>Answer this NEW question to keep playing!';
+  sub.style.color = '#ffd700';
+  const panel = document.querySelector('#qOverlay .q-panel');
+  if (panel) panel.style.borderColor = '#ffd700';
+  document.getElementById('qTimer').style.width = '100%';
+
+  const grid = document.getElementById('qAnswers');
+  grid.innerHTML = '';
+  q.choices.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'q-ans';
+    b.textContent = c;
+    b.addEventListener('click', () => {
+      const correct = String(c) === String(q.answer);
+      recordAnswer(lessonId, correct);
+      b.classList.add(correct ? 'correct' : 'wrong');
+      document.querySelectorAll('.q-ans').forEach(x => x.disabled = true);
+      if (correct) {
+        SFX.correct();
+        bumpStreak();
+        speechSynthesis && speechSynthesis.cancel();
+        setTimeout(() => {
+          overlay.classList.remove('active');
+          Game.paused = false;
+          showToast('🌟 You LEARNED it! Great job!');
+          onComplete && onComplete();
+        }, 800);
+      } else {
+        SFX.wrong();
+        const explainHtml = explainQ(q, lessonId);
+        speak(toSpeech(explainHtml));
+        setTimeout(() => {
+          grid.innerHTML = `
+            <div style="grid-column:1/-1; background:linear-gradient(180deg,#fff8e1,#ffe082); color:#3e2723; padding:14px; border-radius:14px; font-size:15px; line-height:1.6; border:4px solid #ff9800; text-align:left;">
+              <div style="font-weight:bold; font-size:20px; margin-bottom:8px; text-align:center;">📖 Let's Learn Again! 🌟 <button id="masterySpeakBtn" style="background:#1565c0; color:#fff; border:none; border-radius:8px; padding:4px 10px; font-size:13px; cursor:pointer;">🔊</button></div>
+              ${explainHtml}
+            </div>
+            <button class="q-ans" style="grid-column:1/-1; background:linear-gradient(180deg,#42a5f5,#1565c0);" id="tryAnotherBtn">🎯 Try Another Question!</button>
+          `;
+          sub.innerHTML = "Read the tip, then try again — you MUST get it right to continue!";
+          document.getElementById('masterySpeakBtn').addEventListener('click', (e) => { e.stopPropagation(); speak(toSpeech(explainHtml)); });
+          document.getElementById('tryAnotherBtn').addEventListener('click', () => {
+            speechSynthesis && speechSynthesis.cancel();
+            showMasteryGate(lessonId, onComplete);
+          });
+        }, 700);
+      }
+    });
+    grid.appendChild(b);
+  });
+  overlay.classList.add('active');
 }
 
 /* ==== RETENTION QUEUE — same SKILL, NEW question (tests concept not memory) ==== */
@@ -1224,25 +1381,12 @@ function showRetentionBanner(text) {
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d'); ctx.imageSmoothingEnabled = false;
 let W = 0, H = 0;
-let bgGalaxy = null, bgBoss = null, bgAdv = null;
-let hudLeftEl = null, hudCenterEl = null;
-function setHUD(left, center) {
-  if (!hudLeftEl) { hudLeftEl = document.getElementById('hudLeft'); hudCenterEl = document.getElementById('hudCenter'); }
-  if (hudLeftEl.textContent !== left) hudLeftEl.textContent = left;
-  if (hudCenterEl.textContent !== center) hudCenterEl.textContent = center;
-}
 function resize() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   W = window.innerWidth; H = window.innerHeight;
   canvas.width = W * dpr; canvas.height = H * dpr;
   canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.imageSmoothingEnabled = false;
-  bgGalaxy = ctx.createLinearGradient(0, 0, 0, H);
-  bgGalaxy.addColorStop(0, '#000020'); bgGalaxy.addColorStop(1, '#1a0e3d');
-  bgBoss = ctx.createLinearGradient(0, 0, 0, H);
-  bgBoss.addColorStop(0, '#1a0e3d'); bgBoss.addColorStop(0.55, '#311b92'); bgBoss.addColorStop(1, '#0d0d2b');
-  bgAdv = ctx.createLinearGradient(0, 0, 0, H);
-  bgAdv.addColorStop(0, '#4fc3f7'); bgAdv.addColorStop(0.7, '#81d4fa'); bgAdv.addColorStop(1, '#fff59d');
 }
 window.addEventListener('resize', resize);
 
@@ -1432,10 +1576,11 @@ function answerQ(choice, btn) {
       document.getElementById('speakAgainBtn').addEventListener('click', (e) => { e.stopPropagation(); speak(toSpeech(explainHtml)); });
       document.getElementById('contBtn').addEventListener('click', () => {
         speechSynthesis && speechSynthesis.cancel();
-        document.getElementById('qOverlay').classList.remove('active');
-        Game.paused = false;
-        const cb = qCallback; qCallback = null;
-        if (cb) cb(false, q._retention);
+        // MASTERY GATE: must correctly answer a new question on same skill to progress
+        showMasteryGate(q.lessonId, () => {
+          const cb = qCallback; qCallback = null;
+          if (cb) cb(false, q._retention);
+        });
       });
     }, 700);
   }
@@ -1465,10 +1610,11 @@ function showGalaxyExplanation(q) {
   document.getElementById('galaxySpeakBtn').addEventListener('click', (e) => { e.stopPropagation(); speak(toSpeech(explainHtml)); });
   document.getElementById('galaxyContBtn').addEventListener('click', () => {
     speechSynthesis && speechSynthesis.cancel();
-    overlay.classList.remove('active');
-    Game.paused = false;
-    Galaxy.aliens.forEach(x => x.alive = false);
-    spawnGalaxyWave();
+    // MASTERY GATE
+    showMasteryGate(q.lessonId, () => {
+      Galaxy.aliens.forEach(x => x.alive = false);
+      spawnGalaxyWave();
+    });
   });
 }
 
@@ -1579,13 +1725,10 @@ canvas.addEventListener('click', (e) => {
   SFX.shoot();
 });
 
-// Geometry Dash: tap anywhere on screen to jump
-canvas.addEventListener('pointerdown', () => { if ((Game.mode === 'boss' || Game.mode === 'moto') && !Game.paused) { ensureAudio(); KEYS.jump = true; } });
-canvas.addEventListener('pointerup',   () => { if (Game.mode === 'boss' || Game.mode === 'moto') KEYS.jump = false; });
-canvas.addEventListener('pointercancel', () => { if (Game.mode === 'boss' || Game.mode === 'moto') KEYS.jump = false; });
-
 function renderGalaxy() {
-  ctx.fillStyle = bgGalaxy; ctx.fillRect(0, 0, W, H);
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#000020'); grad.addColorStop(1, '#1a0e3d');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
   // stars
   ctx.fillStyle = '#fff';
   for (const s of Galaxy.stars) { ctx.globalAlpha = 0.3 + s.sp; ctx.fillRect(s.x, s.y, s.s, s.s); }
@@ -1652,594 +1795,361 @@ function renderGalaxy() {
   ctx.closePath(); ctx.fill();
 
   // hud
-  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `Wave ${Galaxy.wave}`);
+  document.getElementById('hudLeft').textContent = `❤️ ${Game.lives} · ⭐ ${Game.score}`;
+  document.getElementById('hudCenter').textContent = `Wave ${Galaxy.wave}`;
 }
 
-/* ============================================================ GEOMETRY DASH ============================================================ */
-const Geo = {
-  player: null, obstacles: [], portals: [], coins: [],
-  cam: { x: 0 }, speed: 5, worldEnd: 0, distance: 0, groundY: 0, shake: 0
+/* ============================================================ DON'T LOOK DOWN BOSS ============================================================ */
+const Boss = {
+  player: null, platforms: [], dragon: null, lava: 0, lavaSpeed: 0.06,
+  fireballs: [], cam: { y: 0 }, height: 0, dragonHits: 0, level: 1,
+  nextBonusQ: 0, doubleHit: 0
 };
-let geoSpeedMode = 'medium'; // 'medium' (gentler) or 'fast'
 
 function startBoss() {
-  Game.mode = 'boss'; Game.lives = 5; Game.score = 0; Game.paused = false;
+  Game.mode = 'boss'; Game.lives = 3; Game.score = 0;
   resetStreak(); Retention.reset();
-  Geo.groundY = H - 90;
-  Geo.player = {
-    x: 140, y: Geo.groundY - 38, w: 38, h: 38,
-    vy: 0, onGround: true, rot: 0, invuln: 0, char: CHARACTERS[chosenChar]
+  Boss.player = {
+    x: W/2 - 18, y: H - 200, w: 36, h: 44,
+    vx: 0, vy: 0, onGround: false, facing: 1,
+    char: CHARACTERS[chosenChar], invuln: 0, frame: 0, jumps: 0
   };
-  Geo.obstacles = []; Geo.portals = []; Geo.coins = [];
-  Geo.cam.x = 0; Geo.distance = 0; Geo.speed = 5; Geo.shake = 0;
+  Boss.platforms = []; Boss.fireballs = []; Boss.lava = H + 40; Boss.lavaSpeed = 0.06;
+  Boss.height = 0; Boss.dragonHits = 0; Boss.level = 1; Boss.cam.y = 0;
+  Boss.nextBonusQ = performance.now() + 12000; Boss.doubleHit = 0;
   particles = [];
-  buildGeoLevel();
+  buildBossArena();
+  spawnDragon();
   startMainLoop();
 }
 
-function buildGeoLevel() {
-  const gy = Geo.groundY;
-  Geo.obstacles = []; Geo.coins = []; Geo.portals = [];
-  const easy = (geoSpeedMode !== 'fast'); // medium = gentler patterns + more room
-  const pad = easy ? 70 : 0;               // slower speed = shorter jump, so spread out
-  let x = 760; // generous empty runway to start
-  for (let seg = 0; seg < 28; seg++) {
+function buildBossArena() {
+  const groundY = H - 80;
+  Boss.platforms.push({ x: 0, y: groundY, w: W, h: 80, type: 'ground' });
+  // generate climbing platforms going UP
+  let y = groundY - 90;
+  let lastX = W/2 - 50;
+  for (let i = 0; i < 40; i++) {
+    const w = rand(80, 130);
+    const x = Math.max(20, Math.min(W - w - 20, lastX + (Math.random() - 0.5) * 220));
+    let type = 'solid';
     const r = Math.random();
-    if (r < (easy ? 0.62 : 0.46)) {
-      // spikes — always single on medium; occasionally double (later) on fast
-      const n = (!easy && seg > 8 && Math.random() < 0.3) ? 2 : 1;
-      for (let i = 0; i < n; i++) Geo.obstacles.push({ x: x + i * 30, y: gy - 30, w: 30, h: 30, type: 'spike' });
-      Geo.coins.push({ x: x + (n * 30) / 2, y: gy - 92, taken: false });
-      x += n * 30 + rand(230, 320) + pad;
-    } else if (easy || r < 0.74) {
-      // a low block — very short/narrow on medium so a short jump flies clean over it
-      const bh = easy ? rand(22, 34) : rand(34, 56);
-      const bw = easy ? rand(34, 46) : rand(40, 64);
-      Geo.obstacles.push({ x, y: gy - bh, w: bw, h: bh, type: 'block' });
-      for (let k = 0; k < 2; k++) Geo.coins.push({ x: x + bw/2 - 13 + k * 26, y: gy - bh - 30, taken: false });
-      x += bw + rand(220, 300) + pad;
-    } else {
-      // fast only: a spike then a low block, spaced so one jump clears both
-      Geo.obstacles.push({ x, y: gy - 30, w: 30, h: 30, type: 'spike' });
-      const bh = rand(34, 52);
-      Geo.obstacles.push({ x: x + 70, y: gy - bh, w: 56, h: bh, type: 'block' });
-      Geo.coins.push({ x: x + 55, y: gy - 96, taken: false });
-      x += rand(280, 360);
-    }
-    // a learning portal every 5 segments (with a big clear landing zone)
-    if (seg > 0 && seg % 5 === 0) {
-      Geo.portals.push({ x, passed: false });
-      x += 340;
-    }
+    if (i > 2 && r < 0.18) type = 'crumble';
+    else if (i > 3 && r < 0.30) type = 'moving';
+    Boss.platforms.push({ x, y, w, h: 14, type, originX: x, range: 60, dir: Math.random()<0.5 ? 1 : -1, breakTimer: 0 });
+    y -= rand(75, 105);
+    lastX = x;
   }
-  Geo.worldEnd = x + 500;
+  // top safe zone
+  Boss.topY = y + 50;
 }
 
-function geoCrash(p) {
-  Game.lives--; SFX.hurt(); resetStreak(); Geo.shake = 12;
-  for (let i = 0; i < 16; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h/2, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8 - 2, life: 30, text: '💥', color: '#ff1744' });
-  if (Game.lives <= 0) { endGame('dead'); return; }
-  // forgiving respawn: back up onto clear ground with a brief shield
-  p.x = Math.max(140, p.x - 220);
-  for (let tries = 0; tries < 40; tries++) {
-    const clash = Geo.obstacles.some(o => o.x < p.x + p.w + 50 && o.x + o.w > p.x - 50);
-    if (!clash) break;
-    p.x -= 30;
-    if (p.x <= 140) { p.x = 140; break; }
-  }
-  p.y = Geo.groundY - p.h; p.vy = 0; p.onGround = true; p.rot = 0; p.invuln = 95;
+function spawnDragon() {
+  const monsters = [
+    { emoji: '🐉', name: 'Dragon' },
+    { emoji: '👹', name: 'Ogre' },
+    { emoji: '🦖', name: 'T-Rex' }
+  ];
+  const m = monsters[(Boss.level - 1) % monsters.length];
+  Boss.dragon = {
+    x: W/2 - 50, y: H/2 - 60, w: 100, h: 100,
+    vx: 1.5 + Boss.level * 0.3, vy: 0,
+    emoji: m.emoji, name: m.name, hp: 4, maxHP: 4,
+    flash: 0, stunned: 0, fireTimer: 0
+  };
+  Boss.dragonHits = 0;
+  Boss.lavaSpeed = 0.06;
 }
 
 function physicsBoss(p, dt, t) {
-  const GRAV = 0.9, JUMP_V = -15.5;
-  if (Geo.shake > 0) Geo.shake--;
-  if (p.invuln > 0) p.invuln--;
-  // auto-run forward; two selectable speeds (medium is gentler)
-  if (geoSpeedMode === 'fast') Geo.speed = 5.5 + Math.min(2, p.x / 9000);
-  else Geo.speed = 4 + Math.min(1.5, p.x / 11000);
-  p.x += Geo.speed;
-  // jump (hold or tap) only when on the ground
-  if (KEYS.jump && p.onGround) {
-    p.vy = JUMP_V; p.onGround = false; SFX.jump();
-    for (let i = 0; i < 5; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h, vx: (Math.random()-0.5)*3, vy: 1 + Math.random(), life: 18, text: '✨', color: '#fff' });
+  const SPEED = 5, JUMP_V = -14, AIR_JUMP_V = -12.5, GRAV = 0.6, FRICTION = 0.82;
+  const MAX_JUMPS = 3; // triple jump
+  if (KEYS.left) { p.vx = -SPEED; p.facing = -1; }
+  else if (KEYS.right) { p.vx = SPEED; p.facing = 1; }
+  else p.vx *= FRICTION;
+  if (KS.jumpBuffer > 0) KS.jumpBuffer--;
+  if (p.onGround) { KS.coyote = 8; p.jumps = 0; }
+  else if (KS.coyote > 0) KS.coyote--;
+  if (KS.jumpBuffer > 0) {
+    if ((p.onGround || KS.coyote > 0) && p.jumps === 0) {
+      p.vy = JUMP_V; p.onGround = false; KS.coyote = 0; KS.jumpBuffer = 0; p.jumps = 1; SFX.jump();
+    } else if (p.jumps < MAX_JUMPS) {
+      p.vy = AIR_JUMP_V; p.jumps++; KS.jumpBuffer = 0; SFX.jump();
+      for (let i = 0; i < 8; i++) particles.push({ x: p.x + p.w/2 + (Math.random()-0.5)*22, y: p.y + p.h, vx:(Math.random()-0.5)*2, vy: 1+Math.random(), life: 22, text: ['✨','⭐','💫'][p.jumps-1] || '✨', color: '#ffeb3b' });
+    }
   }
-  // gravity
-  p.vy += GRAV; if (p.vy > 22) p.vy = 22;
+  if (!KS.jumpHeld && p.vy < -6) p.vy = -6;
+  p.vy += GRAV;
+  if (p.vy > 18) p.vy = 18;
+  p.x += p.vx;
+  if (p.x < 0) p.x = 0; if (p.x + p.w > W) p.x = W - p.w;
+  for (const pl of Boss.platforms) {
+    if (rectOverlap(p, pl)) { if (p.vx > 0) p.x = pl.x - p.w; else if (p.vx < 0) p.x = pl.x + pl.w; p.vx = 0; }
+  }
   p.y += p.vy;
-  // spin while airborne
-  if (!p.onGround) p.rot += 0.18;
-  // ground collision
-  let landed = false;
-  if (p.y + p.h >= Geo.groundY) { p.y = Geo.groundY - p.h; p.vy = 0; landed = true; }
-  // obstacle collision
-  for (const o of Geo.obstacles) {
-    if (o.x + o.w < p.x - 60 || o.x > p.x + 60) continue;
-    if (!rectOverlap(p, o)) continue;
-    if (o.type === 'spike') { if (p.invuln === 0) { geoCrash(p); return; } continue; }
-    // block: land on top if descending onto it, otherwise crash into the side
-    const prevBottom = p.y + p.h - p.vy;
-    if (p.vy >= 0 && prevBottom <= o.y + 10) { p.y = o.y - p.h; p.vy = 0; landed = true; }
-    else if (p.invuln === 0) { geoCrash(p); return; }
-  }
-  if (landed) {
-    if (!p.onGround) p.rot = Math.round(p.rot / (Math.PI/2)) * (Math.PI/2);
-    p.onGround = true;
-  } else p.onGround = false;
-  // coins
-  for (const c of Geo.coins) {
-    if (c.taken) continue;
-    if (Math.abs(p.x + p.w/2 - c.x) < 24 && Math.abs(p.y + p.h/2 - c.y) < 24) {
-      c.taken = true; Game.score += 5; SFX.coin();
-      particles.push({ x: c.x, y: c.y, vx: 0, vy: -2, life: 30, text: '+5', color: '#ffeb3b' });
-    }
-  }
-  // learning portals — answer a question to keep your streak and earn a shield
-  for (const portal of Geo.portals) {
-    if (portal.passed) continue;
-    if (p.x + p.w > portal.x - 6 && p.x < portal.x + 12) {
-      portal.passed = true;
-      showQuestion(Game.subject, '🟢 Portal! Answer to power up!', (correct, wasRetention) => {
-        if (correct) {
-          bumpStreak();
-          const bonus = wasRetention ? 3 : 1;
-          const pts = 50 * comboMult() * bonus;
-          Game.score += pts;
-          if (wasRetention && Game.lives < 5) Game.lives++;
-          else if (Math.random() < 0.4 && Game.lives < 5) Game.lives++;
-          p.invuln = Math.max(p.invuln, 90);
-          particles.push({ x: p.x, y: p.y, vx: 0, vy: -2, life: 60, text: (wasRetention ? '🧠 +' : '+') + pts + ' ⭐ shield!', color: '#00e676' });
-        } else {
-          resetStreak();
-          particles.push({ x: p.x, y: p.y, vx: 0, vy: -2, life: 50, text: '🧠 Try later!', color: '#ffd700' });
+  p.onGround = false;
+  for (const pl of Boss.platforms) {
+    if (rectOverlap(p, pl)) {
+      if (p.vy > 0) {
+        p.y = pl.y - p.h; p.vy = 0; p.onGround = true; p.jumps = 0;
+        if (pl.type === 'crumble') {
+          if (pl.breakTimer === 0) pl.breakTimer = 1;
         }
-      });
-      break;
+      } else if (p.vy < 0) { p.y = pl.y + pl.h; p.vy = 0; }
     }
   }
-  // reached the finish line
-  if (p.x >= Geo.worldEnd) { endGame('win'); return; }
-  Geo.distance = Math.max(Geo.distance, p.x - 140);
-  // camera follows horizontally
-  Geo.cam.x = p.x - W * 0.28;
-  if (Geo.cam.x < 0) Geo.cam.x = 0;
+  // crumble platforms
+  for (const pl of Boss.platforms) {
+    if (pl.type === 'crumble' && pl.breakTimer > 0) {
+      pl.breakTimer++;
+      if (pl.breakTimer > 40) { pl.x = -9999; pl.broken = true; }
+    }
+    if (pl.type === 'moving') {
+      pl.x += pl.dir * 1.2;
+      if (pl.x > pl.originX + pl.range) pl.dir = -1;
+      if (pl.x < pl.originX - pl.range) pl.dir = 1;
+    }
+  }
+
+  // dragon collision: from above + falling = drop kick
+  const d = Boss.dragon;
+  if (d && rectOverlap(p, d) && p.invuln === 0) {
+    const fromAbove = p.vy > 4 && p.y + p.h - d.y < 35;
+    if (fromAbove) {
+      const dmg = Boss.doubleHit > 0 ? 2 : 1;
+      d.hp -= dmg;
+      d.flash = 25; d.stunned = 60;
+      p.vy = -14; p.invuln = 30; p.jumps = 0;
+      Game.score += 50;
+      Boss.dragonHits++;
+      if (Boss.doubleHit > 0) Boss.doubleHit--;
+      SFX.correct();
+      for (let i=0;i<10;i++) particles.push({ x: d.x+d.w/2+(Math.random()-0.5)*60, y: d.y, vx:(Math.random()-0.5)*4, vy:-2-Math.random()*3, life:35, text:'💥', color:'#ff5722' });
+      particles.push({ x: d.x+d.w/2, y: d.y-10, vx:0, vy:-2, life:50, text:'-' + dmg + ' HP', color:'#f44336' });
+      if (d.hp <= 0) {
+        Game.score += 200; Boss.level++;
+        particles.push({ x: d.x+d.w/2, y: d.y, vx:0, vy:-2, life:90, text:'DEFEATED!', color:'#ffeb3b' });
+        SFX.win();
+        if (Boss.level > 5) { setTimeout(() => endGame('win'), 800); return; }
+        setTimeout(() => spawnDragon(), 800);
+      }
+    } else {
+      Game.lives--; p.invuln = 80;
+      p.vx = (p.x < d.x ? -10 : 10); p.vy = -10;
+      SFX.hurt();
+      particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:40, text:'JUMP ON HEAD!', color:'#ffeb3b' });
+      if (Game.lives <= 0) { endGame('dead'); return; }
+    }
+  }
+  // fireballs
+  Boss.fireballs = Boss.fireballs.filter(fb => {
+    fb.x += fb.vx; fb.y += fb.vy; fb.vy += 0.18; fb.life--;
+    if (rectOverlap(p, { x: fb.x-12, y: fb.y-12, w:24, h:24 }) && p.invuln === 0) {
+      Game.lives--; p.invuln = 60; p.vy = -8; SFX.hurt();
+      particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:30, text:'🔥-1', color:'#ff5722' });
+      if (Game.lives <= 0) { endGame('dead'); return false; }
+      return false;
+    }
+    return fb.life > 0 && fb.y < H + 50;
+  });
+
+  // lava rising
+  Boss.lava -= Boss.lavaSpeed;
+  if (p.y + p.h >= Boss.lava) {
+    Game.lives--; p.invuln = 80; p.vy = -14; SFX.hurt();
+    particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:40, text:'🌋 LAVA!', color:'#ff5722' });
+    if (Game.lives <= 0) { endGame('dead'); return; }
+    p.y = Boss.lava - p.h - 50;
+  }
+
+  // dragon AI
+  if (d) {
+    if (d.flash > 0) d.flash--;
+    if (d.stunned > 0) d.stunned--;
+    else {
+      // chase player horizontally near their height
+      const targetY = p.y + 20;
+      const dy = targetY - d.y;
+      d.vy += dy * 0.0008;
+      d.vy *= 0.96;
+      d.y += d.vy;
+      const targetX = p.x;
+      d.vx += (Math.sign(targetX - d.x) * (1 + Boss.level * 0.2) - d.vx) * 0.05;
+      d.x += d.vx;
+      if (d.x < 0) d.x = 0; if (d.x + d.w > W) d.x = W - d.w;
+      if (d.y < 50) d.y = 50; if (d.y > H - 200) d.y = H - 200;
+      // fire breath
+      d.fireTimer = (d.fireTimer || 0) + 16;
+      if (d.fireTimer > 2200) {
+        d.fireTimer = 0;
+        const dx = (p.x + p.w/2) - (d.x + d.w/2);
+        const dy2 = (p.y) - (d.y + 30);
+        const dist = Math.hypot(dx, dy2) || 1;
+        Boss.fireballs.push({ x: d.x + d.w/2, y: d.y + 30, vx: (dx/dist)*4, vy: (dy2/dist)*3 - 1, life: 220 });
+      }
+    }
+  }
+
+  // bonus question
+  if (t > Boss.nextBonusQ && !Game.paused) {
+    Boss.nextBonusQ = t + 99999;
+    showQuestion(Game.subject, '⭐ Bonus! Correct = +1 ❤ or 2x next hit', (correct, wasRetention) => {
+      if (correct) {
+        bumpStreak();
+        const bonus = wasRetention ? 3 : 1; // 3x for retention!
+        Game.score += 50 * comboMult() * bonus;
+        if (wasRetention) {
+          // retention reward: extra heart!
+          if (Game.lives < 5) Game.lives++;
+          Boss.doubleHit = 3;
+          particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:60, text:'🧠 RETENTION! +1❤ +3x DMG', color:'#ffd700' });
+        } else if (Math.random() < 0.5 && Game.lives < 5) {
+          Game.lives++;
+          particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'+1 ❤', color:'#f44336' });
+        } else {
+          Boss.doubleHit = 2;
+          particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'2x DAMAGE!', color:'#ffeb3b' });
+        }
+      } else {
+        // wrong: small penalty (lose streak only, no life lost — they got the explanation)
+        resetStreak();
+        particles.push({ x: p.x, y: p.y, vx:0, vy:-2, life:50, text:'🧠 Try later!', color:'#ffd700' });
+      }
+      Boss.nextBonusQ = performance.now() + 12000;
+    });
+  }
+
+  // out of map
+  if (p.y > H + 200) {
+    Game.lives--;
+    if (Game.lives <= 0) { endGame('dead'); return; }
+    p.x = W/2 - 18; p.y = 100; p.vx = 0; p.vy = 0;
+  }
+  // track height
+  Boss.height = Math.max(Boss.height, (H - 80) - p.y);
+  // camera follow vertically (lock x at 0)
+  const targetY = p.y - H * 0.5;
+  Boss.cam.y += (targetY - Boss.cam.y) * 0.1;
+  if (Boss.cam.y > 0) Boss.cam.y = 0;
 }
 
 function renderBoss() {
-  // neon background
-  ctx.fillStyle = bgBoss; ctx.fillRect(0, 0, W, H);
-  // moving grid (Geometry Dash style)
-  ctx.strokeStyle = 'rgba(140,120,255,0.10)'; ctx.lineWidth = 1;
-  const off = Geo.cam.x % 44;
-  for (let gx = -off; gx < W; gx += 44) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke(); }
-  for (let gy2 = (Geo.groundY % 44) - 44; gy2 < H; gy2 += 44) { ctx.beginPath(); ctx.moveTo(0, gy2); ctx.lineTo(W, gy2); ctx.stroke(); }
-
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#1a0e3d'); grad.addColorStop(0.6, '#7b1f1f'); grad.addColorStop(1, '#000');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  // far stars
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  for (let i = 0; i < 30; i++) {
+    const x = (i * 137 + Boss.cam.y * 0.05) % W;
+    const y = (i * 73) % H;
+    ctx.fillRect(x, y, 2, 2);
+  }
   ctx.save();
-  const sh = Geo.shake > 0 ? (Math.random()-0.5) * Geo.shake : 0;
-  ctx.translate(-Geo.cam.x + sh, sh);
+  ctx.translate(0, -Boss.cam.y);
 
-  // ground slab with glowing edge
-  ctx.fillStyle = '#160a33'; ctx.fillRect(Geo.cam.x, Geo.groundY, W, H - Geo.groundY);
-  ctx.fillStyle = '#00e5ff'; ctx.fillRect(Geo.cam.x, Geo.groundY - 3, W, 5);
-  ctx.fillStyle = 'rgba(0,229,255,0.15)'; ctx.fillRect(Geo.cam.x, Geo.groundY + 2, W, 12);
-
-  // portals
-  for (const portal of Geo.portals) {
-    if (portal.passed) continue;
-    if (portal.x < Geo.cam.x - 40 || portal.x > Geo.cam.x + W + 40) continue;
-    const pulse = 0.4 + Math.abs(Math.sin(performance.now()/300)) * 0.4;
-    ctx.fillStyle = `rgba(0,230,118,${pulse})`;
-    ctx.fillRect(portal.x - 16, 50, 32, Geo.groundY - 50);
-    ctx.strokeStyle = '#00e676'; ctx.lineWidth = 4; ctx.strokeRect(portal.x - 16, 50, 32, Geo.groundY - 50);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 34px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('?', portal.x, Geo.groundY / 2);
-  }
-
-  // obstacles
-  for (const o of Geo.obstacles) {
-    if (o.x + o.w < Geo.cam.x - 40 || o.x > Geo.cam.x + W + 40) continue;
-    if (o.type === 'spike') {
-      ctx.fillStyle = '#ff1744';
-      ctx.beginPath(); ctx.moveTo(o.x, o.y + o.h); ctx.lineTo(o.x + o.w/2, o.y); ctx.lineTo(o.x + o.w, o.y + o.h); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+  // platforms
+  for (const pl of Boss.platforms) {
+    if (pl.broken || pl.x < -100) continue;
+    if (pl.type === 'ground') {
+      ctx.fillStyle = '#4e342e'; ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
+      ctx.fillStyle = '#6d4c41'; ctx.fillRect(pl.x, pl.y, pl.w, 8);
     } else {
-      ctx.fillStyle = '#3949ab'; ctx.fillRect(o.x, o.y, o.w, o.h);
-      ctx.fillStyle = '#7c4dff'; ctx.fillRect(o.x, o.y, o.w, 6);
-      ctx.strokeStyle = '#b388ff'; ctx.lineWidth = 2; ctx.strokeRect(o.x, o.y, o.w, o.h);
-    }
-  }
-
-  // coins
-  for (const c of Geo.coins) {
-    if (c.taken) continue;
-    if (c.x < Geo.cam.x - 40 || c.x > Geo.cam.x + W + 40) continue;
-    const sq = Math.abs(Math.sin(performance.now()/200 + c.x));
-    ctx.fillStyle = '#ffd54f';
-    ctx.beginPath(); ctx.ellipse(c.x, c.y, 7 * sq + 2, 9, 0, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#f57f17'; ctx.lineWidth = 1.5; ctx.stroke();
-  }
-
-  // player cube
-  const p = Geo.player;
-  if (p) {
-    if (!p.onGround) emitTrail(p);
-    renderTrail(0, 0);
-    renderAura(p, 0, 0);
-    ctx.save();
-    ctx.translate(p.x + p.w/2, p.y + p.h/2);
-    ctx.rotate(p.rot);
-    if (p.invuln > 0 && Math.floor(p.invuln/5)%2 === 0) ctx.globalAlpha = 0.45;
-    if (p.invuln > 0) { ctx.shadowColor = '#00e676'; ctx.shadowBlur = 16; }
-    ctx.fillStyle = '#00e5ff'; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    ctx.fillStyle = '#b3f5ff'; ctx.fillRect(-p.w/2, -p.h/2, p.w, 6);
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = '#01579b'; ctx.lineWidth = 3; ctx.strokeRect(-p.w/2, -p.h/2, p.w, p.h);
-    ctx.fillStyle = '#01579b';
-    ctx.fillRect(-8, -5, 5, 7); ctx.fillRect(4, -5, 5, 7);
-    ctx.fillRect(-6, 7, 12, 3);
-    ctx.restore();
-    ctx.globalAlpha = 1;
-  }
-
-  // particles
-  particles = particles.filter(pt => pt.life > 0);
-  ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-  for (const pt of particles) {
-    pt.life--; pt.x += pt.vx || 0; pt.y += pt.vy; pt.vy += 0.12;
-    ctx.globalAlpha = Math.max(0, pt.life / 40);
-    ctx.fillStyle = pt.color || '#fff';
-    if (pt.text) { ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y); }
-    ctx.globalAlpha = 1;
-  }
-
-  ctx.restore();
-
-  // progress bar to the finish
-  const pct = Math.max(0, Math.min(1, (p ? p.x : 0) / Geo.worldEnd));
-  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(W/2 - 80, 44, 160, 12);
-  ctx.fillStyle = '#00e676'; ctx.fillRect(W/2 - 78, 46, 156 * pct, 8);
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.strokeRect(W/2 - 80, 44, 160, 12);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(Math.floor(pct * 100) + '%', W/2, 50);
-
-  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `${geoSpeedMode === 'fast' ? '🚀' : '🐢'} ${Math.floor(Geo.distance/30)}m`);
-}
-
-/* ============================================================ MOTO MADNESS ============================================================ */
-const Moto = {
-  player: null, obstacles: [], coins: [], portals: [], boosts: [],
-  cam: { x: 0 }, speed: 6, baseSpeed: 6, worldEnd: 0, distance: 0, groundY: 0,
-  shake: 0, boostUntil: 0
-};
-
-function startMoto() {
-  Game.mode = 'moto'; Game.lives = 5; Game.score = 0; Game.paused = false;
-  resetStreak(); Retention.reset();
-  Moto.groundY = H - 80;
-  Moto.player = {
-    x: 150, y: Moto.groundY - 38, w: 54, h: 38,
-    vy: 0, onGround: true, wheelRot: 0, tilt: 0, invuln: 0
-  };
-  Moto.obstacles = []; Moto.coins = []; Moto.portals = []; Moto.boosts = [];
-  Moto.cam.x = 0; Moto.distance = 0; Moto.baseSpeed = 6; Moto.speed = 6;
-  Moto.shake = 0; Moto.boostUntil = 0;
-  particles = [];
-  buildMotoLevel();
-  startMainLoop();
-}
-
-function buildMotoLevel() {
-  const gy = Moto.groundY;
-  Moto.obstacles = []; Moto.coins = []; Moto.portals = []; Moto.boosts = [];
-  let x = 820; // big runway at the start
-  for (let seg = 0; seg < 30; seg++) {
-    const r = Math.random();
-    if (r < 0.40) {
-      // traffic cones — small, easy hop; sometimes 2 in a row later
-      const n = (seg > 5 && Math.random() < 0.3) ? 2 : 1;
-      for (let i = 0; i < n; i++) Moto.obstacles.push({ x: x + i * 36, y: gy - 28, w: 28, h: 28, type: 'cone' });
-      Moto.coins.push({ x: x + (n * 36) / 2, y: gy - 100, taken: false });
-      x += n * 36 + rand(280, 360);
-    } else if (r < 0.65) {
-      // rock — chunky, land on top or jump over
-      const rsz = rand(34, 50);
-      Moto.obstacles.push({ x, y: gy - rsz, w: rsz + 8, h: rsz, type: 'rock' });
-      for (let k = 0; k < 2; k++) Moto.coins.push({ x: x + 13 + k * 26, y: gy - rsz - 36, taken: false });
-      x += rsz + rand(300, 380);
-    } else if (r < 0.85) {
-      // car — bigger jump needed
-      Moto.obstacles.push({ x, y: gy - 56, w: 88, h: 56, type: 'car', color: ['#e91e63','#1976d2','#43a047','#fb8c00'][rand(0,3)] });
-      Moto.coins.push({ x: x + 44, y: gy - 116, taken: false });
-      x += rand(360, 460);
-    } else {
-      // boost zone — run through for a brief speedup
-      Moto.boosts.push({ x, w: 80, used: false });
-      for (let k = 0; k < 3; k++) Moto.coins.push({ x: x + 16 + k * 24, y: gy - 30, taken: false });
-      x += rand(300, 380);
-    }
-    if (seg > 0 && seg % 5 === 0) {
-      Moto.portals.push({ x, passed: false });
-      x += 360; // big clearance after a portal so you land safe
-    }
-  }
-  Moto.worldEnd = x + 500;
-}
-
-function motoCrash(p) {
-  Game.lives--; SFX.hurt(); resetStreak(); Moto.shake = 14;
-  for (let i = 0; i < 18; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h/2, vx: (Math.random()-0.5)*9, vy: (Math.random()-0.5)*9 - 2, life: 32, text: '💥', color: '#ff5722' });
-  if (Game.lives <= 0) { endGame('dead'); return; }
-  // forgiving respawn: back up to clear ground with a long shield
-  p.x = Math.max(150, p.x - 240);
-  for (let tries = 0; tries < 40; tries++) {
-    const clash = Moto.obstacles.some(o => o.x < p.x + p.w + 60 && o.x + o.w > p.x - 60);
-    if (!clash) break;
-    p.x -= 30;
-    if (p.x <= 150) { p.x = 150; break; }
-  }
-  p.y = Moto.groundY - p.h; p.vy = 0; p.onGround = true; p.tilt = 0; p.invuln = 100;
-  Moto.boostUntil = 0; Moto.baseSpeed = 6;
-}
-
-function physicsMoto(p, dt, t) {
-  const GRAV = 0.85, JUMP_V = -15.5;
-  if (Moto.shake > 0) Moto.shake--;
-  if (p.invuln > 0) p.invuln--;
-  // gentle speed ramp + temporary boost
-  Moto.baseSpeed = 6 + Math.min(2, p.x / 10000);
-  Moto.speed = Moto.boostUntil > t ? Moto.baseSpeed + 4 : Moto.baseSpeed;
-  p.x += Moto.speed;
-  if (KEYS.jump && p.onGround) {
-    p.vy = JUMP_V; p.onGround = false; SFX.jump();
-    for (let i = 0; i < 6; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h, vx: (Math.random()-0.5)*4, vy: 1 + Math.random()*2, life: 20, text: '·', color: '#bbb' });
-  }
-  p.vy += GRAV; if (p.vy > 22) p.vy = 22;
-  p.y += p.vy;
-  // wheelie tilt while airborne (front wheel lifts)
-  if (!p.onGround) {
-    if (p.vy < 0) p.tilt = Math.max(-0.45, p.tilt - 0.05);
-    else p.tilt = Math.min(0.25, p.tilt + 0.04);
-  }
-  // wheel spin scales with speed
-  p.wheelRot += Moto.speed * 0.05;
-  // ground collision
-  let landed = false;
-  if (p.y + p.h >= Moto.groundY) { p.y = Moto.groundY - p.h; p.vy = 0; landed = true; }
-  // obstacle collision
-  for (const o of Moto.obstacles) {
-    if (o.x + o.w < p.x - 80 || o.x > p.x + 80) continue;
-    if (!rectOverlap(p, o)) continue;
-    const prevBottom = p.y + p.h - p.vy;
-    if ((o.type === 'rock' || o.type === 'car') && p.vy >= 0 && prevBottom <= o.y + 12) {
-      p.y = o.y - p.h; p.vy = 0; landed = true;
-    } else if (p.invuln === 0) {
-      motoCrash(p); return;
-    }
-  }
-  if (landed) {
-    if (!p.onGround) {
-      for (let i = 0; i < 5; i++) particles.push({ x: p.x + p.w/2 + (Math.random()-0.5)*30, y: p.y + p.h, vx: (Math.random()-0.5)*3, vy: -Math.random()*1.5, life: 16, text: '·', color: '#bbb' });
-      p.tilt = 0;
-    }
-    p.onGround = true;
-  } else p.onGround = false;
-  // tire dust trail
-  if (p.onGround && Math.random() < 0.4) particles.push({ x: p.x + 4, y: p.y + p.h - 2, vx: -1 - Math.random(), vy: -Math.random()*0.5, life: 12, text: '·', color: 'rgba(160,160,160,0.7)' });
-  // coins
-  for (const c of Moto.coins) {
-    if (c.taken) continue;
-    if (Math.abs(p.x + p.w/2 - c.x) < 26 && Math.abs(p.y + p.h/2 - c.y) < 26) {
-      c.taken = true; Game.score += 5; SFX.coin();
-      particles.push({ x: c.x, y: c.y, vx: 0, vy: -2, life: 30, text: '+5', color: '#ffeb3b' });
-    }
-  }
-  // boost pads
-  for (const b of Moto.boosts) {
-    if (b.used) continue;
-    if (p.x + p.w/2 > b.x && p.x + p.w/2 < b.x + b.w) {
-      b.used = true; Moto.boostUntil = t + 1500; SFX.coin();
-      for (let i = 0; i < 14; i++) particles.push({ x: p.x + p.w/2, y: p.y + p.h/2, vx: 2 + Math.random()*4, vy: (Math.random()-0.5)*3, life: 22, text: '⚡', color: '#ffeb3b' });
-    }
-  }
-  // learning portals
-  for (const portal of Moto.portals) {
-    if (portal.passed) continue;
-    if (p.x + p.w > portal.x - 6 && p.x < portal.x + 12) {
-      portal.passed = true;
-      showQuestion(Game.subject, '📚 Checkpoint! Answer for a boost!', (correct, wasRetention) => {
-        if (correct) {
-          bumpStreak();
-          const bonus = wasRetention ? 3 : 1;
-          const pts = 50 * comboMult() * bonus;
-          Game.score += pts;
-          if (wasRetention && Game.lives < 5) Game.lives++;
-          else if (Math.random() < 0.4 && Game.lives < 5) Game.lives++;
-          p.invuln = Math.max(p.invuln, 100);
-          Moto.boostUntil = performance.now() + 1800;
-          particles.push({ x: p.x, y: p.y, vx: 0, vy: -2, life: 60, text: (wasRetention ? '🧠 +' : '+') + pts + ' ⭐ BOOST!', color: '#ff9800' });
-        } else {
-          resetStreak();
-          particles.push({ x: p.x, y: p.y, vx: 0, vy: -2, life: 50, text: '🧠 Try later!', color: '#ffd700' });
-        }
-      });
-      break;
-    }
-  }
-  if (p.x >= Moto.worldEnd) { endGame('win'); return; }
-  Moto.distance = Math.max(Moto.distance, p.x - 150);
-  Moto.cam.x = p.x - W * 0.28;
-  if (Moto.cam.x < 0) Moto.cam.x = 0;
-}
-
-function renderMoto() {
-  // sunset sky
-  const sky = ctx.createLinearGradient(0, 0, 0, Moto.groundY);
-  sky.addColorStop(0, '#1a237e'); sky.addColorStop(0.55, '#d84315'); sky.addColorStop(1, '#ffb300');
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, Moto.groundY);
-  // sun
-  ctx.fillStyle = 'rgba(255,235,59,0.85)';
-  ctx.beginPath(); ctx.arc(W * 0.7, Moto.groundY - 50, 36, 0, Math.PI*2); ctx.fill();
-  // distant mountains (parallax)
-  ctx.fillStyle = 'rgba(48,30,90,0.7)';
-  for (let i = 0; i < 7; i++) {
-    const mx = ((i * 250 - Moto.cam.x * 0.2) % (W + 300)) - 150;
-    ctx.beginPath(); ctx.moveTo(mx, Moto.groundY); ctx.lineTo(mx + 120, Moto.groundY - 80); ctx.lineTo(mx + 240, Moto.groundY); ctx.closePath(); ctx.fill();
-  }
-  // road
-  ctx.fillStyle = '#1c1c1c'; ctx.fillRect(0, Moto.groundY, W, H - Moto.groundY);
-  ctx.fillStyle = '#ffeb3b'; ctx.fillRect(0, Moto.groundY - 2, W, 3);
-  // lane dashes (scrolling)
-  ctx.fillStyle = '#fff';
-  const dashOff = Moto.cam.x % 80;
-  for (let dx = -dashOff; dx < W; dx += 80) ctx.fillRect(dx, Moto.groundY + 26, 40, 5);
-
-  ctx.save();
-  const sh = Moto.shake > 0 ? (Math.random()-0.5) * Moto.shake : 0;
-  ctx.translate(-Moto.cam.x + sh, sh);
-
-  // boost arrows on the road
-  for (const b of Moto.boosts) {
-    if (b.x + b.w < Moto.cam.x - 40 || b.x > Moto.cam.x + W + 40) continue;
-    ctx.fillStyle = b.used ? 'rgba(255,235,59,0.25)' : '#ffeb3b';
-    for (let i = 0; i < 3; i++) {
-      const ax = b.x + 6 + i * 24;
-      ctx.beginPath();
-      ctx.moveTo(ax, Moto.groundY + 14);
-      ctx.lineTo(ax + 14, Moto.groundY + 6);
-      ctx.lineTo(ax + 14, Moto.groundY + 12);
-      ctx.lineTo(ax + 26, Moto.groundY + 4);
-      ctx.lineTo(ax + 14, Moto.groundY + 24);
-      ctx.lineTo(ax + 14, Moto.groundY + 18);
-      ctx.closePath();
-      ctx.fill();
-    }
-  }
-
-  // portals (highway-sign style)
-  for (const portal of Moto.portals) {
-    if (portal.passed) continue;
-    if (portal.x < Moto.cam.x - 40 || portal.x > Moto.cam.x + W + 40) continue;
-    ctx.fillStyle = '#5d4037'; ctx.fillRect(portal.x - 3, Moto.groundY - 80, 6, 80);
-    const pulse = 0.7 + Math.abs(Math.sin(performance.now()/300)) * 0.3;
-    ctx.fillStyle = `rgba(0,230,118,${pulse})`;
-    ctx.fillRect(portal.x - 26, Moto.groundY - 116, 52, 40);
-    ctx.strokeStyle = '#00e676'; ctx.lineWidth = 3; ctx.strokeRect(portal.x - 26, Moto.groundY - 116, 52, 40);
-    ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('📚', portal.x, Moto.groundY - 96);
-  }
-
-  // obstacles
-  for (const o of Moto.obstacles) {
-    if (o.x + o.w < Moto.cam.x - 40 || o.x > Moto.cam.x + W + 40) continue;
-    if (o.type === 'cone') {
-      ctx.fillStyle = '#ff6f00';
-      ctx.beginPath(); ctx.moveTo(o.x + o.w/2, o.y); ctx.lineTo(o.x, o.y + o.h); ctx.lineTo(o.x + o.w, o.y + o.h); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.fillRect(o.x + 4, o.y + o.h * 0.45, o.w - 8, 4);
-      ctx.fillStyle = '#3e2723'; ctx.fillRect(o.x - 2, o.y + o.h - 4, o.w + 4, 4);
-    } else if (o.type === 'rock') {
-      ctx.fillStyle = '#616161';
-      ctx.beginPath(); ctx.ellipse(o.x + o.w/2, o.y + o.h/2, o.w/2, o.h/2, 0, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#37474f'; ctx.lineWidth = 2; ctx.stroke();
-      ctx.fillStyle = '#9e9e9e';
-      ctx.beginPath(); ctx.ellipse(o.x + o.w/2 - 6, o.y + 6, 5, 3, 0, 0, Math.PI*2); ctx.fill();
-    } else if (o.type === 'car') {
-      ctx.fillStyle = o.color || '#e91e63';
-      ctx.fillRect(o.x, o.y + 14, o.w, o.h - 14);
-      ctx.beginPath();
-      ctx.moveTo(o.x + 14, o.y + 14); ctx.lineTo(o.x + 24, o.y); ctx.lineTo(o.x + o.w - 24, o.y); ctx.lineTo(o.x + o.w - 14, o.y + 14);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#b3e5fc'; ctx.fillRect(o.x + 24, o.y + 4, o.w - 48, 10);
-      ctx.fillStyle = '#000';
-      ctx.beginPath(); ctx.arc(o.x + 16, o.y + o.h, 8, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(o.x + o.w - 16, o.y + o.h, 8, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.fillRect(o.x + o.w - 5, o.y + 18, 5, 8);
-    }
-  }
-
-  // coins
-  for (const c of Moto.coins) {
-    if (c.taken) continue;
-    if (c.x < Moto.cam.x - 40 || c.x > Moto.cam.x + W + 40) continue;
-    const sq = Math.abs(Math.sin(performance.now()/200 + c.x));
-    ctx.fillStyle = '#ffd54f';
-    ctx.beginPath(); ctx.ellipse(c.x, c.y, 7 * sq + 2, 9, 0, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#f57f17'; ctx.lineWidth = 1.5; ctx.stroke();
-  }
-
-  // motorcycle
-  const p = Moto.player;
-  if (p) {
-    renderTrail(0, 0);
-    renderAura(p, 0, 0);
-    // boost flame behind the bike (drawn first so the bike covers its base)
-    if (Moto.boostUntil > performance.now()) {
-      ctx.fillStyle = '#ffeb3b';
-      ctx.beginPath(); ctx.moveTo(p.x - 2, p.y + 14); ctx.lineTo(p.x - 22 - Math.random()*8, p.y + 20); ctx.lineTo(p.x - 2, p.y + 26); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#ff5722';
-      ctx.beginPath(); ctx.moveTo(p.x - 2, p.y + 16); ctx.lineTo(p.x - 14 - Math.random()*4, p.y + 20); ctx.lineTo(p.x - 2, p.y + 24); ctx.closePath(); ctx.fill();
-    }
-    if (p.invuln > 0 && Math.floor(p.invuln/5)%2 === 0) ctx.globalAlpha = 0.5;
-    ctx.save();
-    ctx.translate(p.x + p.w/2, p.y + p.h/2);
-    ctx.rotate(p.tilt);
-    if (p.invuln > 0) { ctx.shadowColor = '#00e676'; ctx.shadowBlur = 12; }
-    // bike body
-    ctx.fillStyle = '#e53935';
-    ctx.beginPath();
-    ctx.moveTo(-22, 6); ctx.lineTo(-14, -8); ctx.lineTo(14, -8); ctx.lineTo(22, 6); ctx.lineTo(18, 10); ctx.lineTo(-18, 10); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#212121'; ctx.fillRect(-10, -10, 18, 4);
-    // handlebar
-    ctx.strokeStyle = '#212121'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(14, -8); ctx.lineTo(20, -16); ctx.stroke();
-    // rider
-    ctx.fillStyle = '#1976d2';
-    ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(8, -10); ctx.lineTo(6, -2); ctx.lineTo(-4, -2); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#5d4037';
-    ctx.beginPath(); ctx.arc(2, -16, 6, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#90caf9'; ctx.fillRect(2, -18, 6, 2);
-    ctx.shadowBlur = 0;
-    // wheels with spinning spokes
-    for (const wx of [-18, 18]) {
-      ctx.save();
-      ctx.translate(wx, 14);
-      ctx.fillStyle = '#212121';
-      ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#616161';
-      ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
-      for (let k = 0; k < 4; k++) {
-        const a = p.wheelRot + k * Math.PI/2;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a)*8, Math.sin(a)*8); ctx.stroke();
+      let color = '#a1887f', edge = '#6d4c41';
+      if (pl.type === 'crumble') { color = pl.breakTimer > 0 ? (pl.breakTimer % 6 < 3 ? '#fff' : '#bf360c') : '#bf360c'; edge = '#3e2723'; }
+      if (pl.type === 'moving') { color = '#1976d2'; edge = '#0d47a1'; }
+      ctx.fillStyle = color; ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
+      ctx.fillStyle = edge; ctx.fillRect(pl.x, pl.y + pl.h - 3, pl.w, 3);
+      if (pl.type === 'crumble') {
+        ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('💥', pl.x + pl.w/2, pl.y - 2);
+      } else if (pl.type === 'moving') {
+        ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('↔', pl.x + pl.w/2, pl.y - 2);
       }
+    }
+  }
+
+  // dragon
+  const d = Boss.dragon;
+  if (d) {
+    if (d.flash > 0) ctx.globalAlpha = d.flash % 6 < 3 ? 0.4 : 1;
+    ctx.font = `${d.h}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(d.emoji, d.x + d.w/2, d.y + d.h/2);
+    ctx.globalAlpha = 1;
+    if (d.stunned > 0) {
+      ctx.font = '20px sans-serif'; ctx.fillText('💫', d.x + d.w/2 - 24 + Math.cos(performance.now()/100)*15, d.y - 5);
+      ctx.fillText('💫', d.x + d.w/2 + 24 + Math.cos(performance.now()/100+2)*15, d.y - 5);
+    }
+    // hp dots
+    for (let i = 0; i < d.maxHP; i++) {
+      ctx.fillStyle = i < d.hp ? '#f44336' : '#444';
+      ctx.beginPath(); ctx.arc(d.x + 14 + i*22, d.y - 16, 8, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(`${d.name} Lv.${Boss.level}`, d.x + d.w/2, d.y - 32);
+  }
+  // fireballs
+  for (const fb of Boss.fireballs) {
+    ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('🔥', fb.x, fb.y);
+  }
+  // player
+  const p = Boss.player;
+  if (p) {
+    if (p.vx !== 0 || !p.onGround) emitTrail(p);
+    renderTrail(0, 0);
+    renderAura(p, 0, 0);
+    if (p.invuln > 0 && Math.floor(p.invuln/6)%2 === 0) ctx.globalAlpha = 0.4;
+    if (Boss.doubleHit > 0) {
+      ctx.save();
+      ctx.shadowColor = '#ffeb3b'; ctx.shadowBlur = 14;
+      ctx.fillStyle = 'rgba(255,235,59,0.25)';
+      ctx.beginPath(); ctx.arc(p.x + p.w/2, p.y + p.h/2, 28, 0, Math.PI*2); ctx.fill();
       ctx.restore();
     }
-    ctx.restore();
+    p.frame++;
+    drawCharacter(ctx, p.char, p.x + p.w/2, p.y + p.h, p.w + 8, p.frame, p.facing);
+    ctx.globalAlpha = 1;
+    // jump indicator
+    const jumpsLeft = 3 - p.jumps;
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i < jumpsLeft ? '#ffeb3b' : '#444';
+      ctx.beginPath(); ctx.arc(p.x + p.w/2 - 12 + i*12, p.y - 14, 4, 0, Math.PI*2); ctx.fill();
+    }
+  }
+  // particles
+  particles = particles.filter(pt => pt.life > 0);
+  for (const pt of particles) {
+    pt.life--; pt.y += pt.vy; pt.vy += 0.05;
+    ctx.globalAlpha = Math.max(0, pt.life / 50);
+    ctx.fillStyle = pt.color || '#fff';
+    ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+    ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y);
     ctx.globalAlpha = 1;
   }
 
-  // particles
-  particles = particles.filter(pt => pt.life > 0);
-  ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
-  for (const pt of particles) {
-    pt.life--; pt.x += pt.vx || 0; pt.y += pt.vy; pt.vy += 0.12;
-    ctx.globalAlpha = Math.max(0, pt.life / 40);
-    ctx.fillStyle = pt.color || '#fff';
-    if (pt.text) { ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y); }
-    ctx.globalAlpha = 1;
+  // LAVA
+  ctx.fillStyle = '#bf360c';
+  ctx.fillRect(0, Boss.lava, W, H + 200 - Boss.lava);
+  // lava waves
+  ctx.fillStyle = '#ff5722';
+  for (let i = 0; i < W; i += 30) {
+    const wy = Boss.lava + Math.sin((performance.now()/200) + i*0.05)*4;
+    ctx.fillRect(i, wy, 30, 6);
+  }
+  ctx.fillStyle = '#ffeb3b';
+  for (let i = 0; i < W; i += 60) {
+    const wy = Boss.lava + Math.sin((performance.now()/300) + i*0.03)*3 + 8;
+    ctx.fillRect(i, wy, 18, 3);
   }
 
   ctx.restore();
 
-  // progress bar
-  const pct = Math.max(0, Math.min(1, (p ? p.x : 0) / Moto.worldEnd));
-  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(W/2 - 80, 44, 160, 12);
-  ctx.fillStyle = '#ff9800'; ctx.fillRect(W/2 - 78, 46, 156 * pct, 8);
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.strokeRect(W/2 - 80, 44, 160, 12);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(Math.floor(pct * 100) + '%', W/2, 50);
-
-  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `🏍️ ${Math.floor(Moto.distance/30)}m${Moto.boostUntil > performance.now() ? ' · ⚡BOOST' : ''}`);
+  // hud
+  document.getElementById('hudLeft').textContent = `❤️ ${Game.lives} · ⭐ ${Game.score}`;
+  document.getElementById('hudCenter').textContent = `🐲 Lv.${Boss.level} · 📏 ${Math.floor(Boss.height)}`;
 }
 
 /* ============================================================ ADVENTURE (simple runner with gates) ============================================================ */
@@ -2349,7 +2259,9 @@ function physicsAdv(p, dt) {
 }
 
 function renderAdv() {
-  ctx.fillStyle = bgAdv; ctx.fillRect(0, 0, W, H);
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#4fc3f7'); grad.addColorStop(0.7, '#81d4fa'); grad.addColorStop(1, '#fff59d');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   for (let i = 0; i < 6; i++) {
     const cx2 = ((i * 280 - Adv.cam.x * 0.2) % (W + 200)) - 100;
@@ -2399,16 +2311,16 @@ function renderAdv() {
     ctx.globalAlpha = 1;
   }
   particles = particles.filter(pt => pt.life > 0);
-  ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
   for (const pt of particles) {
     pt.life--; pt.y += pt.vy; pt.vy += 0.05;
     ctx.globalAlpha = Math.max(0, pt.life / 50);
-    ctx.fillStyle = pt.color || '#fff';
+    ctx.fillStyle = pt.color || '#fff'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
     ctx.strokeText(pt.text, pt.x, pt.y); ctx.fillText(pt.text, pt.x, pt.y); ctx.globalAlpha = 1;
   }
   ctx.restore();
-  setHUD(`❤️ ${Game.lives} · ⭐ ${Game.score}`, `🏃 ${Math.floor(Adv.distance/30)}m`);
+  document.getElementById('hudLeft').textContent = `❤️ ${Game.lives} · ⭐ ${Game.score}`;
+  document.getElementById('hudCenter').textContent = `🏃 ${Math.floor(Adv.distance/30)}m`;
 }
 
 /* ============================================================ MAIN LOOP ============================================================ */
@@ -2421,6 +2333,7 @@ function startMainLoop() {
   if (Net.active) document.getElementById('playerList').style.display = 'block';
   else document.getElementById('playerList').style.display = 'none';
   resize();
+  updateSessionHUD();
   cancelAnimationFrame(mainLoopId);
   mainLoopId = requestAnimationFrame(loop);
 }
@@ -2430,7 +2343,7 @@ function loop(t) {
   const dt = t - lastT; lastT = t;
   if (Game.mode === 'galaxy') { updateGalaxy(t); renderGalaxy(); }
   else if (Game.mode === 'boss') {
-    if (!Game.paused) physicsBoss(Geo.player, dt, t);
+    if (!Game.paused) physicsBoss(Boss.player, dt, t);
     if (Game.mode === 'boss') renderBoss();
   } else if (Game.mode === 'adventure') {
     if (!Game.paused) physicsAdv(Adv.player, dt);
@@ -2440,9 +2353,6 @@ function loop(t) {
       if (Adv.cam.x < 0) Adv.cam.x = 0;
     }
     renderAdv();
-  } else if (Game.mode === 'moto') {
-    if (!Game.paused) physicsMoto(Moto.player, dt, t);
-    if (Game.mode === 'moto') renderMoto();
   }
   // multiplayer broadcast
   if (Net.active && t - (Net.lastSend || 0) > 200) {
@@ -2511,6 +2421,7 @@ function startGems() {
   document.getElementById('gemWrap').classList.add('active');
   renderGems();
   Game.active = true;
+  updateSessionHUD();
   cancelAnimationFrame(mainLoopId);
   gemTick();
 }
@@ -2701,7 +2612,10 @@ async function answerGemQ(choice, btn) {
       document.getElementById('gemContBtn').addEventListener('click', () => {
         speechSynthesis && speechSynthesis.cancel();
         document.getElementById('gemQOverlay').style.display = 'none';
-        Gems.qActive = false; Gems.nextQAt = Date.now() + 14000 + Math.random() * 4000;
+        // MASTERY GATE (uses main qOverlay)
+        showMasteryGate(q.lessonId, () => {
+          Gems.qActive = false; Gems.nextQAt = Date.now() + 14000 + Math.random() * 4000;
+        });
       });
     }, 700);
     return;
@@ -2724,9 +2638,7 @@ async function answerGemQ(choice, btn) {
   }, 700);
 }
 
-document.getElementById('gemQuit').addEventListener('click', () => {
-  if (confirm('Quit and go home?')) { Game.active = false; document.getElementById('gemWrap').classList.remove('active'); document.getElementById('home').classList.add('active'); }
-});
+document.getElementById('gemQuit').addEventListener('click', quitToHome);
 
 /* ============================================================ HOME WIRING ============================================================ */
 let chosenSubject = 'mixed';
@@ -2745,32 +2657,39 @@ document.querySelectorAll('[data-mode]').forEach(c => {
     currentLesson = null; // home modes are mixed lessons
     const m = c.dataset.mode;
     if (m === 'galaxy') startGalaxy();
-    else if (m === 'boss') showGeoSpeedPicker();
+    else if (m === 'boss') startBoss();
     else if (m === 'gems') startGems();
     else if (m === 'adventure') startAdventure();
-    else if (m === 'moto') startMoto();
   });
 });
 
-document.getElementById('quitBtn').addEventListener('click', () => {
-  if (confirm('Quit and go home?')) {
-    Game.active = false;
-    if (window.speechSynthesis) speechSynthesis.cancel();
-    document.getElementById('gameWrap').classList.remove('active');
-    document.getElementById('home').classList.add('active');
+function quitToHome() {
+  const remaining = SESSION_GOAL - sessionCorrect;
+  let msg = 'Quit and go home?';
+  if (sessionCorrect > 0 && remaining > 0 && remaining <= SESSION_GOAL) {
+    msg = `🎯 You're SO close! Just ${remaining} more correct answers = HUGE bonus (5,000 🪙 + 5 ⭐)!\n\nStill quit?`;
   }
-});
+  if (!confirm(msg)) return;
+  Game.active = false;
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  document.getElementById('gameWrap').classList.remove('active');
+  document.getElementById('gemWrap').classList.remove('active');
+  document.getElementById('home').classList.add('active');
+  updateSessionHUD();
+  refreshHomeStats();
+}
+document.getElementById('quitBtn').addEventListener('click', quitToHome);
 document.getElementById('resAgain').addEventListener('click', () => {
   document.getElementById('result').classList.remove('active');
   if (Game.mode === 'galaxy') startGalaxy();
   else if (Game.mode === 'boss') startBoss();
   else if (Game.mode === 'gems') startGems();
   else if (Game.mode === 'adventure') startAdventure();
-  else if (Game.mode === 'moto') startMoto();
 });
 document.getElementById('resHome').addEventListener('click', () => {
   document.getElementById('result').classList.remove('active');
   document.getElementById('home').classList.add('active');
+  refreshHomeStats();
 });
 document.getElementById('resetBtn').addEventListener('click', () => {
   if (confirm('Reset stars and best score?')) {
@@ -2892,230 +2811,30 @@ const PACKS = {
       { id: 'ai7', kind: 'aura',  emoji: '✨', name: 'Superintelligence', rarity: 'legendary' }
     ]
   },
-  retro: {
-    name: 'Retro Pack', emoji: '🕹️', cost: 26000, color: 'retro',
+  secret: {
+    name: '??? SECRET PACK ???', emoji: '🎁', cost: 100000, color: 'secret', secret: true,
     items: [
-      { id: 'rt1', kind: 'trail', emoji: '👾', name: 'Pixel Burst',     rarity: 'common' },
-      { id: 'rt2', kind: 'trail', emoji: '🟪', name: 'Neon Blocks',     rarity: 'common' },
-      { id: 'rt3', kind: 'aura',  emoji: '📼', name: 'Cassette Glow',   rarity: 'rare' },
-      { id: 'rt4', kind: 'aura',  emoji: '🕹️', name: 'Joystick Power',  rarity: 'rare' },
-      { id: 'rt5', kind: 'trail', emoji: '💾', name: 'Floppy Dust',     rarity: 'epic' },
-      { id: 'rt6', kind: 'aura',  emoji: '🎮', name: 'Arcade King',     rarity: 'epic' },
-      { id: 'rt7', kind: 'aura',  emoji: '🌈', name: '80s Legend',      rarity: 'legendary' }
-    ]
-  },
-  elemental: {
-    name: 'Elemental Pack', emoji: '🌪️', cost: 32000, color: 'elemental',
-    items: [
-      { id: 'el1', kind: 'trail', emoji: '🔥', name: 'Flame Tail',      rarity: 'common' },
-      { id: 'el2', kind: 'trail', emoji: '💧', name: 'Water Splash',    rarity: 'common' },
-      { id: 'el3', kind: 'trail', emoji: '🌬️', name: 'Wind Whirl',      rarity: 'common' },
-      { id: 'el4', kind: 'aura',  emoji: '🪨', name: 'Stone Shield',    rarity: 'rare' },
-      { id: 'el5', kind: 'aura',  emoji: '❄️', name: 'Ice Crown',       rarity: 'rare' },
-      { id: 'el6', kind: 'trail', emoji: '⚡', name: 'Lightning Bolt',  rarity: 'epic' },
-      { id: 'el7', kind: 'aura',  emoji: '🌪️', name: 'Storm Lord',      rarity: 'legendary' }
-    ]
-  },
-  atlas: {
-    name: 'Atlas Pack', emoji: '🗺️', cost: 29000, color: 'atlas',
-    items: [
-      { id: 'at1', kind: 'trail', emoji: '📜', name: 'Old Scroll',      rarity: 'common' },
-      { id: 'at2', kind: 'trail', emoji: '🧭', name: 'Compass Spin',    rarity: 'common' },
-      { id: 'at3', kind: 'aura',  emoji: '🗺️', name: 'World Map',       rarity: 'rare' },
-      { id: 'at4', kind: 'aura',  emoji: '⛰️', name: 'Mountain Peak',   rarity: 'rare' },
-      { id: 'at5', kind: 'trail', emoji: '🏝️', name: 'Island Hop',      rarity: 'epic' },
-      { id: 'at6', kind: 'aura',  emoji: '🌍', name: 'Globe Trotter',   rarity: 'epic' },
-      { id: 'at7', kind: 'aura',  emoji: '🏛️', name: 'Atlas Titan',     rarity: 'legendary' }
-    ]
-  },
-  boddle: {
-    name: 'Boddle Pack', emoji: '🐲', cost: 31000, color: 'boddle',
-    items: [
-      { id: 'bd1', kind: 'trail', emoji: '🟢', name: 'Slime Trail',     rarity: 'common' },
-      { id: 'bd2', kind: 'trail', emoji: '🔢', name: 'Math Sparks',     rarity: 'common' },
-      { id: 'bd3', kind: 'aura',  emoji: '👹', name: 'Boddle Monster',  rarity: 'rare' },
-      { id: 'bd4', kind: 'aura',  emoji: '🦖', name: 'Boddle Beast',    rarity: 'rare' },
-      { id: 'bd5', kind: 'trail', emoji: '🧪', name: 'Potion Quiz',     rarity: 'epic' },
-      { id: 'bd6', kind: 'aura',  emoji: '🐉', name: 'Boddle Dragon',   rarity: 'epic' },
-      { id: 'bd7', kind: 'aura',  emoji: '👑', name: 'Boddle Champ',    rarity: 'legendary' }
-    ]
-  },
-  gimkit: {
-    name: 'Gimkit Pack', emoji: '💰', cost: 34000, color: 'gimkit',
-    items: [
-      { id: 'gk1', kind: 'trail', emoji: '💵', name: 'Cash Stream',     rarity: 'common' },
-      { id: 'gk2', kind: 'trail', emoji: '🎯', name: 'Quiz Hit',        rarity: 'common' },
-      { id: 'gk3', kind: 'aura',  emoji: '💰', name: 'Money Bag',       rarity: 'rare' },
-      { id: 'gk4', kind: 'aura',  emoji: '🐟', name: 'Fishtopia',       rarity: 'rare' },
-      { id: 'gk5', kind: 'trail', emoji: '🏰', name: 'Tag Domination',  rarity: 'epic' },
-      { id: 'gk6', kind: 'aura',  emoji: '🧊', name: 'Snowbrawl',       rarity: 'epic' },
-      { id: 'gk7', kind: 'aura',  emoji: '🏆', name: 'Gimkit GOAT',     rarity: 'legendary' }
-    ]
-  },
-  blooket: {
-    name: 'Blooket Pack', emoji: '🐔', cost: 36000, color: 'blooket',
-    items: [
-      { id: 'bk1', kind: 'trail', emoji: '🐔', name: 'Chicken Trail',   rarity: 'common' },
-      { id: 'bk2', kind: 'trail', emoji: '🥚', name: 'Egg Drop',        rarity: 'common' },
-      { id: 'bk3', kind: 'aura',  emoji: '🐰', name: 'Bunny Blook',     rarity: 'rare' },
-      { id: 'bk4', kind: 'aura',  emoji: '🐱', name: 'Cat Blook',       rarity: 'rare' },
-      { id: 'bk5', kind: 'trail', emoji: '🦄', name: 'Mythical Magic',  rarity: 'epic' },
-      { id: 'bk6', kind: 'aura',  emoji: '🐉', name: 'Chroma Dragon',   rarity: 'epic' },
-      { id: 'bk7', kind: 'aura',  emoji: '👑', name: 'King Blook',      rarity: 'legendary' }
-    ]
-  },
-  aarav: {
-    name: "Aarav's Quest Arena", emoji: '⚔️', cost: 45000, color: 'aarav',
-    items: [
-      { id: 'aq1', kind: 'trail', emoji: '⚔️', name: 'Sword Slash',     rarity: 'common' },
-      { id: 'aq2', kind: 'trail', emoji: '🛡️', name: 'Shield Shine',    rarity: 'common' },
-      { id: 'aq3', kind: 'aura',  emoji: '🏹', name: 'Archer Aim',      rarity: 'rare' },
-      { id: 'aq4', kind: 'aura',  emoji: '👑', name: 'Crown of Quests', rarity: 'rare' },
-      { id: 'aq5', kind: 'trail', emoji: '💥', name: 'Combo Strike',    rarity: 'epic' },
-      { id: 'aq6', kind: 'aura',  emoji: '🐎', name: 'Battle Steed',    rarity: 'epic' },
-      { id: 'aq7', kind: 'aura',  emoji: '🏆', name: 'Aarav The Brave', rarity: 'legendary' }
-    ]
-  },
-  fun: {
-    name: 'Fun Pack', emoji: '🎉', cost: 60000, color: 'fun',
-    items: [
-      { id: 'fn1', kind: 'trail', emoji: '🎈', name: 'Party Balloons',  rarity: 'common' },
-      { id: 'fn2', kind: 'trail', emoji: '🎊', name: 'Confetti Toss',   rarity: 'common' },
-      { id: 'fn3', kind: 'aura',  emoji: '🎁', name: 'Gift Glow',       rarity: 'rare' },
-      { id: 'fn4', kind: 'aura',  emoji: '🍭', name: 'Candy Halo',      rarity: 'rare' },
-      { id: 'fn5', kind: 'trail', emoji: '🌈', name: 'Rainbow Wake',    rarity: 'epic' },
-      { id: 'fn6', kind: 'aura',  emoji: '🦄', name: 'Unicorn Friend',  rarity: 'epic' },
-      { id: 'fn7', kind: 'trail', emoji: '✨', name: 'Pure Joy',        rarity: 'legendary' },
-      { id: 'fn8', kind: 'aura',  emoji: '🌟', name: 'Mega Star',       rarity: 'legendary' },
-      { id: 'fn9', kind: 'aura',  emoji: '🎉', name: 'Ultimate Fun',    rarity: 'legendary' }
-    ]
-  },
-  dad: {
-    name: 'Dad Pack', emoji: '👨', cost: 23000, color: 'dad',
-    items: [
-      { id: 'dd1', kind: 'trail', emoji: '☕', name: 'Coffee Steam',    rarity: 'common' },
-      { id: 'dd2', kind: 'trail', emoji: '📰', name: 'Newspaper',       rarity: 'common' },
-      { id: 'dd3', kind: 'aura',  emoji: '👔', name: 'Tie Time',        rarity: 'rare' },
-      { id: 'dd4', kind: 'aura',  emoji: '🍖', name: 'BBQ Master',      rarity: 'rare' },
-      { id: 'dd5', kind: 'trail', emoji: '🔧', name: 'Tool Box',        rarity: 'epic' },
-      { id: 'dd6', kind: 'aura',  emoji: '🚗', name: 'Dad Car',         rarity: 'epic' },
-      { id: 'dd7', kind: 'aura',  emoji: '👨', name: 'Super Dad',       rarity: 'legendary' }
-    ]
-  },
-  veggie: {
-    name: 'Veggie Pack', emoji: '🥦', cost: 21000, color: 'veggie',
-    items: [
-      { id: 'vg1', kind: 'trail', emoji: '🥕', name: 'Carrot Crunch',   rarity: 'common' },
-      { id: 'vg2', kind: 'trail', emoji: '🌽', name: 'Corn Pop',        rarity: 'common' },
-      { id: 'vg3', kind: 'aura',  emoji: '🥬', name: 'Lettuce Leaf',    rarity: 'rare' },
-      { id: 'vg4', kind: 'aura',  emoji: '🥒', name: 'Cool Cucumber',   rarity: 'rare' },
-      { id: 'vg5', kind: 'trail', emoji: '🍆', name: 'Eggplant Zap',    rarity: 'epic' },
-      { id: 'vg6', kind: 'aura',  emoji: '🥔', name: 'Spud Power',      rarity: 'epic' },
-      { id: 'vg7', kind: 'aura',  emoji: '🥦', name: 'Veggie King',     rarity: 'legendary' }
-    ]
-  },
-  fruit: {
-    name: 'Fruit Pack', emoji: '🍎', cost: 22000, color: 'fruit',
-    items: [
-      { id: 'fr1', kind: 'trail', emoji: '🍎', name: 'Apple Shine',     rarity: 'common' },
-      { id: 'fr2', kind: 'trail', emoji: '🍌', name: 'Banana Slip',     rarity: 'common' },
-      { id: 'fr3', kind: 'aura',  emoji: '🍓', name: 'Berry Sweet',     rarity: 'rare' },
-      { id: 'fr4', kind: 'aura',  emoji: '🍇', name: 'Grape Bunch',     rarity: 'rare' },
-      { id: 'fr5', kind: 'trail', emoji: '🍑', name: 'Peach Fuzz',      rarity: 'epic' },
-      { id: 'fr6', kind: 'aura',  emoji: '🍉', name: 'Melon Slice',     rarity: 'epic' },
-      { id: 'fr7', kind: 'aura',  emoji: '🍍', name: 'Pineapple King',  rarity: 'legendary' }
-    ]
-  },
-  hero: {
-    name: 'Hero Pack', emoji: '🦸', cost: 100000, color: 'hero',
-    items: [
-      { id: 'hr1', kind: 'trail', emoji: '💪', name: 'Power Surge',     rarity: 'common' },
-      { id: 'hr2', kind: 'trail', emoji: '🦸', name: 'Hero Dash',       rarity: 'common' },
-      { id: 'hr3', kind: 'aura',  emoji: '🛡️', name: 'Hero Shield',     rarity: 'rare' },
-      { id: 'hr4', kind: 'aura',  emoji: '⚡', name: 'Speedster',       rarity: 'rare' },
-      { id: 'hr5', kind: 'trail', emoji: '🔥', name: 'Burning Cape',    rarity: 'epic' },
-      { id: 'hr6', kind: 'aura',  emoji: '🦅', name: 'Eagle Soar',      rarity: 'epic' },
-      { id: 'hr7', kind: 'aura',  emoji: '🦸', name: 'Super Hero',      rarity: 'legendary' },
-      { id: 'hr8', kind: 'aura',  emoji: '🦹', name: 'Mega Hero',       rarity: 'legendary' }
-    ]
-  },
-  cosmic: {
-    name: 'Cosmic Pack', emoji: '🌌', cost: 100000, color: 'cosmic',
-    items: [
-      { id: 'cm1', kind: 'trail', emoji: '☄️', name: 'Comet Tail',      rarity: 'common' },
-      { id: 'cm2', kind: 'trail', emoji: '⭐', name: 'Star Spark',      rarity: 'common' },
-      { id: 'cm3', kind: 'aura',  emoji: '🌙', name: 'Moon Halo',       rarity: 'rare' },
-      { id: 'cm4', kind: 'aura',  emoji: '☀️', name: 'Sun Crown',       rarity: 'rare' },
-      { id: 'cm5', kind: 'trail', emoji: '🌠', name: 'Shooting Star',   rarity: 'epic' },
-      { id: 'cm6', kind: 'aura',  emoji: '🪐', name: 'Planet Orbit',    rarity: 'epic' },
-      { id: 'cm7', kind: 'aura',  emoji: '🌌', name: 'Galaxy God',      rarity: 'legendary' },
-      { id: 'cm8', kind: 'aura',  emoji: '🕳️', name: 'Black Hole',      rarity: 'legendary' }
-    ]
-  },
-  ultimate: {
-    name: 'Ultimate Pack', emoji: '💫', cost: 100000, color: 'ultimate',
-    items: [
-      { id: 'ult1', kind: 'trail', emoji: '✨', name: 'Pure Shine',     rarity: 'common' },
-      { id: 'ult2', kind: 'trail', emoji: '💎', name: 'Diamond Dust',   rarity: 'common' },
-      { id: 'ult3', kind: 'aura',  emoji: '👑', name: 'Royal Crown',    rarity: 'rare' },
-      { id: 'ult4', kind: 'aura',  emoji: '🏆', name: 'Champion',       rarity: 'rare' },
-      { id: 'ult5', kind: 'trail', emoji: '💫', name: 'Star Flow',      rarity: 'epic' },
-      { id: 'ult6', kind: 'aura',  emoji: '🔱', name: 'Trident',        rarity: 'epic' },
-      { id: 'ult7', kind: 'aura',  emoji: '⚜️', name: 'Royal Sigil',    rarity: 'legendary' },
-      { id: 'ult8', kind: 'aura',  emoji: '💫', name: 'Ultimate Form',  rarity: 'legendary' },
-      { id: 'ult9', kind: 'aura',  emoji: '🌟', name: 'Pure Power',     rarity: 'legendary' }
+      { id: 'sc1', kind: 'trail', emoji: '✨', name: 'Magic Dust',       rarity: 'common' },
+      { id: 'sc2', kind: 'trail', emoji: '⚡', name: 'Neon Bolt',        rarity: 'common' },
+      { id: 'sc3', kind: 'aura',  emoji: '🎁', name: 'Mystery Gift',     rarity: 'rare' },
+      { id: 'sc4', kind: 'trail', emoji: '🔥', name: 'Rainbow Flame',    rarity: 'rare' },
+      { id: 'sc5', kind: 'aura',  emoji: '💎', name: 'Diamond Aura',     rarity: 'epic' },
+      { id: 'sc6', kind: 'trail', emoji: '🌈', name: 'Rainbow Trail',    rarity: 'epic' },
+      { id: 'sc7', kind: 'aura',  emoji: '👑', name: 'Golden Crown',     rarity: 'legendary' },
+      { id: 'sc8', kind: 'aura',  emoji: '🦕', name: 'Cosmic Dino',      rarity: 'legendary' }
     ]
   }
 };
-
-/* Inject Kio / Chroma / Mythical items into every pack */
-const RARE_EXTRA = {
-  galaxy:       [{k:'trail',e:'🪩',n:'Disco Stars'},      {k:'aura', e:'🌠',n:'Chroma Comet'},      {k:'aura', e:'🪐',n:'Mythic Stargate'}],
-  dragon:       [{k:'aura', e:'💎',n:'Diamond Dragon'},   {k:'trail',e:'🔥',n:'Chroma Inferno'},    {k:'aura', e:'🐉',n:'Mythic Wyrm'}],
-  ocean:        [{k:'trail',e:'🌀',n:'Whirlpool Trail'},  {k:'aura', e:'🐋',n:'Chroma Whale'},      {k:'aura', e:'🧜',n:'Mythic Mer-Lord'}],
-  cyber:        [{k:'aura', e:'💻',n:'Quantum Core'},     {k:'trail',e:'🌐',n:'Chroma Net'},        {k:'aura', e:'👁️',n:'Mythic Singularity'}],
-  pirate:       [{k:'trail',e:'⚔️',n:'Ghost Cutlass'},    {k:'aura', e:'🦑',n:'Chroma Kraken'},     {k:'aura', e:'🏝️',n:'Mythic Treasure Isle'}],
-  wizard:       [{k:'aura', e:'🌙',n:'Moon Sage'},        {k:'trail',e:'⚗️',n:'Chroma Brew'},       {k:'aura', e:'🦄',n:'Mythic Familiar'}],
-  circus:       [{k:'aura', e:'🎭',n:'Mystic Mask'},      {k:'aura', e:'🎠',n:'Chroma Carousel'},   {k:'aura', e:'🦋',n:'Mythic Acrobat'}],
-  magic_school: [{k:'trail',e:'📚',n:'Forbidden Tome'},   {k:'aura', e:'⚡',n:'Chroma Spell'},      {k:'aura', e:'🏰',n:'Mythic Headmaster'}],
-  dog:          [{k:'aura', e:'🦊',n:'Cyber Pup'},        {k:'trail',e:'🌈',n:'Chroma Hound'},      {k:'aura', e:'🐺',n:'Mythic Alpha'}],
-  ai:           [{k:'aura', e:'🛸',n:'Quantum Mind'},     {k:'aura', e:'💠',n:'Chroma Core'},       {k:'aura', e:'🌌',n:'Mythic AGI'}],
-  retro:        [{k:'trail',e:'🎰',n:'Jackpot Glow'},     {k:'trail',e:'🎨',n:'Chroma Pixel'},      {k:'aura', e:'🦖',n:'Mythic 8-Bit Beast'}],
-  elemental:    [{k:'aura', e:'☄️',n:'Cosmic Element'},   {k:'trail',e:'🌈',n:'Chroma Storm'},      {k:'aura', e:'☯️',n:'Mythic Balance'}],
-  atlas:        [{k:'aura', e:'🗿',n:'Lost Civilization'},{k:'aura', e:'🌋',n:'Chroma Volcano'},    {k:'aura', e:'🌠',n:'Mythic Atlas Star'}],
-  boddle:       [{k:'trail',e:'🧟',n:'Boddle Phantom'},   {k:'aura', e:'🌈',n:'Chroma Boddle'},     {k:'aura', e:'🐲',n:'Mythic Boddle God'}],
-  gimkit:       [{k:'trail',e:'💸',n:'Money Tornado'},    {k:'aura', e:'🌈',n:'Chroma Cash'},       {k:'aura', e:'🏰',n:'Mythic Kingdom'}],
-  blooket:      [{k:'aura', e:'🦖',n:'T-Rex Blook'},      {k:'aura', e:'🌈',n:'Chroma Megalodon'},  {k:'aura', e:'🦄',n:'Mythic Blook'}],
-  aarav:        [{k:'trail',e:'🗡️',n:'Excalibur Aarav'}, {k:'aura', e:'🌈',n:'Chroma Aarav'},      {k:'aura', e:'👑',n:'Mythic Aarav Emperor'}],
-  fun:          [{k:'trail',e:'🎢',n:'Mega Coaster'},     {k:'aura', e:'🌈',n:'Chroma Party'},      {k:'aura', e:'🌌',n:'Mythic Funverse'}],
-  dad:          [{k:'aura', e:'🍳',n:'Grill Master'},     {k:'aura', e:'🌈',n:'Chroma Tools'},      {k:'aura', e:'👴',n:'Mythic Grandpa'}],
-  veggie:       [{k:'trail',e:'🌶️',n:'Spicy Pepper'},    {k:'aura', e:'🌈',n:'Chroma Salad'},      {k:'aura', e:'🥗',n:'Mythic Garden God'}],
-  fruit:        [{k:'aura', e:'🥝',n:'Kiwi Burst'},       {k:'trail',e:'🌈',n:'Chroma Smoothie'},   {k:'aura', e:'🍒',n:'Mythic Fruit Lord'}],
-  hero:         [{k:'aura', e:'🦾',n:'Bionic Hero'},      {k:'aura', e:'🌈',n:'Chroma Cape'},       {k:'aura', e:'🦸',n:'Mythic Avenger'}],
-  cosmic:       [{k:'trail',e:'💫',n:'Quasar Stream'},    {k:'aura', e:'🌈',n:'Chroma Nebula'},     {k:'aura', e:'🌌',n:'Mythic Universe'}],
-  ultimate:     [{k:'trail',e:'🎆',n:'Ultra Burst'},      {k:'aura', e:'🌈',n:'Chroma Champion'},   {k:'aura', e:'💫',n:'Mythic Ultimate'}]
-};
-const NEW_RARITIES = ['kio','chroma','mythical'];
-Object.entries(RARE_EXTRA).forEach(([key, list]) => {
-  const pack = PACKS[key];
-  if (!pack) return;
-  list.forEach((def, i) => {
-    pack.items.push({ id: key + '_' + NEW_RARITIES[i], kind: def.k, emoji: def.e, name: def.n, rarity: NEW_RARITIES[i] });
-  });
-});
 
 const ALL_ITEMS = {};
 Object.values(PACKS).forEach(p => p.items.forEach(it => ALL_ITEMS[it.id] = it));
 
 function rarityRoll() {
   const r = Math.random();
-  if (r < 0.50)   return 'common';   // 50%
-  if (r < 0.78)   return 'rare';     // 28%
-  if (r < 0.92)   return 'epic';     // 14%
-  if (r < 0.97)   return 'legendary';// 5%
-  if (r < 0.99)   return 'kio';      // 2%
-  if (r < 0.998)  return 'chroma';   // 0.8%
-  return 'mythical';                 // 0.2%
+  if (r < 0.50) return 'common';
+  if (r < 0.80) return 'rare';
+  if (r < 0.97) return 'epic';
+  return 'legendary';
 }
 
 function openPack(packKey) {
@@ -3128,7 +2847,7 @@ function openPack(packKey) {
   let targetRarity = rarityRoll();
   let pool = pack.items.filter(i => i.rarity === targetRarity);
   while (!pool.length) {
-    const order = ['mythical','chroma','kio','legendary','epic','rare','common'];
+    const order = ['legendary','epic','rare','common'];
     const idx = order.indexOf(targetRarity);
     targetRarity = order[Math.min(order.length - 1, idx + 1)];
     pool = pack.items.filter(i => i.rarity === targetRarity);
@@ -3151,8 +2870,7 @@ function revealItem(item, pack) {
   // duplicates give coins back
   let dupCoins = 0;
   if (dup) {
-    const DUP_COINS = { common: 300, rare: 800, epic: 2000, legendary: 5000, kio: 10000, chroma: 25000, mythical: 75000 };
-    dupCoins = DUP_COINS[item.rarity] || 300;
+    dupCoins = item.rarity === 'legendary' ? 5000 : item.rarity === 'epic' ? 2000 : item.rarity === 'rare' ? 800 : 300;
     coins += dupCoins; Save.set('coins', coins);
   }
   document.getElementById('packBox').style.display = 'none';
@@ -3191,17 +2909,21 @@ function refreshShop() {
   const grid = document.getElementById('packGrid');
   grid.innerHTML = '';
   Object.entries(PACKS).forEach(([key, pack]) => {
+    // hide secret pack unless unlocked
+    if (pack.secret && !secretUnlocked) return;
     const card = document.createElement('div');
     const locked = coins < pack.cost;
     card.className = 'pack-card ' + pack.color + (locked ? ' locked' : '');
+    card.style.position = 'relative';
     const owned = pack.items.filter(it => inventory.includes(it.id)).length;
     const total = pack.items.length;
-    // Build the collection slots: each pack item shows owned (color) or locked (gray)
     const slotsHtml = pack.items.map(it => {
       const has = inventory.includes(it.id);
       return `<div class="collected-slot ${has ? 'has' : 'locked'}" title="${has ? it.name + ' (' + it.rarity + ')' : '???'}">${has ? it.emoji : '?'}</div>`;
     }).join('');
+    const badge = pack.secret ? '<div class="secret-badge">🌟 SECRET</div>' : '';
     card.innerHTML = `
+      ${badge}
       <div class="emoji">${pack.emoji}</div>
       <div class="nm">${pack.name}</div>
       <div style="font-size:11px; opacity:0.85; margin-top:3px;">${owned}/${total} collected</div>
@@ -3211,6 +2933,13 @@ function refreshShop() {
     card.addEventListener('click', () => openPack(key));
     grid.appendChild(card);
   });
+  // hint about secret pack if not unlocked
+  if (!secretUnlocked) {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 12px; background: rgba(0,0,0,0.3); border: 2px dashed rgba(255,255,255,0.4); border-radius: 12px; font-size: 13px; opacity: 0.8;';
+    hint.innerHTML = `🔒 <b>Hidden Pack Locked!</b><br>Unlock by: reaching Level 3, answering 100 correctly, or... finding a secret! 🤫`;
+    grid.appendChild(hint);
+  }
 }
 
 function refreshInventory() {
@@ -3262,6 +2991,26 @@ document.getElementById('shopBtn').addEventListener('click', () => {
   document.getElementById('shopScreen').classList.add('active');
   refreshShop();
 });
+
+// SECRET UNLOCK: click ⚡ in title 7 times to reveal secret pack
+function handleSecretBoltClick(e) {
+  if (secretUnlocked) return;
+  secretClickCount++;
+  SFX.click();
+  // subtle visual feedback — grows a tiny bit
+  const el = e.target;
+  el.style.transform = `scale(${1 + secretClickCount * 0.05}) rotate(${secretClickCount * 15}deg)`;
+  el.style.transition = 'transform 0.15s';
+  setTimeout(() => { el.style.transform = ''; }, 200);
+  if (secretClickCount >= 7) {
+    secretClickCount = 0;
+    checkSecretUnlock('clicks');
+  } else if (secretClickCount >= 5) {
+    showToast(`✨ Something magical...${7 - secretClickCount} more!`);
+  }
+}
+document.getElementById('secretBolt').addEventListener('click', handleSecretBoltClick);
+document.getElementById('secretBolt2').addEventListener('click', handleSecretBoltClick);
 document.getElementById('shopBack').addEventListener('click', () => {
   document.getElementById('shopScreen').classList.remove('active');
   document.getElementById('home').classList.add('active');
@@ -3277,60 +3026,6 @@ document.getElementById('invBack').addEventListener('click', () => {
   document.getElementById('home').classList.add('active');
 });
 
-/* NEWS */
-const NEW_PACKS = ['hero','cosmic','ultimate','retro','elemental','atlas','boddle','gimkit','blooket','aarav','fun','dad','veggie','fruit'];
-const PACK_BLURBS = {
-  retro:     '80s arcade vibes — pixels, joysticks, neon, and cassette tape glow.',
-  elemental: 'Master fire, water, wind, stone, ice, and lightning. Become the Storm Lord.',
-  atlas:     'Maps, compasses, mountains, and globes for the explorer hero.',
-  boddle:    'Slimes, monsters, dragons & potions — earn the Boddle Champ crown.',
-  gimkit:    'Cash streams, money bags, Fishtopia & Snowbrawl gear. Be the Gimkit GOAT!',
-  blooket:   'Chickens, bunnies, cats, the Chroma Dragon, and the legendary King Blook.',
-  aarav:     'A pack themed after Aarav himself — swords, shields, and the Aarav The Brave aura.',
-  fun:       'THE BEST PACK! 9 items with THREE legendaries: Pure Joy, Mega Star & Ultimate Fun.',
-  dad:       'Coffee, newspapers, BBQ, tools, and the legendary Super Dad aura. Dad joke not included.',
-  veggie:    'Carrots, corn, lettuce, cucumber, eggplant & spuds — crowned by the Veggie King.',
-  fruit:     'Apples, bananas, berries, grapes, peaches & melons — ruled by the Pineapple King.',
-  hero:      '🔥 PREMIUM 100k 🔥 Transform into a Super Hero. Cape, shield, speed, eagle soar & Mythic Avenger.',
-  cosmic:    '🔥 PREMIUM 100k 🔥 Stars, moons, comets, planets & black holes. Become the Galaxy God.',
-  ultimate:  '🔥 PREMIUM 100k 🔥 The ultimate ultra-pack. Crown, trident, royal sigil & Mythic Ultimate form.'
-};
-function refreshNews() {
-  const list = document.getElementById('newsPackList');
-  list.innerHTML = '';
-  NEW_PACKS.forEach(key => {
-    const pack = PACKS[key];
-    if (!pack) return;
-    const item = document.createElement('div');
-    item.className = 'news-pack-item ' + pack.color + (key === 'fun' ? ' best' : '');
-    const legendaryCount = pack.items.filter(i => i.rarity === 'legendary').length;
-    const ultraCount = pack.items.filter(i => ['kio','chroma','mythical'].includes(i.rarity)).length;
-    item.innerHTML = `
-      <div class="np-emoji">${pack.emoji}</div>
-      <div class="np-info">
-        <div class="np-name">${pack.name}${key === 'fun' ? ' ⭐' : ''}</div>
-        <div class="np-desc">${PACK_BLURBS[key]}</div>
-        <div class="np-cost">🪙 ${pack.cost.toLocaleString()} · ${pack.items.length} items · ${legendaryCount} legendary · ${ultraCount} ultra-rare</div>
-      </div>
-    `;
-    item.addEventListener('click', () => {
-      document.getElementById('newsScreen').classList.remove('active');
-      document.getElementById('shopScreen').classList.add('active');
-      refreshShop();
-    });
-    list.appendChild(item);
-  });
-}
-document.getElementById('newsBtn').addEventListener('click', () => {
-  document.getElementById('home').classList.remove('active');
-  document.getElementById('newsScreen').classList.add('active');
-  refreshNews();
-});
-document.getElementById('newsBack').addEventListener('click', () => {
-  document.getElementById('newsScreen').classList.remove('active');
-  document.getElementById('home').classList.add('active');
-});
-
 /* LEVEL SYSTEM */
 function starsForLevel(lv) { return lv * 10; } // 10 stars per level
 function checkLevelUp() {
@@ -3342,25 +3037,13 @@ function checkLevelUp() {
     Save.set('level', level); Save.set('coins', coins);
     document.getElementById('newLevel').textContent = level;
     document.getElementById('levelUp').classList.add('active');
+    setTimeout(() => checkSecretUnlock('level'), 3000);
   }
   refreshHomeStats();
 }
 document.getElementById('levelUpClose').addEventListener('click', () => {
   document.getElementById('levelUp').classList.remove('active');
 });
-
-/* GEOMETRY DASH SPEED PICKER */
-function showGeoSpeedPicker() {
-  document.getElementById('geoSpeed').classList.add('active');
-}
-function launchGeo(mode) {
-  geoSpeedMode = mode;
-  document.getElementById('geoSpeed').classList.remove('active');
-  startBoss();
-}
-document.getElementById('geoMediumBtn').addEventListener('click', () => { SFX.click(); launchGeo('medium'); });
-document.getElementById('geoFastBtn').addEventListener('click', () => { SFX.click(); launchGeo('fast'); });
-document.getElementById('geoSpeedCancel').addEventListener('click', () => { SFX.click(); document.getElementById('geoSpeed').classList.remove('active'); });
 
 function refreshHomeStats() {
   document.getElementById('coinsTop').textContent = coins.toLocaleString();
@@ -3372,6 +3055,28 @@ function refreshHomeStats() {
   const pct = Math.max(0, Math.min(100, ((totalStars - prev) / (need - prev)) * 100));
   document.getElementById('levelFill').style.width = pct + '%';
   document.getElementById('levelText').textContent = `${totalStars}/${need} ⭐ to next level`;
+  refreshProgressPanel();
+}
+
+function refreshProgressPanel() {
+  const day = 24*60*60*1000;
+  const week = correctInLast(7*day);
+  const year = correctInLast(365*day);
+  const lifetime = answerLog.filter(e => e.correct).length;
+  const goalPct = Math.min(100, (sessionCorrect / SESSION_GOAL) * 100);
+  const done = sessionCorrect >= SESSION_GOAL;
+  const gt = document.getElementById('progGoalText');
+  const gb = document.getElementById('progGoalBar');
+  const ps = document.getElementById('progSession');
+  const pw = document.getElementById('progWeek');
+  const py = document.getElementById('progYear');
+  const pl = document.getElementById('progLifetime');
+  if (gt) gt.textContent = `${sessionCorrect}/${SESSION_GOAL}${done ? ' 🏆' : ''}`;
+  if (gb) { gb.style.width = goalPct + '%'; gb.style.background = done ? 'linear-gradient(90deg,#ffeb3b,#ff9800)' : 'linear-gradient(90deg,#66bb6a,#2e7d32)'; }
+  if (ps) ps.textContent = sessionCorrect;
+  if (pw) pw.textContent = week;
+  if (py) py.textContent = year;
+  if (pl) pl.textContent = lifetime + ' correct all-time';
 }
 
 /* ============================================================ PROFILE SCREEN ============================================================ */
@@ -3490,6 +3195,350 @@ document.getElementById('resetLessonsBtn').addEventListener('click', () => {
   }
 });
 
+/* ============================================================ MONEY MASTER — Financial Literacy Game ============================================================ */
+const JOBS = [
+  { id: 'j_lemon',  emoji: '🍋', name: 'Lemonade Stand', pay: 40,   unlockWeek: 1 },
+  { id: 'j_pizza',  emoji: '🍕', name: 'Pizza Maker',    pay: 60,   unlockWeek: 1 },
+  { id: 'j_petsit', emoji: '🐕', name: 'Pet Sitter',     pay: 90,   unlockWeek: 1 },
+  { id: 'j_lawn',   emoji: '🌱', name: 'Lawn Mowing',    pay: 120,  unlockWeek: 2 },
+  { id: 'j_art',    emoji: '🎨', name: 'Selling Art',    pay: 180,  unlockWeek: 5 },
+  { id: 'j_tutor',  emoji: '📚', name: 'Tutor',          pay: 250,  unlockWeek: 10 },
+  { id: 'j_youtube',emoji: '📹', name: 'YouTuber',       pay: 400,  unlockWeek: 15 },
+  { id: 'j_coder',  emoji: '💻', name: 'Coder',          pay: 700,  unlockWeek: 20 },
+  { id: 'j_doctor', emoji: '🩺', name: 'Doctor',         pay: 1500, unlockWeek: 30 },
+  { id: 'j_ceo',    emoji: '👔', name: 'CEO',            pay: 5000, unlockWeek: 50 }
+];
+
+const WANTS = [
+  { id: 'w_book',    emoji: '📚', name: 'Cool Book',       cost: 100 },
+  { id: 'w_lego',    emoji: '🧱', name: 'Lego Set',         cost: 300 },
+  { id: 'w_guitar',  emoji: '🎸', name: 'Guitar',           cost: 500 },
+  { id: 'w_bike',    emoji: '🚴', name: 'Mountain Bike',    cost: 800 },
+  { id: 'w_drone',   emoji: '🛸', name: 'Drone',            cost: 1500 },
+  { id: 'w_pc',      emoji: '🎮', name: 'Gaming PC',        cost: 2500 },
+  { id: 'w_camera',  emoji: '📷', name: 'Pro Camera',       cost: 3500 },
+  { id: 'w_vacation',emoji: '🏝️', name: 'Beach Vacation',   cost: 10000 },
+  { id: 'w_car',     emoji: '🚗', name: 'Regular Car',      cost: 30000 },
+  { id: 'w_lambo',   emoji: '🏎️', name: 'Lamborghini',      cost: 250000 },
+  { id: 'w_house',   emoji: '🏠', name: 'Dream House',      cost: 750000 },
+  { id: 'w_yacht',   emoji: '⛵', name: 'Yacht',             cost: 2000000 },
+  { id: 'w_island',  emoji: '🏝️', name: 'Private Island',   cost: 8000000 },
+  { id: 'w_space',   emoji: '🚀', name: 'Space Trip',       cost: 25000000 }
+];
+
+const DISTRACTIONS = [
+  { emoji: '🍭', name: 'Candy Store',        cost: 15 },
+  { emoji: '🎁', name: 'Loot Box',           cost: 30 },
+  { emoji: '🌀', name: 'Fidget Spinner',     cost: 10 },
+  { emoji: '☕', name: 'Fancy Coffee',       cost: 8 },
+  { emoji: '🃏', name: 'Trading Cards',      cost: 25 },
+  { emoji: '🥤', name: 'Slushie',            cost: 6 },
+  { emoji: '🕹️', name: 'Impulse Toy',        cost: 50 },
+  { emoji: '🍿', name: 'Movie Snacks',       cost: 20 },
+  { emoji: '📱', name: 'Silly App Purchase', cost: 40 },
+  { emoji: '👟', name: 'Trendy Sneakers',    cost: 150 }
+];
+
+const EVENTS = [
+  { type: 'good',  text: '🎂 Birthday gift from Grandma!', money: 100 },
+  { type: 'good',  text: '💵 Found $20 in an old coat!',   money: 20 },
+  { type: 'good',  text: '🏆 Won a school contest!',       money: 75 },
+  { type: 'good',  text: '⭐ Bonus at work!',              money: 200 },
+  { type: 'bad',   text: '📱 Cracked your phone screen!',  money: -80 },
+  { type: 'bad',   text: '🤒 Got sick, need medicine',     money: -30 },
+  { type: 'bad',   text: '🏫 School fundraiser donation',  money: -20 },
+  { type: 'stock', text: '📈 Market boom! Stocks +15%',    mult: 1.15 },
+  { type: 'stock', text: '📉 Market crash! Stocks -20%',   mult: 0.80 },
+  { type: 'stock', text: '📈 Stocks growing! +8%',         mult: 1.08 },
+  { type: 'stock', text: '📉 Stocks dip -5%',              mult: 0.95 },
+  { type: 'stock', text: '💥 HUGE stock boom! +30%',       mult: 1.30 }
+];
+
+const Money = {
+  cash: 100, savings: 0, stocks: 0, bonds: 0,
+  week: 1, jobId: 'j_pizza', wants: [], wasted: 0, earned: 0,
+  log: []
+};
+
+function loadMoneyState() {
+  const saved = Save.get('money', null);
+  if (saved) Object.assign(Money, saved);
+}
+function saveMoneyState() { Save.set('money', Money); }
+
+function fmt(n) {
+  if (n >= 1_000_000) return '$' + (n/1_000_000).toFixed(1) + 'M';
+  if (n >= 10000) return '$' + (n/1000).toFixed(1) + 'K';
+  return '$' + Math.floor(n).toLocaleString();
+}
+function netWorth() { return Math.floor(Money.cash + Money.savings + Money.stocks + Money.bonds); }
+function addLog(text) {
+  Money.log.unshift(`Wk${Money.week}: ${text}`);
+  if (Money.log.length > 20) Money.log.length = 20;
+}
+
+function startMoneyGame() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  loadMoneyState();
+  document.getElementById('moneyScreen').classList.add('active');
+  renderMoney();
+  // welcome modal if brand new
+  if (Money.week === 1 && Money.earned === 0) {
+    showMoneyModal(`
+      <div style="text-align:center;">
+        <div style="font-size:70px;">💰</div>
+        <h2>Welcome to Money Master!</h2>
+        <div style="text-align:left; font-size:14px; margin:14px 0; line-height:1.6;">
+          <b>🎯 Your goal:</b> Save & invest to buy BIG dreams like a Lamborghini!<br><br>
+          <b>💼 How to play:</b><br>
+          1. Pick a job<br>
+          2. Click <b>WORK</b> to earn money each week<br>
+          3. Put money in <b>Savings</b> (safe), <b>Bonds</b> (steady), or <b>Stocks</b> (risky but grows fast)<br>
+          4. Watch out for money-wasters! 🍭<br>
+          5. Buy BIG goals when you have enough!<br><br>
+          <b>💡 Secret:</b> Money you INVEST grows every week — that's called <b>compound interest!</b> 📈
+        </div>
+        <button class="btn green" onclick="closeMoneyModal()">Let's Go! 🚀</button>
+      </div>
+    `);
+  }
+}
+
+function renderMoney() {
+  document.getElementById('moneyHudLeft').textContent = `💰${fmt(Money.cash)} · 🏦${fmt(Money.savings)} · 📈${fmt(Money.stocks)}`;
+  document.getElementById('moneyHudCenter').textContent = `Week ${Money.week}`;
+  document.getElementById('netWorth').textContent = fmt(netWorth());
+  document.getElementById('wastedTotal').textContent = fmt(Money.wasted);
+  document.getElementById('earnedTotal').textContent = fmt(Money.earned);
+  // Job
+  const job = JOBS.find(j => j.id === Money.jobId) || JOBS[0];
+  document.getElementById('jobDisplay').innerHTML = `${job.emoji} ${job.name} — <b>${fmt(job.pay)}/week</b>`;
+  // Investments
+  const inv = document.getElementById('investPanel');
+  inv.innerHTML = '';
+  const types = [
+    { key: 'savings', emoji: '🏦', name: 'Savings',  rate: '0.5%',   color: '#42a5f5', desc: 'Safe!' },
+    { key: 'bonds',   emoji: '📊', name: 'Bonds',    rate: '2%',     color: '#66bb6a', desc: 'Steady' },
+    { key: 'stocks',  emoji: '📈', name: 'Stocks',   rate: '~5%',    color: '#ef5350', desc: 'Risky, grows fast!' }
+  ];
+  types.forEach(t => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); padding:6px 8px; border-radius:8px; border-left:4px solid ' + t.color;
+    row.innerHTML = `
+      <div style="flex:1;">
+        <div style="font-size:13px; font-weight:bold;">${t.emoji} ${t.name} <span style="font-size:10px; opacity:0.8;">(${t.rate}/wk ${t.desc})</span></div>
+        <div style="font-size:16px; color:gold; font-weight:bold;">${fmt(Money[t.key])}</div>
+      </div>
+      <button class="btn small green" data-inv="${t.key}" data-amt="10">+$10</button>
+      <button class="btn small green" data-inv="${t.key}" data-amt="100">+$100</button>
+      <button class="btn small red"   data-inv="${t.key}" data-amt="-100">−</button>
+    `;
+    inv.appendChild(row);
+  });
+  inv.querySelectorAll('button[data-inv]').forEach(b => {
+    b.addEventListener('click', () => invest(b.dataset.inv, +b.dataset.amt));
+  });
+  // Wants
+  const wp = document.getElementById('wantsPanel');
+  wp.innerHTML = '';
+  WANTS.forEach(w => {
+    const owned = Money.wants.includes(w.id);
+    const canAfford = Money.cash >= w.cost;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.3); padding:6px 8px; border-radius:8px;' + (owned ? 'border:2px solid gold;' : '');
+    row.innerHTML = `
+      <div style="font-size:22px;">${w.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px; font-weight:bold;">${w.name}</div>
+        <div style="font-size:11px; opacity:0.85;">${fmt(w.cost)}</div>
+      </div>
+      ${owned ? '<div style="color:gold; font-weight:bold;">✓ OWNED</div>' : `<button class="btn small ${canAfford ? 'green' : 'red'}" data-want="${w.id}" ${canAfford?'':'disabled style="opacity:0.5"'}>${canAfford ? 'BUY!' : '🔒'}</button>`}
+    `;
+    wp.appendChild(row);
+  });
+  wp.querySelectorAll('button[data-want]').forEach(b => {
+    b.addEventListener('click', () => buyWant(b.dataset.want));
+  });
+  // Log
+  document.getElementById('moneyLog').innerHTML = Money.log.slice(0, 8).map(l => `<div>• ${l}</div>`).join('');
+}
+
+function showMoneyModal(html) {
+  document.getElementById('moneyModalBody').innerHTML = html;
+  document.getElementById('moneyModal').style.display = 'flex';
+}
+function closeMoneyModal() {
+  document.getElementById('moneyModal').style.display = 'none';
+}
+window.closeMoneyModal = closeMoneyModal;
+
+function invest(type, amount) {
+  if (amount > 0) {
+    if (Money.cash < amount) { showToast('Not enough cash!'); return; }
+    Money.cash -= amount; Money[type] += amount;
+    addLog(`Invested ${fmt(amount)} in ${type}`);
+  } else {
+    const take = Math.min(Money[type], -amount);
+    if (take <= 0) return;
+    Money[type] -= take; Money.cash += take;
+    addLog(`Took ${fmt(take)} from ${type}`);
+  }
+  SFX.coin();
+  saveMoneyState(); renderMoney();
+}
+
+function buyWant(id) {
+  const w = WANTS.find(x => x.id === id);
+  if (!w || Money.cash < w.cost) return;
+  Money.cash -= w.cost;
+  Money.wants.push(id);
+  addLog(`🎉 Bought ${w.name} for ${fmt(w.cost)}!`);
+  SFX.win();
+  saveMoneyState();
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:100px;">${w.emoji}</div>
+      <h1 style="color:#2e7d32;">🎉 CONGRATULATIONS!</h1>
+      <h2>You bought a ${w.name}!</h2>
+      <div style="font-size:18px; margin:14px 0;">for ${fmt(w.cost)}</div>
+      <div style="font-size:13px; margin:14px 0; padding:10px; background:#e8f5e9; border-radius:10px;">
+        💡 <b>Smart tip:</b> That took ${Money.week} weeks of hard work.<br>
+        Your money in <b>stocks 📈</b> would have kept growing too!
+      </div>
+      <button class="btn green" onclick="closeMoneyModal()">Awesome!</button>
+    </div>
+  `);
+  renderMoney();
+}
+
+function workWeek() {
+  const job = JOBS.find(j => j.id === Money.jobId) || JOBS[0];
+  Money.cash += job.pay;
+  Money.earned += job.pay;
+  Money.week++;
+  addLog(`💼 Worked as ${job.name}, earned ${fmt(job.pay)}`);
+
+  // Investments grow!
+  const savingsGrowth = Math.floor(Money.savings * 0.005);
+  const bondsGrowth   = Math.floor(Money.bonds * 0.02);
+  const stocksGrowth  = Math.floor(Money.stocks * (0.03 + Math.random() * 0.04));
+  Money.savings += savingsGrowth;
+  Money.bonds   += bondsGrowth;
+  Money.stocks  += stocksGrowth;
+  if (savingsGrowth || bondsGrowth || stocksGrowth) {
+    addLog(`📊 Investments grew: 🏦+${fmt(savingsGrowth)} 📊+${fmt(bondsGrowth)} 📈+${fmt(stocksGrowth)}`);
+  }
+
+  SFX.coin();
+  saveMoneyState();
+  renderMoney();
+
+  // 40% chance of a distraction, 30% chance of random event (but not both)
+  const r = Math.random();
+  if (r < 0.4) triggerDistraction();
+  else if (r < 0.7) triggerEvent();
+}
+
+function triggerDistraction() {
+  const d = pick(DISTRACTIONS);
+  showMoneyModal(`
+    <div style="text-align:center;">
+      <div style="font-size:80px;">${d.emoji}</div>
+      <h2>${d.name}!</h2>
+      <div style="font-size:20px; margin:12px 0;">Only <b style="color:#b71c1c;">${fmt(d.cost)}</b>! 🤩</div>
+      <div style="font-size:13px; margin:12px 0; padding:10px; background:#fff3e0; border-radius:10px;">
+        ⚠️ <b>Think first!</b> If you buy this, that money is <b>WASTED</b>.<br>
+        You could invest it and grow it instead! 📈
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn green" style="flex:1;" onclick="skipDistraction('${d.name}', ${d.cost})">✅ SKIP — Save Money!</button>
+        <button class="btn red"   style="flex:1;" onclick="buyDistraction('${d.name}', ${d.cost})">💸 Buy Anyway</button>
+      </div>
+    </div>
+  `);
+}
+
+window.skipDistraction = function(name, cost) {
+  addLog(`💪 Skipped ${name}, saved ${fmt(cost)}!`);
+  closeMoneyModal(); saveMoneyState(); renderMoney();
+  showToast('🌟 Smart choice! Money saved!');
+};
+window.buyDistraction = function(name, cost) {
+  if (Money.cash < cost) { showToast('Not enough cash — lucky escape!'); closeMoneyModal(); return; }
+  Money.cash -= cost; Money.wasted += cost;
+  addLog(`💸 Wasted ${fmt(cost)} on ${name}`);
+  closeMoneyModal(); saveMoneyState(); renderMoney();
+  showToast('💸 Money wasted! Try to skip next time!');
+};
+
+function triggerEvent() {
+  const e = pick(EVENTS);
+  if (e.type === 'stock') {
+    const before = Money.stocks;
+    Money.stocks = Math.floor(Money.stocks * e.mult);
+    const diff = Money.stocks - before;
+    addLog(`${e.text} (${diff >= 0 ? '+' : ''}${fmt(diff)})`);
+    showMoneyModal(`
+      <div style="text-align:center;">
+        <div style="font-size:70px;">${e.mult > 1 ? '📈' : '📉'}</div>
+        <h2>${e.text}</h2>
+        <div style="font-size:18px; margin:12px 0; color:${diff >= 0 ? '#2e7d32' : '#b71c1c'};">Your stocks: ${diff >= 0 ? '+' : ''}${fmt(diff)}</div>
+        <div style="font-size:13px; margin:12px 0; padding:10px; background:#f3e5f5; border-radius:10px;">
+          💡 Stocks can go UP or DOWN each week. Over time they usually grow, but be ready for bumps!
+        </div>
+        <button class="btn green" onclick="closeMoneyModal()">Got it!</button>
+      </div>
+    `);
+  } else {
+    Money.cash = Math.max(0, Money.cash + e.money);
+    if (e.money > 0) Money.earned += e.money;
+    addLog(`${e.text} (${e.money >= 0 ? '+' : ''}${fmt(e.money)})`);
+    showMoneyModal(`
+      <div style="text-align:center;">
+        <div style="font-size:70px;">${e.type === 'good' ? '🎁' : '😰'}</div>
+        <h2>${e.text}</h2>
+        <div style="font-size:20px; margin:12px 0; color:${e.money >= 0 ? '#2e7d32' : '#b71c1c'};">${e.money >= 0 ? '+' : ''}${fmt(e.money)}</div>
+        <button class="btn green" onclick="closeMoneyModal()">OK!</button>
+      </div>
+    `);
+  }
+  saveMoneyState(); renderMoney();
+}
+
+function showJobPicker() {
+  const rows = JOBS.map(j => {
+    const locked = Money.week < j.unlockWeek;
+    return `<button class="btn ${locked ? 'red' : (j.id === Money.jobId ? 'green' : 'blue')}" data-jid="${j.id}" ${locked ? 'disabled style="opacity:0.5;"' : ''} style="display:flex; justify-content:space-between; align-items:center; width:100%; margin:4px 0;">
+      <span>${j.emoji} ${j.name}</span>
+      <span>${locked ? '🔒 Wk ' + j.unlockWeek : fmt(j.pay) + '/wk'}</span>
+    </button>`;
+  }).join('');
+  showMoneyModal(`
+    <div>
+      <h2 style="text-align:center;">💼 Pick a Job</h2>
+      <div style="font-size:12px; text-align:center; opacity:0.7; margin-bottom:8px;">Better jobs unlock as you gain experience!</div>
+      ${rows}
+      <button class="btn red" style="width:100%; margin-top:8px;" onclick="closeMoneyModal()">Cancel</button>
+    </div>
+  `);
+  document.querySelectorAll('#moneyModalBody [data-jid]').forEach(b => {
+    b.addEventListener('click', () => {
+      Money.jobId = b.dataset.jid;
+      addLog(`Started new job: ${JOBS.find(j => j.id === Money.jobId).name}`);
+      closeMoneyModal(); saveMoneyState(); renderMoney();
+    });
+  });
+}
+
+document.getElementById('moneyBtn').addEventListener('click', () => { SFX.click(); startMoneyGame(); });
+document.getElementById('moneyQuit').addEventListener('click', () => {
+  saveMoneyState();
+  document.getElementById('moneyScreen').classList.remove('active');
+  document.getElementById('home').classList.add('active');
+});
+document.getElementById('workBtn').addEventListener('click', workWeek);
+document.getElementById('changeJobBtn').addEventListener('click', showJobPicker);
+
 /* ============================================================ MULTIPLAYER ============================================================ */
 const Net = {
   active: false, isHost: false, peer: null, conns: [], hostConn: null,
@@ -3512,7 +3561,6 @@ const Net = {
       else if (msg.mode === 'boss') startBoss();
       else if (msg.mode === 'gems') startGems();
       else if (msg.mode === 'adventure') startAdventure();
-      else if (msg.mode === 'moto') startMoto();
     } else if (msg.type === 'lobby') {
       const el = document.getElementById('hostPlayers');
       el && (el.innerHTML = msg.players.map(n => `<div>👤 ${n}</div>`).join(''));
@@ -3577,7 +3625,6 @@ document.getElementById('hostStart').addEventListener('click', () => {
   if (hostMode === 'galaxy') startGalaxy();
   else if (hostMode === 'boss') startBoss();
   else if (hostMode === 'gems') startGems();
-  else if (hostMode === 'moto') startMoto();
   else startAdventure();
 });
 document.getElementById('joinBtn').addEventListener('click', () => { document.getElementById('home').classList.remove('active'); document.getElementById('joinScreen').classList.add('active'); });
