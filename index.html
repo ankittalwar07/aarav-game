@@ -532,10 +532,11 @@
       <button class="btn" id="realEstateBtn" style="background:linear-gradient(180deg,#8e24aa,#4a148c); color:#fff; font-size:12px;">🏠 Real Estate</button>
       <button class="btn" id="portfolioBtn" style="background:linear-gradient(180deg,#00838f,#004d40); color:#fff; font-size:12px;">📊 Portfolio</button>
     </div>
-    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px;">
-      <button class="btn" id="pnlBtn" style="background:linear-gradient(180deg,#546e7a,#263238); color:#fff; font-size:12px;">📈 P&L Report</button>
-      <button class="btn" id="charityBtn" style="background:linear-gradient(180deg,#e91e63,#880e4f); color:#fff; font-size:12px;">❤️ Charity</button>
-      <button class="btn" id="achieveBtn" style="background:linear-gradient(180deg,#ffb300,#e65100); color:#fff; font-size:12px;">🏆 Trophies <span id="achieveCount" style="font-size:10px;">0/0</span></button>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px;">
+      <button class="btn" id="pnlBtn" style="background:linear-gradient(180deg,#546e7a,#263238); color:#fff; font-size:11px;">📈 P&L</button>
+      <button class="btn" id="sleepBtn" style="background:linear-gradient(180deg,#5c6bc0,#1a237e); color:#fff; font-size:11px;">💤 Sleep $</button>
+      <button class="btn" id="charityBtn" style="background:linear-gradient(180deg,#e91e63,#880e4f); color:#fff; font-size:11px;">❤️ Charity</button>
+      <button class="btn" id="achieveBtn" style="background:linear-gradient(180deg,#ffb300,#e65100); color:#fff; font-size:11px;">🏆 <span id="achieveCount" style="font-size:10px;">0/0</span></button>
     </div>
 
     <!-- JOB -->
@@ -3388,7 +3389,8 @@ const Money = {
   currentNews: null,
   loanBalance: 0,
   lastCryptoChange: 0,
-  lastWeekPnL: null  // { income, expenses, profit }
+  lastWeekPnL: null,   // { income, expenses, profit }
+  weeklyHistory: []    // [{ week, active, passive }] — tracks earnings over time
 };
 
 /* Financial Literacy Micro-Lessons — teach at the right moment */
@@ -3530,74 +3532,172 @@ window.showInfo = showInfo;
 
 function showJobCompare() {
   const job = JOBS.find(j => j.id === Money.jobId) || JOBS[0];
-  // find matching business if any
-  const matchMap = { j_pizza:'b_rest', j_lemon:'b_ice', j_youtube:'b_arcade', j_tutor:'b_shop', j_coder:'b_tech', j_ceo:'b_corp', j_art:'b_arcade', j_lawn:'b_vm', j_petsit:'b_vm', j_doctor:'b_shop' };
-  const bizId = matchMap[job.id];
+  // Match jobs to comparably-priced businesses (fair comparison)
+  const matchMap = {
+    j_lemon:  'b_vm',     j_pizza:  'b_ice',    j_petsit: 'b_arcade',
+    j_lawn:   'b_truck',  j_art:    'b_shop',   j_tutor:  'b_rest',
+    j_youtube:'b_rest',   j_coder:  'b_chain',  j_doctor: 'b_factory',
+    j_ceo:    'b_tech'
+  };
+  const bizId = matchMap[job.id] || 'b_ice';
   const biz = BUSINESSES.find(b => b.id === bizId) || BUSINESSES[0];
-  // 52 weeks comparison
-  let workTotal = 0, ownTotal = -biz.cost;
-  const workData = [], ownData = [];
-  for (let w = 0; w <= 52; w++) {
-    workTotal = job.pay * w * JOBS_PER_WEEK;
+
+  // 3-YEAR (156 weeks) comparison with 3 scenarios
+  const WEEKS = 156;
+  const workData = [], ownData = [], reinvData = [];
+  const jobPerWeek = job.pay * JOBS_PER_WEEK;
+  let workTotal = 0;
+  let ownTotal = -biz.cost;
+  // Reinvestment scenario: buy 1 business, whenever cash >= biz.cost, buy another
+  let reinvCash = -biz.cost;
+  let reinvOwned = 1;
+  for (let w = 0; w <= WEEKS; w++) {
+    workTotal = jobPerWeek * w;
     ownTotal = -biz.cost + biz.income * w;
-    workData.push(workTotal); ownData.push(ownTotal);
+    // Reinvestment: each week accumulate income from all owned businesses
+    if (w > 0) {
+      reinvCash += biz.income * reinvOwned;
+      while (reinvCash >= biz.cost) {
+        reinvCash -= biz.cost;
+        reinvOwned++;
+      }
+    }
+    // net worth of reinvest scenario = cash + businesses owned × cost
+    const reinvTotal = reinvCash + reinvOwned * biz.cost - biz.cost; // subtract initial cost
+    workData.push(workTotal);
+    ownData.push(ownTotal);
+    reinvData.push(reinvTotal);
   }
-  // Break-even week
-  let breakEven = -1;
-  for (let w = 1; w <= 200; w++) {
-    if (biz.income * w > biz.cost) { breakEven = w; break; }
-  }
-  const workAt52 = job.pay * 52 * JOBS_PER_WEEK;
-  const ownAt52 = -biz.cost + biz.income * 52;
-  // Simple SVG chart
-  const chartW = 300, chartH = 140, padding = 30;
-  const maxVal = Math.max(workData[52], ownData[52], biz.cost * 1.2);
-  const minVal = Math.min(0, ownData[0]);
+  const breakEven = Math.ceil(biz.cost / biz.income);
+  const workAt52 = workData[52], workAt156 = workData[156];
+  const ownAt52 = ownData[52], ownAt156 = ownData[156];
+  const reinvAt52 = reinvData[52], reinvAt156 = reinvData[156];
+
+  // Chart
+  const chartW = 320, chartH = 180, padding = 34;
+  const maxVal = Math.max(reinvData[WEEKS], workData[WEEKS], 1);
+  const minVal = Math.min(0, ownData[0], reinvData[0]);
   const range = maxVal - minVal || 1;
   const scaleY = (v) => chartH - padding - ((v - minVal) / range) * (chartH - padding * 2);
-  const scaleX = (w) => padding + (w / 52) * (chartW - padding * 2);
-  const workPath = workData.map((v,w) => `${w===0?'M':'L'}${scaleX(w).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
-  const ownPath = ownData.map((v,w) => `${w===0?'M':'L'}${scaleX(w).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
+  const scaleX = (w) => padding + (w / WEEKS) * (chartW - padding * 2);
+  const workPath  = workData.map((v,w)  => `${w===0?'M':'L'}${scaleX(w).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
+  const ownPath   = ownData.map((v,w)   => `${w===0?'M':'L'}${scaleX(w).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
+  const reinvPath = reinvData.map((v,w) => `${w===0?'M':'L'}${scaleX(w).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
   const zeroY = scaleY(0);
+  // Year markers
+  const year1X = scaleX(52), year2X = scaleX(104), year3X = scaleX(156);
+
   showMoneyModal(`
     <div>
-      <h2 style="text-align:center;">⚖️ WORK vs OWN — 1 Year</h2>
-      <div style="font-size:13px; text-align:center; margin:6px 0;">Compare: Working at ${job.name} vs Owning ${biz.name}</div>
-      <div style="background:#fafafa; border-radius:10px; padding:10px; margin:8px 0;">
+      <h2 style="text-align:center;">⚖️ WORK vs OWN — 3 Years!</h2>
+      <div style="font-size:12px; text-align:center; margin:4px 0;">Compare: Working at ${job.name} vs Owning ${biz.name}</div>
+      <div style="background:#fafafa; border-radius:10px; padding:8px; margin:6px 0;">
         <svg viewBox="0 0 ${chartW} ${chartH}" style="width:100%; height:auto;">
           <line x1="${padding}" y1="${zeroY}" x2="${chartW-padding}" y2="${zeroY}" stroke="#ccc" stroke-dasharray="3,3"/>
-          <text x="${padding-5}" y="${zeroY+3}" font-size="10" text-anchor="end" fill="#666">$0</text>
-          <path d="${workPath}" fill="none" stroke="#42a5f5" stroke-width="2.5"/>
-          <path d="${ownPath}" fill="none" stroke="#f44336" stroke-width="2.5"/>
-          <text x="${chartW-padding}" y="${scaleY(workData[52])-4}" font-size="10" text-anchor="end" fill="#1565c0">Work</text>
-          <text x="${chartW-padding}" y="${scaleY(ownData[52])-4}" font-size="10" text-anchor="end" fill="#b71c1c">Own</text>
-          <text x="${chartW/2}" y="${chartH-4}" font-size="10" text-anchor="middle" fill="#666">Weeks →</text>
+          <text x="${padding-4}" y="${zeroY+3}" font-size="9" text-anchor="end" fill="#666">$0</text>
+          <line x1="${year1X}" y1="${padding}" x2="${year1X}" y2="${chartH-padding}" stroke="#eee"/>
+          <line x1="${year2X}" y1="${padding}" x2="${year2X}" y2="${chartH-padding}" stroke="#eee"/>
+          <text x="${year1X}" y="${chartH-padding+12}" font-size="9" text-anchor="middle" fill="#999">Yr1</text>
+          <text x="${year2X}" y="${chartH-padding+12}" font-size="9" text-anchor="middle" fill="#999">Yr2</text>
+          <text x="${year3X}" y="${chartH-padding+12}" font-size="9" text-anchor="middle" fill="#999">Yr3</text>
+          <path d="${workPath}" fill="none" stroke="#42a5f5" stroke-width="2"/>
+          <path d="${ownPath}" fill="none" stroke="#ff9800" stroke-width="2"/>
+          <path d="${reinvPath}" fill="none" stroke="#4caf50" stroke-width="3"/>
+          <text x="${chartW-padding+2}" y="${scaleY(workData[WEEKS])+3}" font-size="9" fill="#1565c0">Work</text>
+          <text x="${chartW-padding+2}" y="${scaleY(ownData[WEEKS])+3}" font-size="9" fill="#e65100">Own 1</text>
+          <text x="${chartW-padding+2}" y="${scaleY(reinvData[WEEKS])+3}" font-size="9" fill="#2e7d32" font-weight="bold">Own+Reinvest</text>
         </svg>
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px;">
-        <div style="background:#e3f2fd; padding:10px; border-radius:10px; text-align:center;">
-          <div style="font-weight:bold; color:#1565c0;">💼 WORK</div>
-          <div>at ${job.name}</div>
-          <div style="margin-top:6px; font-size:11px;">Pay: ${fmt(job.pay)}/job</div>
-          <div style="margin-top:6px; font-weight:bold; color:#2e7d32;">1 Year: ${fmt(workAt52)}</div>
-          <div style="font-size:10px; opacity:0.7;">(you must work every week!)</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-size:10px;">
+        <div style="background:#e3f2fd; padding:6px; border-radius:8px; text-align:center;">
+          <div style="font-weight:bold; color:#1565c0;">💼 WORK ${job.emoji}</div>
+          <div style="font-size:9px;">at ${job.name}</div>
+          <div style="margin-top:4px;">Yr1: ${fmt(workAt52)}<br>Yr3: <b>${fmt(workAt156)}</b></div>
+          <div style="font-size:8px; opacity:0.7;">must work every week!</div>
         </div>
-        <div style="background:#ffebee; padding:10px; border-radius:10px; text-align:center;">
-          <div style="font-weight:bold; color:#b71c1c;">🏬 OWN</div>
-          <div>${biz.name}</div>
-          <div style="margin-top:6px; font-size:11px;">Cost: ${fmt(biz.cost)}<br>Earns: ${fmt(biz.income)}/wk</div>
-          <div style="margin-top:6px; font-weight:bold; color:${ownAt52>=0?'#2e7d32':'#b71c1c'};">1 Year: ${fmt(ownAt52)}</div>
-          <div style="font-size:10px; opacity:0.7;">${breakEven>0?`(pays for itself in ${breakEven} weeks!)`:''}</div>
+        <div style="background:#fff3e0; padding:6px; border-radius:8px; text-align:center;">
+          <div style="font-weight:bold; color:#e65100;">🏬 OWN 1 ${biz.emoji}</div>
+          <div style="font-size:9px;">${biz.name}</div>
+          <div style="margin-top:4px;">Yr1: ${fmt(ownAt52)}<br>Yr3: <b>${fmt(ownAt156)}</b></div>
+          <div style="font-size:8px; opacity:0.7;">pays back in ${breakEven}wk</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#c8e6c9,#a5d6a7); padding:6px; border-radius:8px; text-align:center; border:2px solid gold;">
+          <div style="font-weight:bold; color:#2e7d32;">👑 REINVEST</div>
+          <div style="font-size:9px;">Own ${reinvOwned}× at Yr3!</div>
+          <div style="margin-top:4px;">Yr1: ${fmt(reinvAt52)}<br>Yr3: <b style="color:#1b5e20;">${fmt(reinvAt156)}</b></div>
+          <div style="font-size:8px; opacity:0.8;">💤 while sleeping!</div>
         </div>
       </div>
-      <div style="font-size:13px; padding:12px; background:linear-gradient(135deg,#fff3e0,#ffe0b2); border-radius:12px; margin:10px 0; text-align:center;">
-        💡 <b>LESSON:</b> Working pays right away.<br>Owning costs money first, but pays FOREVER — even while you sleep! 💤<br><b>${ownAt52 > workAt52 ? '👑 Owning WINS in the long run!' : '⏰ Owning wins after enough time passes!'}</b>
+      <div style="font-size:12px; padding:10px; background:linear-gradient(135deg,#fff3e0,#ffe082); border-radius:12px; margin:8px 0; text-align:center; color:#3e2723;">
+        💡 <b>RICH DAD SECRET:</b><br>
+        Don't just BUY a business — <b>REINVEST</b> its income to buy MORE!<br>
+        That's how ${reinvAt156 > workAt156 ? `<b style="color:#b71c1c;">${(reinvAt156/workAt156).toFixed(1)}x more money</b> is possible in 3 years` : 'compound wealth builds'}!<br>
+        🕊️ <b>Business owners earn even while they SLEEP.</b>
       </div>
-      <button class="btn green" style="width:100%;" onclick="closeMoneyModal()">Got it! 💪</button>
+      <button class="btn green" style="width:100%;" onclick="closeMoneyModal()">I get it! 💪</button>
     </div>
   `);
 }
 window.showJobCompare = showJobCompare;
+
+/* WEEKLY EARNINGS DASHBOARD — track active vs passive over time (Rich Dad Poor Dad style) */
+function showWeeklyDashboard() {
+  const hist = Money.weeklyHistory || [];
+  if (hist.length === 0) {
+    showMoneyModal(`<div style="text-align:center;"><div style="font-size:60px;">📊</div><h2>Sleep Money Dashboard</h2><div style="margin:14px 0; padding:12px; background:#e3f2fd; border-radius:10px; font-size:13px;">End at least 1 week to see your <b>ACTIVE</b> income (jobs) vs <b>PASSIVE</b> income (businesses+rent+growth).<br><br>💡 The GOAL of Rich Dad Poor Dad: make PASSIVE income beat your ACTIVE income — then you're FREE from working!</div><button class="btn green" onclick="closeMoneyModal()">Got it!</button></div>`);
+    return;
+  }
+  // Chart data (last 20 weeks)
+  const recent = hist.slice(-20);
+  const chartW = 320, chartH = 160, padding = 34;
+  const maxVal = Math.max(1, ...recent.map(h => Math.max(h.active, h.passive)));
+  const scaleY = (v) => chartH - padding - (v / maxVal) * (chartH - padding * 2);
+  const scaleX = (i) => padding + (recent.length > 1 ? (i / (recent.length - 1)) * (chartW - padding * 2) : (chartW-padding*2)/2 + padding);
+  const activePath = recent.map((h,i) => `${i===0?'M':'L'}${scaleX(i).toFixed(1)},${scaleY(h.active).toFixed(1)}`).join(' ');
+  const passivePath = recent.map((h,i) => `${i===0?'M':'L'}${scaleX(i).toFixed(1)},${scaleY(h.passive).toFixed(1)}`).join(' ');
+  const passiveArea = passivePath + ` L${scaleX(recent.length-1).toFixed(1)},${(chartH-padding).toFixed(1)} L${scaleX(0).toFixed(1)},${(chartH-padding).toFixed(1)} Z`;
+  // Totals
+  const totalActive = hist.reduce((s,h) => s + h.active, 0);
+  const totalPassive = hist.reduce((s,h) => s + h.passive, 0);
+  const totalSleep = totalPassive; // money earned "while sleeping"
+  const latest = recent[recent.length-1];
+  const passiveWins = latest && latest.passive > latest.active;
+  // Rows for detailed history
+  const rowsHtml = recent.slice().reverse().slice(0, 8).map(h => `<tr><td>Wk ${h.week}</td><td style="text-align:right; color:#1565c0;">${fmt(h.active)}</td><td style="text-align:right; color:#2e7d32;">${fmt(h.passive)}</td><td style="text-align:right; font-weight:bold;">${fmt(h.active + h.passive)}</td></tr>`).join('');
+
+  showMoneyModal(`
+    <div>
+      <h2 style="text-align:center;">📊 Sleep Money Dashboard</h2>
+      <div style="text-align:center; font-size:11px; opacity:0.75; margin-bottom:6px;">Active (jobs) vs Passive (businesses + rent + growth)</div>
+      <div style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9); padding:10px; border-radius:10px; margin:6px 0; text-align:center; border:2px solid gold;">
+        <div style="font-size:11px; opacity:0.8;">💤 TOTAL MONEY EARNED WHILE SLEEPING</div>
+        <div style="font-size:22px; font-weight:bold; color:#2e7d32;">${fmt(totalSleep)}</div>
+        <div style="font-size:10px; opacity:0.7;">across ${hist.length} weeks — no work needed!</div>
+      </div>
+      <div style="background:#fafafa; border-radius:10px; padding:8px; margin:6px 0;">
+        <svg viewBox="0 0 ${chartW} ${chartH}" style="width:100%; height:auto;">
+          <path d="${passiveArea}" fill="rgba(76,175,80,0.15)"/>
+          <line x1="${padding}" y1="${chartH-padding}" x2="${chartW-padding}" y2="${chartH-padding}" stroke="#ccc"/>
+          <path d="${activePath}" fill="none" stroke="#42a5f5" stroke-width="2.5"/>
+          <path d="${passivePath}" fill="none" stroke="#4caf50" stroke-width="2.5"/>
+          <text x="${chartW-padding}" y="${scaleY(latest.active)-4}" font-size="10" text-anchor="end" fill="#1565c0">💼 Active</text>
+          <text x="${chartW-padding}" y="${scaleY(latest.passive)+12}" font-size="10" text-anchor="end" fill="#2e7d32" font-weight="bold">💤 Passive</text>
+          <text x="${padding}" y="${padding-4}" font-size="9" fill="#666">${fmt(maxVal)}</text>
+          <text x="${chartW/2}" y="${chartH-4}" font-size="9" text-anchor="middle" fill="#666">Last ${recent.length} weeks</text>
+        </svg>
+      </div>
+      <div style="background:${passiveWins ? 'linear-gradient(135deg,#c8e6c9,#a5d6a7)' : '#fff3e0'}; padding:10px; border-radius:10px; margin:6px 0; text-align:center; font-size:13px; color:#3e2723;">
+        ${passiveWins ? '🎉 <b>YOU\'RE WINNING!</b><br>Passive > Active — you\'re on your way to FREEDOM!' : '💡 Keep buying businesses & real estate<br>to grow your passive income above your active work!'}
+      </div>
+      <table style="width:100%; font-size:11px; border-collapse:collapse;">
+        <thead><tr style="background:#f5f5f5;"><th style="padding:4px; text-align:left;">Week</th><th style="padding:4px; text-align:right;">💼 Active</th><th style="padding:4px; text-align:right;">💤 Passive</th><th style="padding:4px; text-align:right;">Total</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <button class="btn green" style="width:100%; margin-top:8px;" onclick="closeMoneyModal()">Cool!</button>
+    </div>
+  `);
+}
+window.showWeeklyDashboard = showWeeklyDashboard;
 
 function showPortfolio() {
   const bizRows = (Money.businesses || []).map(id => {
@@ -3828,6 +3928,8 @@ function startMoneyGame() {
   if (Money.achievements === undefined) Money.achievements = [];
   if (Money.crypto === undefined) Money.crypto = 0;
   if (Money.donated === undefined) Money.donated = 0;
+  if (Money.realEstate === undefined) Money.realEstate = [];
+  if (Money.weeklyHistory === undefined) Money.weeklyHistory = [];
   if (!Money.currentNews) refreshNews();
   document.getElementById('moneyScreen').classList.add('active');
   renderMoney();
@@ -4163,6 +4265,12 @@ function endWeek() {
 
   // Build P&L statement
   const jobIncome = Money.jobsThisWeek * (JOBS.find(j => j.id === Money.jobId)?.pay || 0);
+  // Track weekly history for Sleep Money Dashboard
+  const activeIncomeThisWeek = jobIncome;
+  const passiveIncomeThisWeek = bizIncome + rentIncome + savingsGrowth + bondsGrowth + Math.max(0, stocksGrowth) + Math.max(0, cryptoGrowth) + appreciation;
+  if (!Money.weeklyHistory) Money.weeklyHistory = [];
+  Money.weeklyHistory.push({ week: Money.week, active: activeIncomeThisWeek, passive: passiveIncomeThisWeek });
+  if (Money.weeklyHistory.length > 100) Money.weeklyHistory = Money.weeklyHistory.slice(-100);
   Money.lastWeekPnL = {
     income: [
       ['💼 Job income (this week)', jobIncome],
@@ -4203,11 +4311,14 @@ function endWeek() {
   const totalPassive = bizIncome + rentIncome;
   const totalGrowth = savingsGrowth + bondsGrowth + stocksGrowth + cryptoGrowth + appreciation;
   const total = totalPassive + totalGrowth;
+  const sleepMoney = passiveIncomeThisWeek; // total earned while "sleeping" — no work needed
   const readyMsg = readyThisWeek.length ? `<div style="background:linear-gradient(135deg,#c8e6c9,#a5d6a7); padding:10px; border-radius:10px; margin:8px 0; font-size:13px;">🎉 <b>Construction complete!</b><br>${readyThisWeek.map(re => `${re.emoji} ${re.name} is now earning rent!`).join('<br>')}</div>` : '';
+  const sleepBanner = sleepMoney > 0 ? `<div style="background:linear-gradient(135deg,#1a237e,#5c6bc0); color:#fff; padding:12px; border-radius:12px; margin:8px 0; text-align:center; border:2px solid gold; box-shadow:0 0 20px rgba(255,215,0,0.5);"><div style="font-size:11px; opacity:0.9;">💤 YOU EARNED WHILE SLEEPING!</div><div style="font-size:24px; font-weight:bold; color:gold;">${fmt(sleepMoney)}</div><div style="font-size:10px; opacity:0.85;">No work needed — your ASSETS made you rich this week! 🎉</div></div>` : '';
   showMoneyModal(`
     <div style="text-align:center;">
       <div style="font-size:60px;">📈</div>
       <h2 style="color:#2e7d32;">Week ${Money.week - 1} Ended!</h2>
+      ${sleepBanner}
       ${readyMsg}
       <div style="background:#e8f5e9; padding:12px; border-radius:12px; margin:10px 0; font-size:12px; text-align:left;">
         <div style="font-weight:bold; color:#1565c0;">💰 PASSIVE INCOME</div>
@@ -4334,6 +4445,7 @@ document.getElementById('realEstateBtn').addEventListener('click', () => { SFX.c
 document.getElementById('portfolioBtn').addEventListener('click', () => { SFX.click(); showPortfolio(); });
 document.getElementById('pnlBtn').addEventListener('click', () => { SFX.click(); showPnL(); });
 document.getElementById('compareBtn').addEventListener('click', () => { SFX.click(); showJobCompare(); });
+document.getElementById('sleepBtn').addEventListener('click', () => { SFX.click(); showWeeklyDashboard(); });
 document.getElementById('moneyQuit').addEventListener('click', () => {
   saveMoneyState();
   document.getElementById('moneyScreen').classList.remove('active');
